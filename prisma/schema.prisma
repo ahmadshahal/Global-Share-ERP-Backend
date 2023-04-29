@@ -12,18 +12,14 @@ datasource db {
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  squad Squad? @relation(fields: [squad_id], references: [id])
-  squad_id Int?
-
-  @@index([squad_id])
+    id     Int     @id @default(autoincrement())
+    email  String  @unique
+    name   String?
+    squads Squad[]
 }
 
 model Squad {
-    id Int @default(autoincrement()) @id
-    name String
-    members User[]
+    id    Int    @id @default(autoincrement())
+    name  String
+    users User[]
 }
-
