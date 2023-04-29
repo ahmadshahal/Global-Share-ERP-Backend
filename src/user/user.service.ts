@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 
 @Injectable()
 export class UserService {
@@ -75,7 +76,7 @@ export class UserService {
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === 'P2025') {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('User Not Found');
                 }
             }
@@ -92,7 +93,7 @@ export class UserService {
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === 'P2025') {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('User Not Found');
                 }
             }

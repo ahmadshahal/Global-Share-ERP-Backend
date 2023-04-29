@@ -6,6 +6,7 @@ import * as argon from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
+import { PrismaErrorCodes} from 'src/prisma/utils/prisma.error-codes.utils';
 
 @Injectable()
 export class AuthService {
@@ -49,7 +50,7 @@ export class AuthService {
             return await this.signToken(user.id, user.email);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === 'P2002') {
+                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
                     throw new BadRequestException('Credentials Taken');
                 }
             }
