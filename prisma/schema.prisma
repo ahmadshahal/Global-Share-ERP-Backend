@@ -6,6 +6,23 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
+    provider = "mysql"
     url      = env("DATABASE_URL")
+    relationMode = "prisma"
+}
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  email String  @unique
+  name  String?
+  squad Squad? @relation(fields: [squad_id], references: [id])
+  squad_id Int?
+
+  @@index([squad_id])
+}
+
+model Squad {
+    id Int @default(autoincrement()) @id
+    name String
+    members User[]
 }
