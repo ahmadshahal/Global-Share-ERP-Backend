@@ -26,6 +26,13 @@ model User {
     gsLevel         GsLevel  @default(COORDINATOR)
     status          Status   @default(ACTIVE)
     joinDate        DateTime @default(now())
+    squads          Squad[]
+}
+
+model Squad {
+    id    Int    @id @default(autoincrement())
+    name  String
+    users User[]
 }
 
 enum GsLevel {

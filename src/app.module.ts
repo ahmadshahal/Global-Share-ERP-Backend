@@ -4,12 +4,14 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { SquadModule } from './squad/squad.module';
 
 @Module({
     imports: [
         PrismaModule,
         UserModule,
         AuthModule,
+        SquadModule,
         JwtModule.register({ global: true }),
         ConfigModule.forRoot({ isGlobal: true }),
     ],
