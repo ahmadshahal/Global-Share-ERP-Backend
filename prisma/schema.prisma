@@ -6,20 +6,20 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
 
 model User {
-    id     Int     @id @default(autoincrement())
-    email  String  @unique
-    name   String?
-    squads Squad[]
-}
-
-model Squad {
-    id    Int    @id @default(autoincrement())
-    name  String
-    users User[]
+    id              Int      @id @default(autoincrement())
+    email           String   @unique
+    additionalEmail String?  @unique
+    password        String
+    phoneNumber     String   @unique
+    firstName       String
+    middleName      String?
+    lastName        String
+    arabicFullName  String?
+    joinDate        DateTime @default(now())
 }
