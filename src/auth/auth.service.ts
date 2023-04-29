@@ -43,10 +43,7 @@ export class AuthService {
                     password: hashedPassword,
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
-                    additionalEmail: signupDto.additionalEmail,
-                    middleName: signupDto.middleName,
                     lastName: signupDto.lastName,
-                    arabicFullName: signupDto.arabicFullName
                 },
             });
             return await this.signToken(user.id, user.email);
