@@ -6,9 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "db:dev:rm": "docker compose rm global-share-dev-db -s -f -v",
-    "db:dev:up": "docker compose up global-share-dev-db -d",
-    "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
