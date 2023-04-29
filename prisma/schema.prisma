@@ -14,12 +14,31 @@ datasource db {
 model User {
     id              Int      @id @default(autoincrement())
     email           String   @unique
-    additionalEmail String?  @unique
     password        String
     phoneNumber     String   @unique
     firstName       String
-    middleName      String?
     lastName        String
+    additionalEmail String?  @unique
+    middleName      String?
     arabicFullName  String?
+    appointlet      String?
+    bio             String?
+    gsLevel         GsLevel  @default(COORDINATOR)
+    status          Status   @default(ACTIVE)
     joinDate        DateTime @default(now())
+}
+
+enum GsLevel {
+    INTERN
+    COORDINATOR
+    SPECIALIST
+    VETERAN
+    REPRESENTATIVE
+    ORCHESTRATOR
+}
+
+enum Status {
+    ACTIVE
+    FREEZE
+    LEFT
 }

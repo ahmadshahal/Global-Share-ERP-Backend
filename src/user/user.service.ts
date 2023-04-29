@@ -18,6 +18,10 @@ export class UserService {
                 middleName: true,
                 phoneNumber: true,
                 joinDate: true,
+                appointlet: true,
+                bio: true,
+                gsLevel: true,
+                status: true,
             },
         });
     }
