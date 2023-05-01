@@ -16,7 +16,7 @@ export class SquadService {
             },
         });
         if (!squad) {
-            throw new NotFoundException('Category Not Found');
+            throw new NotFoundException('Squad Not Found');
         }
         return squad;
     }

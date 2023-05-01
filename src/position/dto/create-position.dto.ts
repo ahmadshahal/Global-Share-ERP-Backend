@@ -1,42 +1,40 @@
+import { GsLevel } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-    IsEmail,
+    IsEnum,
     IsInt,
-    IsMobilePhone,
     IsNotEmpty,
-    IsString,
     MaxLength,
     MinLength,
 } from 'class-validator';
 
-export class SignupDto {
+export class CreatePositionDto {
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(50)
-    firstName: string;
+    name: string;
 
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(50)
-    lastName: string;
-
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
-
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(8)
-    @MaxLength(64)
-    password: string;
+    gsName: string;
 
     @IsNotEmpty()
-    @IsMobilePhone()
-    phoneNumber: string;
+    @MinLength(3)
+    @MaxLength(250)
+    jobDescription: string;
 
-    // TODO: Should be replaced by vacancyId
     @IsNotEmpty()
     @IsInt()
     @Type(() => Number)
-    positionId: number;
+    weeklyHours: number;
+
+    @IsNotEmpty()
+    @IsEnum(GsLevel)
+    gsLevel: GsLevel;
+
+    @IsNotEmpty()
+    @IsInt()
+    @Type(() => Number)
+    squadId: number;
 }
