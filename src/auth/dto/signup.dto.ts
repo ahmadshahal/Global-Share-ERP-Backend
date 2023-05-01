@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
     IsEmail,
     IsMobilePhone,
@@ -31,4 +32,9 @@ export class SignupDto {
     @IsNotEmpty()
     @IsMobilePhone()
     phoneNumber: string;
+
+    // TODO: Should be replaced by vacancyId
+    @IsNotEmpty()
+    @Type(() => Number)
+    positionId: number;
 }

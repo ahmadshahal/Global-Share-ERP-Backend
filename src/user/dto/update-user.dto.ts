@@ -1,4 +1,5 @@
-import { GsLevel, Status } from '@prisma/client';
+import { GsLevel, GsStatus } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
     IsEmail,
     IsEnum,
@@ -62,7 +63,13 @@ export class UpdateUserDto {
     gsLevel: GsLevel;
 
     @IsOptional()
-    @IsEnum(Status)
+    @IsEnum(GsStatus)
     @IsNotEmpty()
-    status: Status;
+    gsStatus: GsStatus;
+
+    // TODO: Should be replaced by vacancyId
+    @IsOptional()
+    @Type(() => Number)
+    @IsNotEmpty()
+    positionId: number;
 }
