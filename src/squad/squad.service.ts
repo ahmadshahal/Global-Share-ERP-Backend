@@ -16,7 +16,7 @@ export class SquadService {
             },
         });
         if (!squad) {
-            throw new NotFoundException('Category Not Found');
+            throw new NotFoundException('Squad Not Found');
         }
         return squad;
     }
@@ -29,6 +29,9 @@ export class SquadService {
         await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
+                gsName: createSquadDto.gsName,
+                description: createSquadDto.description,
+                imageUrl: createSquadDto.imageUrl,
             },
         });
     }
@@ -58,6 +61,9 @@ export class SquadService {
                 },
                 data: {
                     name: updateSquadDto.name,
+                    gsName: updateSquadDto.gsName,
+                    description: updateSquadDto.description,
+                    imageUrl: updateSquadDto.imageUrl,
                 },
             });
         } catch (error) {

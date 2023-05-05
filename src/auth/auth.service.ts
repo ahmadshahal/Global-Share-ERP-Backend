@@ -45,6 +45,7 @@ export class AuthService {
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
+                    positionId: signupDto.positionId
                 },
             });
             return await this.signToken(user.id, user.email);

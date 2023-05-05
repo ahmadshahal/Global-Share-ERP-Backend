@@ -25,8 +25,8 @@ export class UserService {
                 joinDate: true,
                 appointlet: true,
                 bio: true,
-                gsLevel: true,
-                status: true,
+                gsStatus: true,
+                position: true,
             },
         });
         if (!user) {
@@ -49,8 +49,8 @@ export class UserService {
                 joinDate: true,
                 appointlet: true,
                 bio: true,
-                gsLevel: true,
-                status: true,
+                gsStatus: true,
+                position: true,
             },
         });
     }
@@ -67,11 +67,11 @@ export class UserService {
                     arabicFullName: updateUserDto.arabicFullName,
                     bio: updateUserDto.bio,
                     firstName: updateUserDto.firstName,
-                    gsLevel: updateUserDto.gsLevel,
                     lastName: updateUserDto.lastName,
                     middleName: updateUserDto.middleName,
                     phoneNumber: updateUserDto.phoneNumber,
-                    status: updateUserDto.status,
+                    gsStatus: updateUserDto.gsStatus,
+                    positionId: updateUserDto.positionId,
                 },
             });
         } catch (error) {

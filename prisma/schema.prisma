@@ -23,16 +23,35 @@ model User {
     arabicFullName  String?
     appointlet      String?
     bio             String?
-    gsLevel         GsLevel  @default(COORDINATOR)
-    status          Status   @default(ACTIVE)
+    gsStatus        GsStatus @default(ACTIVE)
     joinDate        DateTime @default(now())
-    squads          Squad[]
+    positionId      Int
+    position        Position @relation(fields: [positionId], references: [id])
+
+    @@index([positionId])
 }
 
 model Squad {
-    id    Int    @id @default(autoincrement())
-    name  String
-    users User[]
+    id          Int        @id @default(autoincrement())
+    name        String
+    gsName      String
+    description String
+    imageUrl    String
+    positions   Position[]
+}
+
+model Position {
+    id             Int     @id @default(autoincrement())
+    name           String
+    gsName         String
+    jobDescription String
+    weeklyHours    Int
+    gsLevel        GsLevel
+    squadId        Int
+    squad          Squad   @relation(fields: [squadId], references: [id])
+    users          User[]
+
+    @@index([squadId])
 }
 
 enum GsLevel {
@@ -44,7 +63,7 @@ enum GsLevel {
     ORCHESTRATOR
 }
 
-enum Status {
+enum GsStatus {
     ACTIVE
     FREEZE
     LEFT
