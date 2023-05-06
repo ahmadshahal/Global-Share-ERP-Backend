@@ -26,29 +26,22 @@ export class SquadService {
     }
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
+        // TODO: Upload the image to Google Drive and add the link in the DB.
         await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: `temporary link`,
+                imageUrl: image.path,
                 board: {
                     create: {
                         statuses: {
                             createMany: {
                                 data: [
-                                    {
-                                        statusId: 1,
-                                    },
-                                    {
-                                        statusId: 2,
-                                    },
-                                    {
-                                        statusId: 3,
-                                    },
-                                    {
-                                        statusId: 4,
-                                    },
+                                    { statusId: 1 },
+                                    { statusId: 2 },
+                                    { statusId: 3 },
+                                    { statusId: 4 },
                                 ],
                             },
                         },

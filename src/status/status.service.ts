@@ -8,7 +8,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateStatusDto } from './dto/update-status.dto';
-import { error } from 'console';
 
 @Injectable()
 export class StatusService {

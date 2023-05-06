@@ -39,7 +39,7 @@ model Squad {
     description String
     imageUrl    String
     positions   Position[]
-    board      Board?
+    board       Board?
 }
 
 model Position {
@@ -81,6 +81,7 @@ model BoardsOnStatuses {
     @@index([boardId])
     @@index([statusId])
 }
+
 model Task {
     id           Int        @id @default(autoincrement())
     title        String

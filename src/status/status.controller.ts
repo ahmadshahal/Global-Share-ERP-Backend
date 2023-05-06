@@ -12,7 +12,6 @@ import {
 import { StatusService } from './status.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
-import { response } from 'express';
 
 @Controller('status')
 export class StatusController {
@@ -33,11 +32,7 @@ export class StatusController {
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(@Body() createStatusDto: CreateStatusDto) {
-        try {
-            await this.statusService.create(createStatusDto);
-        } catch (error) {
-            throw error;
-        }
+        await this.statusService.create(createStatusDto);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -46,20 +41,12 @@ export class StatusController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateStatusDto: UpdateStatusDto,
     ) {
-        try {
-            await this.statusService.update(id, updateStatusDto);
-        } catch (error) {
-            return response.json(error.message);
-        }
+        await this.statusService.update(id, updateStatusDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        try {
-            await this.statusService.delete(id);
-        } catch (error) {
-            throw error;
-        }
+        await this.statusService.delete(id);
     }
 }

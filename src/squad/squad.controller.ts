@@ -19,6 +19,7 @@ import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SquadImageValidator } from './validator/squad.validator';
 
 @UseGuards(JwtGuard)
 @Controller('squad')
@@ -44,7 +45,8 @@ export class SquadController {
         @Body() createSquadDto: CreateSquadDto,
         @UploadedFile(
             new ParseFilePipe({
-                validators: [new FileTypeValidator({ fileType: 'image' })],
+                validators: SquadImageValidator,
+                // ?: fileIsRequired: false,
             }),
         )
         image: Express.Multer.File,
