@@ -27,7 +27,14 @@ export class TaskService {
                     select: {
                         id: true,
                         title: true,
-                        assignedBy: true,
+                        assignedBy: {
+                            select: {
+                                email: true,
+                                firstName: true,
+                                lastName: true,
+                                arabicFullName: true
+                            }
+                        },
                         deadline: true,
                         description: true,
                         difficulty: true,
