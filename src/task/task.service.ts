@@ -9,34 +9,83 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number): Promise<Task> {
-        const squad = await this.prismaService.task.findFirst({
+    async readOne(id: number) {
+        const task = await this.prismaService.task.findFirst({
             where: {
                 id: id,
             },
+            select: {
+                id: true,
+                assignedBy: {
+                    select: {
+                        id: true,
+                        email: true,
+                        arabicFullName: true,
+                        firstName: true,
+                        lastName: true,
+                        position: true,
+                    },
+                },
+                deadline: true,
+                description: true,
+                difficulty: true,
+                priority: true,
+                title: true,
+                url: true,
+                statusBoard: {
+                    select: {
+                        status: true,
+                    },
+                },
+            },
         });
-        if (!squad) {
+        if (!task) {
             throw new NotFoundException('Task Not Found');
         }
-        return squad;
+        return task;
     }
 
-    async readAll(): Promise<Task[]> {
-        return await this.prismaService.task.findMany();
+    async readAll() {
+        return await this.prismaService.task.findMany({
+            select: {
+                id: true,
+                assignedBy: {
+                    select: {
+                        id: true,
+                        email: true,
+                        arabicFullName: true,
+                        firstName: true,
+                        lastName: true,
+                        position: true,
+                    },
+                },
+                deadline: true,
+                description: true,
+                difficulty: true,
+                priority: true,
+                title: true,
+                url: true,
+                statusBoard: {
+                    select: {
+                        status: true,
+                    },
+                },
+            },
+        });
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {
         try {
             const board = await this.prismaService.board.findUnique({
                 where: {
-                    squadId: createTaskDto.squadId
+                    squadId: createTaskDto.squadId,
                 },
             });
             const statusBoard = await this.prismaService.statusBoard.findFirst({
                 where: {
                     statusId: createTaskDto.statusId,
-                    boardId: board.id
-                }
+                    boardId: board.id,
+                },
             });
             await this.prismaService.task.create({
                 data: {
@@ -47,7 +96,7 @@ export class TaskService {
                     priority: createTaskDto.priority,
                     difficulty: createTaskDto.difficulty,
                     assignedById: assignedById,
-                    statusBoardId: statusBoard.id
+                    statusBoardId: statusBoard.id,
                 },
             });
         } catch (error) {
@@ -79,6 +128,24 @@ export class TaskService {
 
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
+            const task = await this.prismaService.task.findFirst({
+                where: {
+                    id: id,
+                },
+            });
+            const previousStatusBoard =
+                await this.prismaService.statusBoard.findFirst({
+                    where: {
+                        id: task.statusBoardId,
+                    },
+                });
+            const newStatusBoard =
+                await this.prismaService.statusBoard.findFirst({
+                    where: {
+                        statusId: updateTaskDto.statusId,
+                        boardId: previousStatusBoard.boardId,
+                    },
+                });
             await this.prismaService.task.update({
                 where: {
                     id: id,
@@ -90,12 +157,13 @@ export class TaskService {
                     deadline: updateTaskDto.deadline,
                     priority: updateTaskDto.priority,
                     difficulty: updateTaskDto.difficulty,
+                    statusBoardId: newStatusBoard.id,
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Task Not Found');
+                    throw new NotFoundException('Task or Status Not Found');
                 }
             }
             throw error;

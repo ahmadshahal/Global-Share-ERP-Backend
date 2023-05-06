@@ -4,6 +4,7 @@ import {
     IsDate,
     IsEnum,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
     IsUrl,
     MaxLength,
@@ -45,4 +46,10 @@ export class UpdateTaskDto {
     @IsNotEmpty()
     @IsEnum(Difficulty)
     difficulty: Difficulty;
+
+    @IsOptional()
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    statusId: number;
 }
