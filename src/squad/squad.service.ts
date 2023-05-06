@@ -32,7 +32,7 @@ export class SquadService {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: image.path,
+                imageUrl: 'http://image.path.com',
                 board: {
                     create: {
                         statuses: {
@@ -79,7 +79,7 @@ export class SquadService {
                     name: updateSquadDto.name,
                     gsName: updateSquadDto.gsName,
                     description: updateSquadDto.description,
-                    imageUrl: image.path,
+                    imageUrl: 'http://image.path.com',
                 },
             });
         } catch (error) {
