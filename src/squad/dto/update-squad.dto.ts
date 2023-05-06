@@ -18,11 +18,4 @@ export class UpdateSquadDto {
     @MinLength(3)
     @MaxLength(250)
     description: string;
-
-    @IsOptional()
-    @IsNotEmpty()
-    @IsUrl()
-    @MinLength(3)
-    @MaxLength(50)
-    imageUrl: string;
 }

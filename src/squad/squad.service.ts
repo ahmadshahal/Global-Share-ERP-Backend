@@ -68,7 +68,8 @@ export class SquadService {
         }
     }
 
-    async update(id: number, updateSquadDto: UpdateSquadDto) {
+    async update(id: number, updateSquadDto: UpdateSquadDto, image: Express.Multer.File) {
+        // TODO: Upload the image to Google Drive and add the link in the DB.
         try {
             await this.prismaService.squad.update({
                 where: {
@@ -78,7 +79,7 @@ export class SquadService {
                     name: updateSquadDto.name,
                     gsName: updateSquadDto.gsName,
                     description: updateSquadDto.description,
-                    imageUrl: updateSquadDto.imageUrl,
+                    imageUrl: image.path,
                 },
             });
         } catch (error) {

@@ -56,11 +56,19 @@ export class SquadController {
 
     @HttpCode(HttpStatus.OK)
     @Post(':id')
+    @UseInterceptors(FileInterceptor('image'))
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateSquadDto: UpdateSquadDto,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: SquadImageValidator,
+                // ?: fileIsRequired: false,
+            }),
+        )
+        image: Express.Multer.File,
     ) {
-        await this.squadService.update(id, updateSquadDto);
+        await this.squadService.update(id, updateSquadDto, image);
     }
 
     @HttpCode(HttpStatus.OK)
