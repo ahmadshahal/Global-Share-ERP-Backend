@@ -58,11 +58,6 @@ export class UpdateUserDto {
     bio: string;
 
     @IsOptional()
-    @IsEnum(GsLevel)
-    @IsNotEmpty()
-    gsLevel: GsLevel;
-
-    @IsOptional()
     @IsEnum(GsStatus)
     @IsNotEmpty()
     gsStatus: GsStatus;
