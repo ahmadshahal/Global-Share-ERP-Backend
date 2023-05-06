@@ -1,6 +1,8 @@
+import { Difficulty, Priority } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
     IsDate,
+    IsEnum,
     IsNotEmpty,
     IsOptional,
     IsUrl,
@@ -33,4 +35,14 @@ export class UpdateTaskDto {
     @IsDate()
     @Type(() => Date)
     deadline: Date;
+
+    @IsOptional()
+    @IsNotEmpty()
+    @IsEnum(Priority)
+    priority: Priority;
+
+    @IsOptional()
+    @IsNotEmpty()
+    @IsEnum(Difficulty)
+    difficulty: Difficulty;
 }

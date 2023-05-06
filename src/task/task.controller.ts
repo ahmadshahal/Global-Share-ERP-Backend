@@ -14,6 +14,7 @@ import { TaskService } from './task.service';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtGuard)
 @Controller('task')
@@ -34,8 +35,11 @@ export class TaskController {
 
     @HttpCode(HttpStatus.CREATED)
     @Post()
-    async create(@Body() createTaskDto: CreateTaskDto) {
-        await this.taskService.create(createTaskDto);
+    async create(
+        @UserId() userId: number,
+        @Body() createTaskDto: CreateTaskDto,
+    ) {
+        await this.taskService.create(createTaskDto, userId);
     }
 
     @HttpCode(HttpStatus.OK)

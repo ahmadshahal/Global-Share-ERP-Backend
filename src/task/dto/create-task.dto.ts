@@ -1,7 +1,10 @@
+import { Difficulty, Priority } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
     IsDate,
+    IsEnum,
     IsNotEmpty,
+    IsOptional,
     IsUrl,
     MaxLength,
     MinLength,
@@ -18,6 +21,7 @@ export class CreateTaskDto {
     @MaxLength(250)
     description: string;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsUrl()
     @MinLength(3)
@@ -28,4 +32,12 @@ export class CreateTaskDto {
     @IsDate()
     @Type(() => Date)
     deadline: Date;
+
+    @IsNotEmpty()
+    @IsEnum(Priority)
+    priority: Priority;
+
+    @IsNotEmpty()
+    @IsEnum(Difficulty)
+    difficulty: Difficulty;
 }

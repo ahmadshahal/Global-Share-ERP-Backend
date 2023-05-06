@@ -27,6 +27,7 @@ model User {
     joinDate        DateTime @default(now())
     positionId      Int
     position        Position @relation(fields: [positionId], references: [id])
+    Task            Task[]
 
     @@index([positionId])
 }
@@ -55,11 +56,17 @@ model Position {
 }
 
 model Task {
-    id          Int      @id @default(autoincrement())
-    title       String
-    description String
-    url         String
-    deadline    DateTime
+    id           Int        @id @default(autoincrement())
+    title        String
+    description  String
+    url          String?
+    deadline     DateTime
+    priority     Priority   @default(NORMAL)
+    difficulty   Difficulty @default(MEDIUM)
+    assignedById Int
+    assignedBy   User       @relation(fields: [assignedById], references: [id])
+
+    @@index([assignedById])
 }
 
 enum GsLevel {
@@ -75,4 +82,17 @@ enum GsStatus {
     ACTIVE
     FREEZE
     LEFT
+}
+
+enum Difficulty {
+    LOW
+    MEDIUM
+    HIGH
+    // TODO: Map each difficulty to a number value.
+}
+
+enum Priority {
+    NORMAL
+    IMPORTANT
+    URGENT
 }

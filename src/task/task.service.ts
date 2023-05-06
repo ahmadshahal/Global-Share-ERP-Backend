@@ -25,13 +25,16 @@ export class TaskService {
         return await this.prismaService.task.findMany();
     }
 
-    async create(createTaskDto: CreateTaskDto) {
+    async create(createTaskDto: CreateTaskDto, assignedById: number) {
         await this.prismaService.task.create({
             data: {
                 title: createTaskDto.title,
                 description: createTaskDto.description,
                 url: createTaskDto.url,
                 deadline: createTaskDto.deadline,
+                priority: createTaskDto.priority,
+                difficulty: createTaskDto.difficulty,
+                assignedById: assignedById,
             },
         });
     }
@@ -64,6 +67,8 @@ export class TaskService {
                     description: updateTaskDto.description,
                     url: updateTaskDto.url,
                     deadline: updateTaskDto.deadline,
+                    priority: updateTaskDto.priority,
+                    difficulty: updateTaskDto.difficulty,
                 },
             });
         } catch (error) {
