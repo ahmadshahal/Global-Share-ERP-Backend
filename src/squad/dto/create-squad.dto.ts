@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateSquadDto {
     @IsNotEmpty()
@@ -16,9 +16,12 @@ export class CreateSquadDto {
     @MaxLength(250)
     description: string;
 
-    @IsNotEmpty()
-    @IsUrl()
-    @MinLength(3)
-    @MaxLength(50)
-    imageUrl: string;
+    // @IsNotEmpty()
+    // @IsUrl()
+    // @MinLength(3)
+    // @MaxLength(50)
+    // imageUrl: string;
+
+    // @Matches(/\.(jpg|jpeg|png)$/, { message: 'Image must be an image' })
+    image: File;
 }

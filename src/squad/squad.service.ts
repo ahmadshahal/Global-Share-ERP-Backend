@@ -25,13 +25,35 @@ export class SquadService {
         return await this.prismaService.squad.findMany();
     }
 
-    async create(createSquadDto: CreateSquadDto) {
+    async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
         await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: createSquadDto.imageUrl,
+                imageUrl: `temporary link`,
+                board: {
+                    create: {
+                        statuses: {
+                            createMany: {
+                                data: [
+                                    {
+                                        statusId: 1,
+                                    },
+                                    {
+                                        statusId: 2,
+                                    },
+                                    {
+                                        statusId: 3,
+                                    },
+                                    {
+                                        statusId: 4,
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                },
             },
         });
     }

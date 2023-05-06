@@ -1,8 +1,24 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    FileTypeValidator,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseFilePipe,
+    ParseIntPipe,
+    Post,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { SquadService } from './squad.service';
 import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
 @Controller('squad')
@@ -23,8 +39,17 @@ export class SquadController {
 
     @HttpCode(HttpStatus.CREATED)
     @Post()
-    async create(@Body() createSquadDto: CreateSquadDto) {
-        await this.squadService.create(createSquadDto);
+    @UseInterceptors(FileInterceptor('image'))
+    async create(
+        @Body() createSquadDto: CreateSquadDto,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [new FileTypeValidator({ fileType: 'image' })],
+            }),
+        )
+        image: Express.Multer.File,
+    ) {
+        await this.squadService.create(createSquadDto, image);
     }
 
     @HttpCode(HttpStatus.OK)

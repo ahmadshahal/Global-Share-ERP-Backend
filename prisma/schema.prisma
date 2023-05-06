@@ -39,6 +39,7 @@ model Squad {
     description String
     imageUrl    String
     positions   Position[]
+    board      Board?
 }
 
 model Position {
@@ -55,6 +56,31 @@ model Position {
     @@index([squadId])
 }
 
+model Board {
+    id       Int                @id @default(autoincrement())
+    squadId  Int                @unique
+    squad    Squad              @relation(fields: [squadId], references: [id])
+    statuses BoardsOnStatuses[]
+
+    @@index([squadId])
+}
+
+model Status {
+    id     Int                @id @default(autoincrement())
+    name   String
+    boards BoardsOnStatuses[]
+}
+
+model BoardsOnStatuses {
+    boardId  Int
+    board    Board  @relation(fields: [boardId], references: [id])
+    statusId Int
+    status   Status @relation(fields: [statusId], references: [id])
+
+    @@id([boardId, statusId])
+    @@index([boardId])
+    @@index([statusId])
+}
 model Task {
     id           Int        @id @default(autoincrement())
     title        String
