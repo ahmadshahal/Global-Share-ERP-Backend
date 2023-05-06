@@ -67,7 +67,7 @@ model Board {
 
 model Status {
     id     Int                @id @default(autoincrement())
-    name   String
+    name   String             @unique
     boards BoardsOnStatuses[]
 }
 

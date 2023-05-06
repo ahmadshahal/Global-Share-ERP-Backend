@@ -30,21 +30,25 @@ export class StatusService {
     }
 
     async create(createStatusDto: CreateStatusDto) {
-        const statuses = await this.readAll();
-        if (statuses.find((s) => s.name == createStatusDto.name)) {
-            throw new BadRequestException('Duplicate Entry');
+        try {
+            await this.prismaService.status.create({
+                data: {
+                    name: createStatusDto.name,
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
+                    throw new BadRequestException('Status already exists');
+                }
+            }
+            throw error;
         }
-        await this.prismaService.status.create({
-            data: {
-                name: createStatusDto.name,
-            },
-        });
     }
 
     async delete(id: number) {
-        if (id < 5) {
-            throw new BadRequestException("Can't delete a main status");
-        }
+        if (id <= 4)
+            throw new BadRequestException("Deletion of main statuses is forbidden");
         try {
             await this.prismaService.status.delete({
                 where: {
@@ -62,10 +66,6 @@ export class StatusService {
     }
 
     async update(id: number, updateStatusDto: UpdateStatusDto) {
-        const statuses = await this.readAll();
-        if (statuses.find((s) => s.name == updateStatusDto.name)) {
-            throw new BadRequestException('Duplicate Entry');
-        }
         try {
             await this.prismaService.status.update({
                 where: {
@@ -77,6 +77,9 @@ export class StatusService {
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
+                    throw new BadRequestException('Status already exists');
+                }
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Status Not Found');
                 }
