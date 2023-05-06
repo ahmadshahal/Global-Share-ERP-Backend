@@ -33,6 +33,12 @@ export class TaskController {
         return await this.taskService.readOne(id);
     }
 
+    @HttpCode(HttpStatus.OK)
+    @Get('squad/:id')
+    async readBySquad(@Param('id', ParseIntPipe) squadId: number) {
+        return await this.taskService.readBySquad(squadId);
+    }
+
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(

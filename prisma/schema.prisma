@@ -77,7 +77,7 @@ model StatusBoard {
     board    Board  @relation(fields: [boardId], references: [id])
     statusId Int
     status   Status @relation(fields: [statusId], references: [id])
-    Task     Task[]
+    tasks     Task[]
 
     @@index([boardId])
     @@index([statusId])
