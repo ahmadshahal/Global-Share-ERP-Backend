@@ -60,7 +60,7 @@ model Board {
     id       Int                @id @default(autoincrement())
     squadId  Int                @unique
     squad    Squad              @relation(fields: [squadId], references: [id])
-    statuses BoardsOnStatuses[]
+    statuses StatusBoard[]
 
     @@index([squadId])
 }
@@ -68,10 +68,10 @@ model Board {
 model Status {
     id     Int                @id @default(autoincrement())
     name   String             @unique
-    boards BoardsOnStatuses[]
+    boards StatusBoard[]
 }
 
-model BoardsOnStatuses {
+model StatusBoard {
     id       Int    @id @default(autoincrement())
     boardId  Int
     board    Board  @relation(fields: [boardId], references: [id])
@@ -94,7 +94,7 @@ model Task {
     assignedById  Int
     assignedBy    User             @relation(fields: [assignedById], references: [id])
     statusBoardId Int
-    statusBoard   BoardsOnStatuses @relation(fields: [statusBoardId], references: [id])
+    statusBoard   StatusBoard @relation(fields: [statusBoardId], references: [id])
 
     @@index([assignedById])
     @@index([statusBoardId])

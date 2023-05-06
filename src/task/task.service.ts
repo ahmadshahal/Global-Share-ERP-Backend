@@ -32,7 +32,7 @@ export class TaskService {
                     squadId: createTaskDto.squadId
                 },
             });
-            const statusBoard = await this.prismaService.boardsOnStatuses.findFirst({
+            const statusBoard = await this.prismaService.statusBoard.findFirst({
                 where: {
                     statusId: createTaskDto.statusId,
                     boardId: board.id
