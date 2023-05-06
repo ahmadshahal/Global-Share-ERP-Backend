@@ -26,17 +26,38 @@ export class TaskService {
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {
-        await this.prismaService.task.create({
-            data: {
-                title: createTaskDto.title,
-                description: createTaskDto.description,
-                url: createTaskDto.url,
-                deadline: createTaskDto.deadline,
-                priority: createTaskDto.priority,
-                difficulty: createTaskDto.difficulty,
-                assignedById: assignedById,
-            },
-        });
+        try {
+            const board = await this.prismaService.board.findUnique({
+                where: {
+                    squadId: createTaskDto.squadId
+                },
+            });
+            const statusBoard = await this.prismaService.boardsOnStatuses.findFirst({
+                where: {
+                    statusId: createTaskDto.statusId,
+                    boardId: board.id
+                }
+            });
+            await this.prismaService.task.create({
+                data: {
+                    title: createTaskDto.title,
+                    description: createTaskDto.description,
+                    url: createTaskDto.url,
+                    deadline: createTaskDto.deadline,
+                    priority: createTaskDto.priority,
+                    difficulty: createTaskDto.difficulty,
+                    assignedById: assignedById,
+                    statusBoardId: statusBoard.id
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new NotFoundException('Squad or Status Not Found');
+                }
+            }
+            throw error;
+        }
     }
 
     async delete(id: number) {

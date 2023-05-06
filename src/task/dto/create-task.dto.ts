@@ -4,6 +4,7 @@ import {
     IsDate,
     IsEnum,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
     IsUrl,
     MaxLength,
@@ -40,4 +41,14 @@ export class CreateTaskDto {
     @IsNotEmpty()
     @IsEnum(Difficulty)
     difficulty: Difficulty;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    squadId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    statusId: number;
 }

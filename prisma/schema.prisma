@@ -72,28 +72,32 @@ model Status {
 }
 
 model BoardsOnStatuses {
+    id       Int    @id @default(autoincrement())
     boardId  Int
     board    Board  @relation(fields: [boardId], references: [id])
     statusId Int
     status   Status @relation(fields: [statusId], references: [id])
+    Task     Task[]
 
-    @@id([boardId, statusId])
     @@index([boardId])
     @@index([statusId])
 }
 
 model Task {
-    id           Int        @id @default(autoincrement())
-    title        String
-    description  String
-    url          String?
-    deadline     DateTime
-    priority     Priority   @default(NORMAL)
-    difficulty   Difficulty @default(MEDIUM)
-    assignedById Int
-    assignedBy   User       @relation(fields: [assignedById], references: [id])
+    id            Int              @id @default(autoincrement())
+    title         String
+    description   String
+    url           String?
+    deadline      DateTime
+    priority      Priority         @default(NORMAL)
+    difficulty    Difficulty       @default(MEDIUM)
+    assignedById  Int
+    assignedBy    User             @relation(fields: [assignedById], references: [id])
+    statusBoardId Int
+    statusBoard   BoardsOnStatuses @relation(fields: [statusBoardId], references: [id])
 
     @@index([assignedById])
+    @@index([statusBoardId])
 }
 
 enum GsLevel {
