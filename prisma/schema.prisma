@@ -27,7 +27,7 @@ model User {
     joinDate        DateTime @default(now())
     positionId      Int
     position        Position @relation(fields: [positionId], references: [id])
-    Task            Task[]
+    assignedTasks   Task[]
 
     @@index([positionId])
 }
