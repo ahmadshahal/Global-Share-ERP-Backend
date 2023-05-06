@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { SquadModule } from './squad/squad.module';
 import { PositionModule } from './position/position.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { PositionModule } from './position/position.module';
         JwtModule.register({ global: true }),
         ConfigModule.forRoot({ isGlobal: true }),
         PositionModule,
+        TaskModule,
     ],
 })
 export class AppModule {}

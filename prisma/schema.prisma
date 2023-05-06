@@ -54,6 +54,14 @@ model Position {
     @@index([squadId])
 }
 
+model Task {
+    id          Int      @id @default(autoincrement())
+    title       String
+    description String
+    url         String
+    deadline    DateTime
+}
+
 enum GsLevel {
     INTERN
     COORDINATOR
