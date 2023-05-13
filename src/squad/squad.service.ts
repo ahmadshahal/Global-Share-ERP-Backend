@@ -14,6 +14,9 @@ export class SquadService {
             where: {
                 id: id,
             },
+            include: {
+                positions: true
+            }
         });
         if (!squad) {
             throw new NotFoundException('Squad Not Found');
@@ -22,7 +25,11 @@ export class SquadService {
     }
 
     async readAll(): Promise<Squad[]> {
-        return await this.prismaService.squad.findMany();
+        return await this.prismaService.squad.findMany({
+            include: {
+                positions: true
+            }
+        });
     }
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
