@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateTaskDto } from './dto/in/create-task.dto';
+import { exclude } from 'src/utils/utils';
+import { toTaskOutDto } from './mappers/task.mapper';
+import { UpdateTaskDto } from './dto/in/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -18,33 +20,28 @@ export class TaskService {
         if (!board) {
             throw new NotFoundException('Squad Not Found');
         }
-        return await this.prismaService.statusBoard.findMany({
+        const tasks = await this.prismaService.task.findMany({
             where: {
-                boardId: board.id,
+                statusBoard: {
+                    boardId: board.id
+                }
             },
-            select: {
-                tasks: {
+            include: {
+                assignedBy: true,
+                statusBoard: {
                     select: {
-                        id: true,
-                        title: true,
-                        assignedBy: {
-                            select: {
-                                email: true,
-                                firstName: true,
-                                lastName: true,
-                                arabicFullName: true
-                            }
-                        },
-                        deadline: true,
-                        description: true,
-                        difficulty: true,
-                        priority: true,
-                        url: true,
+                        status: true,
                     },
                 },
-                status: true,
             },
         });
+        return tasks.map((task) =>
+            toTaskOutDto({
+                task: task,
+                status: task.statusBoard.status,
+                assignedBy: exclude(task.assignedBy, ['password']) as User,
+            }),
+        );
     }
 
     async readOne(id: number) {
@@ -52,24 +49,8 @@ export class TaskService {
             where: {
                 id: id,
             },
-            select: {
-                id: true,
-                assignedBy: {
-                    select: {
-                        id: true,
-                        email: true,
-                        arabicFullName: true,
-                        firstName: true,
-                        lastName: true,
-                        position: true,
-                    },
-                },
-                deadline: true,
-                description: true,
-                difficulty: true,
-                priority: true,
-                title: true,
-                url: true,
+            include: {
+                assignedBy: true,
                 statusBoard: {
                     select: {
                         status: true,
@@ -80,29 +61,17 @@ export class TaskService {
         if (!task) {
             throw new NotFoundException('Task Not Found');
         }
-        return task;
+        return toTaskOutDto({
+            task: task,
+            status: task.statusBoard.status,
+            assignedBy: exclude(task.assignedBy, ['password']) as User,
+        });
     }
 
     async readAll() {
-        return await this.prismaService.task.findMany({
-            select: {
-                id: true,
-                assignedBy: {
-                    select: {
-                        id: true,
-                        email: true,
-                        arabicFullName: true,
-                        firstName: true,
-                        lastName: true,
-                        position: true,
-                    },
-                },
-                deadline: true,
-                description: true,
-                difficulty: true,
-                priority: true,
-                title: true,
-                url: true,
+        const tasks = await this.prismaService.task.findMany({
+            include: {
+                assignedBy: true,
                 statusBoard: {
                     select: {
                         status: true,
@@ -110,6 +79,13 @@ export class TaskService {
                 },
             },
         });
+        return tasks.map((task) =>
+            toTaskOutDto({
+                task: task,
+                status: task.statusBoard.status,
+                assignedBy: exclude(task.assignedBy, ['password']) as User,
+            }),
+        );
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {
@@ -167,27 +143,20 @@ export class TaskService {
                 where: {
                     id: id,
                 },
+                include: {
+                    statusBoard: true,
+                }
             });
             if (!task) {
-                throw new NotFoundException('Task Not Found');
-            }
-            const previousStatusBoard =
-                await this.prismaService.statusBoard.findFirst({
-                    where: {
-                        id: task.statusBoardId,
-                    },
-                });
-            if (!previousStatusBoard) {
                 throw new NotFoundException('Task Not Found');
             }
             const newStatusBoard =
                 await this.prismaService.statusBoard.findFirst({
                     where: {
                         statusId: updateTaskDto.statusId,
-                        boardId: previousStatusBoard.boardId,
+                        boardId: task.statusBoard.boardId,
                     },
                 });
-
             if (!newStatusBoard) {
                 throw new NotFoundException('Status Not Found');
             }

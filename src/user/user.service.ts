@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
+import { exclude } from 'src/utils/utils';
 
 @Injectable()
 export class UserService {
@@ -13,46 +14,23 @@ export class UserService {
             where: {
                 id: id,
             },
-            select: {
-                id: true,
-                email: true,
-                firstName: true,
-                additionalEmail: true,
-                arabicFullName: true,
-                lastName: true,
-                middleName: true,
-                phoneNumber: true,
-                joinDate: true,
-                appointlet: true,
-                bio: true,
-                gsStatus: true,
-                position: true,
+            include: {
+                position: true
             },
         });
         if (!user) {
             throw new NotFoundException('User Not Found');
         }
-        return user;
+        return exclude(user, ['password']);
     }
 
     async readAll() {
-        return await this.prismaService.user.findMany({
-            select: {
-                id: true,
-                email: true,
-                firstName: true,
-                additionalEmail: true,
-                arabicFullName: true,
-                lastName: true,
-                middleName: true,
-                phoneNumber: true,
-                joinDate: true,
-                appointlet: true,
-                bio: true,
-                gsStatus: true,
-                position: true,
+        const users = await this.prismaService.user.findMany({
+            include: {
+                position: true
             },
         });
+        return users.map((user) => exclude(user, ['password']));
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
