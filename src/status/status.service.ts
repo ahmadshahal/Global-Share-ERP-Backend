@@ -77,9 +77,6 @@ export class StatusService {
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
-                    throw new BadRequestException('Status already exists');
-                }
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Status Not Found');
                 }
