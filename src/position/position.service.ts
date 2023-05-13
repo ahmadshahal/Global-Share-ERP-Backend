@@ -14,6 +14,9 @@ export class PositionService {
             where: {
                 id: id,
             },
+            include: {
+                squad: true
+            }
         });
         if (!position) {
             throw new NotFoundException('Position Not Found');
@@ -22,7 +25,11 @@ export class PositionService {
     }
 
     async readAll(): Promise<Position[]> {
-        return await this.prismaService.position.findMany();
+        return await this.prismaService.position.findMany({
+            include: {
+                squad: true
+            }
+        });
     }
 
     async create(createPositionDto: CreatePositionDto) {
