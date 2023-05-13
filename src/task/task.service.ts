@@ -143,27 +143,20 @@ export class TaskService {
                 where: {
                     id: id,
                 },
+                include: {
+                    statusBoard: true,
+                }
             });
             if (!task) {
-                throw new NotFoundException('Task Not Found');
-            }
-            const previousStatusBoard =
-                await this.prismaService.statusBoard.findFirst({
-                    where: {
-                        id: task.statusBoardId,
-                    },
-                });
-            if (!previousStatusBoard) {
                 throw new NotFoundException('Task Not Found');
             }
             const newStatusBoard =
                 await this.prismaService.statusBoard.findFirst({
                     where: {
                         statusId: updateTaskDto.statusId,
-                        boardId: previousStatusBoard.boardId,
+                        boardId: task.statusBoard.boardId,
                     },
                 });
-
             if (!newStatusBoard) {
                 throw new NotFoundException('Status Not Found');
             }
