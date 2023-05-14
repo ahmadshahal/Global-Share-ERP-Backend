@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, Comment } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/in/create-task.dto';
@@ -33,6 +33,7 @@ export class TaskService {
                         status: true,
                     },
                 },
+                comments: true
             },
         });
         return tasks.map((task) =>
@@ -40,6 +41,7 @@ export class TaskService {
                 task: task,
                 status: task.statusBoard.status,
                 assignedBy: exclude(task.assignedBy, ['password']) as User,
+                comments: task.comments
             }),
         );
     }
@@ -56,6 +58,7 @@ export class TaskService {
                         status: true,
                     },
                 },
+                comments: true
             },
         });
         if (!task) {
@@ -65,6 +68,7 @@ export class TaskService {
             task: task,
             status: task.statusBoard.status,
             assignedBy: exclude(task.assignedBy, ['password']) as User,
+            comments: task.comments
         });
     }
 
@@ -77,6 +81,7 @@ export class TaskService {
                         status: true,
                     },
                 },
+                comments: true
             },
         });
         return tasks.map((task) =>
@@ -84,6 +89,7 @@ export class TaskService {
                 task: task,
                 status: task.statusBoard.status,
                 assignedBy: exclude(task.assignedBy, ['password']) as User,
+                comments: task.comments
             }),
         );
     }

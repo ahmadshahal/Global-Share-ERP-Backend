@@ -1,4 +1,4 @@
-import { Difficulty, Priority, Status, Task, User } from '@prisma/client';
+import { Difficulty, Priority, Status, Comment, User } from '@prisma/client';
 
 export class TaskOutDto {
     constructor(
@@ -11,5 +11,6 @@ export class TaskOutDto {
         readonly difficulty: Difficulty,
         readonly assignedBy: User,
         readonly status: Status,
+        readonly comments: Comment[],
     ) {}
 }

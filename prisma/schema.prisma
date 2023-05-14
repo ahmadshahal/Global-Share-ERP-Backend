@@ -12,22 +12,23 @@ datasource db {
 }
 
 model User {
-    id              Int      @id @default(autoincrement())
-    email           String   @unique
+    id              Int       @id @default(autoincrement())
+    email           String    @unique
     password        String
-    phoneNumber     String   @unique
+    phoneNumber     String    @unique
     firstName       String
     lastName        String
-    additionalEmail String?  @unique
+    additionalEmail String?   @unique
     middleName      String?
     arabicFullName  String?
     appointlet      String?
     bio             String?
-    gsStatus        GsStatus @default(ACTIVE)
-    joinDate        DateTime @default(now())
+    gsStatus        GsStatus  @default(ACTIVE)
+    joinDate        DateTime  @default(now())
     positionId      Int
-    position        Position @relation(fields: [positionId], references: [id])
+    position        Position  @relation(fields: [positionId], references: [id])
     assignedTasks   Task[]
+    comments        Comment[]
 
     @@index([positionId])
 }
@@ -77,7 +78,7 @@ model StatusBoard {
     board    Board  @relation(fields: [boardId], references: [id])
     statusId Int
     status   Status @relation(fields: [statusId], references: [id])
-    tasks     Task[]
+    tasks    Task[]
 
     @@index([boardId])
     @@index([statusId])
@@ -95,9 +96,22 @@ model Task {
     assignedBy    User        @relation(fields: [assignedById], references: [id])
     statusBoardId Int
     statusBoard   StatusBoard @relation(fields: [statusBoardId], references: [id])
+    comments      Comment[]
 
     @@index([assignedById])
     @@index([statusBoardId])
+}
+
+model Comment {
+    id       Int    @id @default(autoincrement())
+    content  String
+    task     Task?  @relation(fields: [taskId], references: [id])
+    taskId   Int?
+    author   User?  @relation(fields: [authorId], references: [id])
+    authorId Int?
+
+    @@index([taskId])
+    @@index([authorId])
 }
 
 enum GsLevel {
