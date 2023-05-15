@@ -4,8 +4,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/in/create-task.dto';
 import { exclude } from 'src/utils/utils';
-import { toTaskOutDto } from './mappers/task.mapper';
 import { UpdateTaskDto } from './dto/in/update-task.dto';
+import { TaskOutDto } from './dto/out/task.out.dto';
 
 @Injectable()
 export class TaskService {
@@ -30,13 +30,14 @@ export class TaskService {
                 comments: true,
             },
         });
-        return tasks.map((task) =>
-            toTaskOutDto({
-                task: task,
-                status: task.statusBoard.status,
-                assignedBy: exclude(task.assignedBy, ['password']) as User,
-                comments: task.comments,
-            }),
+        return tasks.map(
+            (task) =>
+                new TaskOutDto({
+                    task: task,
+                    status: task.statusBoard.status,
+                    assignedBy: exclude(task.assignedBy, ['password']) as User,
+                    comments: task.comments,
+                }),
         );
     }
 
@@ -58,7 +59,7 @@ export class TaskService {
         if (!task) {
             throw new NotFoundException('Task Not Found');
         }
-        return toTaskOutDto({
+        return new TaskOutDto({
             task: task,
             status: task.statusBoard.status,
             assignedBy: exclude(task.assignedBy, ['password']) as User,
@@ -78,13 +79,14 @@ export class TaskService {
                 comments: true,
             },
         });
-        return tasks.map((task) =>
-            toTaskOutDto({
-                task: task,
-                status: task.statusBoard.status,
-                assignedBy: exclude(task.assignedBy, ['password']) as User,
-                comments: task.comments,
-            }),
+        return tasks.map(
+            (task) =>
+                new TaskOutDto({
+                    task: task,
+                    status: task.statusBoard.status,
+                    assignedBy: exclude(task.assignedBy, ['password']) as User,
+                    comments: task.comments,
+                }),
         );
     }
 
@@ -93,10 +95,10 @@ export class TaskService {
             where: {
                 statusId: createTaskDto.statusId,
                 board: {
-                    squadId: createTaskDto.squadId
-                }
-            }
-        })
+                    squadId: createTaskDto.squadId,
+                },
+            },
+        });
         if (!statusBoard) {
             throw new NotFoundException('Squad or Status Not Found');
         }
@@ -109,7 +111,7 @@ export class TaskService {
                 priority: createTaskDto.priority,
                 difficulty: createTaskDto.difficulty,
                 assignedById: assignedById,
-                statusBoardId: statusBoard.id
+                statusBoardId: statusBoard.id,
             },
         });
     }
@@ -131,6 +133,7 @@ export class TaskService {
         }
     }
 
+    // TODO: Refactor.
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
             const task = await this.prismaService.task.findFirst({
@@ -140,8 +143,8 @@ export class TaskService {
                 include: {
                     statusBoard: {
                         include: {
-                            board: true
-                        }
+                            board: true,
+                        },
                     },
                 },
             });
@@ -151,7 +154,8 @@ export class TaskService {
             const newStatusBoard =
                 await this.prismaService.statusBoard.findFirst({
                     where: {
-                        statusId: updateTaskDto.statusId ?? task.statusBoard.statusId,
+                        statusId:
+                            updateTaskDto.statusId ?? task.statusBoard.statusId,
                         boardId: task.statusBoard.boardId,
                     },
                 });
