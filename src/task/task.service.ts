@@ -138,7 +138,11 @@ export class TaskService {
                     id: id,
                 },
                 include: {
-                    statusBoard: true,
+                    statusBoard: {
+                        include: {
+                            board: true
+                        }
+                    },
                 },
             });
             if (!task) {
@@ -147,7 +151,7 @@ export class TaskService {
             const newStatusBoard =
                 await this.prismaService.statusBoard.findFirst({
                     where: {
-                        statusId: updateTaskDto.statusId,
+                        statusId: updateTaskDto.statusId ?? task.statusBoard.statusId,
                         boardId: task.statusBoard.boardId,
                     },
                 });
