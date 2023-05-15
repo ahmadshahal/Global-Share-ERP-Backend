@@ -9,7 +9,7 @@ import { UpdatePositionDto } from './dto/update-position.dto';
 export class PositionService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number): Promise<Position> {
+    async readOne(id: number) {
         const position = await this.prismaService.position.findFirst({
             where: {
                 id: id,
@@ -24,7 +24,7 @@ export class PositionService {
         return position;
     }
 
-    async readAll(): Promise<Position[]> {
+    async readAll() {
         return await this.prismaService.position.findMany({
             include: {
                 squad: true

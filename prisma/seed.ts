@@ -12,7 +12,7 @@ async function main() {
     for (const status of statuses) {
         console.log(status);
         await prisma.status.create({
-            data: { name: status.name },
+            data: { name: status.name, crucial: true },
         });
     }
 }

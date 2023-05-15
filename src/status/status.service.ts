@@ -13,7 +13,7 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 export class StatusService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number): Promise<Status> {
+    async readOne(id: number) {
         const status = await this.prismaService.status.findFirst({
             where: {
                 id: id,
@@ -25,7 +25,7 @@ export class StatusService {
         return status;
     }
 
-    async readAll(): Promise<Status[]> {
+    async readAll() {
         return await this.prismaService.status.findMany();
     }
 
@@ -47,22 +47,16 @@ export class StatusService {
     }
 
     async delete(id: number) {
-        if (id <= 4)
-            throw new BadRequestException("Deletion of main statuses is forbidden");
-        try {
-            await this.prismaService.status.delete({
-                where: {
-                    id: id,
-                },
-            });
-        } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Status Not Found');
-                }
-            }
-            throw error;
-        }
+        const task = await this.readOne(id);
+        if (task.crucial)
+            throw new BadRequestException(
+                'Deletion of crucial statuses is forbidden',
+            );
+        await this.prismaService.status.delete({
+            where: {
+                id: id,
+            },
+        });
     }
 
     async update(id: number, updateStatusDto: UpdateStatusDto) {

@@ -69,6 +69,7 @@ model Board {
 model Status {
     id           Int           @id @default(autoincrement())
     name         String        @unique
+    crucial      Boolean       @default(false)
     statusBoards StatusBoard[]
 }
 
