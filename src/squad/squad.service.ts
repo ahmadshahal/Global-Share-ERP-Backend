@@ -42,7 +42,7 @@ export class SquadService {
                 imageUrl: 'http://image.path.com',
                 board: {
                     create: {
-                        statuses: {
+                        statusBoards: {
                             createMany: {
                                 data: [
                                     { statusId: 1 },

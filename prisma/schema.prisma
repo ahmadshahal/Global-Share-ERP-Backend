@@ -58,18 +58,18 @@ model Position {
 }
 
 model Board {
-    id       Int           @id @default(autoincrement())
-    squadId  Int           @unique
-    squad    Squad         @relation(fields: [squadId], references: [id])
-    statuses StatusBoard[]
+    id           Int           @id @default(autoincrement())
+    squadId      Int           @unique
+    squad        Squad         @relation(fields: [squadId], references: [id])
+    statusBoards StatusBoard[]
 
     @@index([squadId])
 }
 
 model Status {
-    id     Int           @id @default(autoincrement())
-    name   String        @unique
-    boards StatusBoard[]
+    id           Int           @id @default(autoincrement())
+    name         String        @unique
+    statusBoards StatusBoard[]
 }
 
 model StatusBoard {

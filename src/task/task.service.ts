@@ -12,19 +12,13 @@ export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
     async readBySquad(squadId: number) {
-        const board = await this.prismaService.board.findUnique({
-            where: {
-                squadId: squadId,
-            },
-        });
-        if (!board) {
-            throw new NotFoundException('Squad Not Found');
-        }
         const tasks = await this.prismaService.task.findMany({
             where: {
                 statusBoard: {
-                    boardId: board.id
-                }
+                    board: {
+                        squadId: squadId,
+                    },
+                },
             },
             include: {
                 assignedBy: true,
@@ -33,7 +27,7 @@ export class TaskService {
                         status: true,
                     },
                 },
-                comments: true
+                comments: true,
             },
         });
         return tasks.map((task) =>
@@ -41,7 +35,7 @@ export class TaskService {
                 task: task,
                 status: task.statusBoard.status,
                 assignedBy: exclude(task.assignedBy, ['password']) as User,
-                comments: task.comments
+                comments: task.comments,
             }),
         );
     }
@@ -58,7 +52,7 @@ export class TaskService {
                         status: true,
                     },
                 },
-                comments: true
+                comments: true,
             },
         });
         if (!task) {
@@ -68,7 +62,7 @@ export class TaskService {
             task: task,
             status: task.statusBoard.status,
             assignedBy: exclude(task.assignedBy, ['password']) as User,
-            comments: task.comments
+            comments: task.comments,
         });
     }
 
@@ -81,7 +75,7 @@ export class TaskService {
                         status: true,
                     },
                 },
-                comments: true
+                comments: true,
             },
         });
         return tasks.map((task) =>
@@ -89,28 +83,22 @@ export class TaskService {
                 task: task,
                 status: task.statusBoard.status,
                 assignedBy: exclude(task.assignedBy, ['password']) as User,
-                comments: task.comments
+                comments: task.comments,
             }),
         );
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {
-        const board = await this.prismaService.board.findUnique({
-            where: {
-                squadId: createTaskDto.squadId,
-            },
-        });
-        if (!board) {
-            throw new NotFoundException('Squad Not Found');
-        }
         const statusBoard = await this.prismaService.statusBoard.findFirst({
             where: {
                 statusId: createTaskDto.statusId,
-                boardId: board.id,
-            },
-        });
+                board: {
+                    squadId: createTaskDto.squadId
+                }
+            }
+        })
         if (!statusBoard) {
-            throw new NotFoundException('Status Not Found');
+            throw new NotFoundException('Squad or Status Not Found');
         }
         await this.prismaService.task.create({
             data: {
@@ -121,7 +109,7 @@ export class TaskService {
                 priority: createTaskDto.priority,
                 difficulty: createTaskDto.difficulty,
                 assignedById: assignedById,
-                statusBoardId: statusBoard.id,
+                statusBoardId: statusBoard.id
             },
         });
     }
@@ -151,7 +139,7 @@ export class TaskService {
                 },
                 include: {
                     statusBoard: true,
-                }
+                },
             });
             if (!task) {
                 throw new NotFoundException('Task Not Found');
