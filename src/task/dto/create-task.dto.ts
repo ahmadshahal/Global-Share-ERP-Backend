@@ -46,4 +46,9 @@ export class CreateTaskDto {
     @IsNumber()
     @Type(() => Number)
     statusId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    assignedToId: number;
 }

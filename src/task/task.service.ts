@@ -25,7 +25,15 @@ export class TaskService {
                         lastName: true,
                         email: true,
                         middleName: true,
-                    }
+                    },
+                },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
                 },
                 status: true,
                 comments: true,
@@ -46,7 +54,15 @@ export class TaskService {
                         lastName: true,
                         email: true,
                         middleName: true,
-                    }
+                    },
+                },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
                 },
                 status: true,
                 comments: true,
@@ -67,7 +83,15 @@ export class TaskService {
                         lastName: true,
                         email: true,
                         middleName: true,
-                    }
+                    },
+                },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
                 },
                 status: true,
                 comments: true,
@@ -88,14 +112,19 @@ export class TaskService {
                     difficulty: createTaskDto.difficulty,
                     assignedBy: {
                         connect: {
-                            id: assignedById
-                        }
+                            id: assignedById,
+                        },
                     },
                     status: {
                         connect: {
-                            id: createTaskDto.statusId
-                        }
-                    }
+                            id: createTaskDto.statusId,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: createTaskDto.assignedToId,
+                        },
+                    },
                 },
             });
         } catch (error) {
@@ -140,15 +169,20 @@ export class TaskService {
                     difficulty: updateTaskDto.difficulty,
                     status: {
                         connect: {
-                            id: updateTaskDto.statusId
-                        }
-                    }
+                            id: updateTaskDto.statusId,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: updateTaskDto.assignedToId,
+                        },
+                    },
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Task or Status Not Found');
+                    throw new NotFoundException('Task, User, or Status Not Found');
                 }
             }
             throw error;
