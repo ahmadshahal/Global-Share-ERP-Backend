@@ -9,14 +9,14 @@ import { UpdatePositionDto } from './dto/update-position.dto';
 export class PositionService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number): Promise<Position> {
+    async readOne(id: number) {
         const position = await this.prismaService.position.findFirst({
             where: {
                 id: id,
             },
             include: {
-                squad: true
-            }
+                squad: true,
+            },
         });
         if (!position) {
             throw new NotFoundException('Position Not Found');
@@ -24,25 +24,38 @@ export class PositionService {
         return position;
     }
 
-    async readAll(): Promise<Position[]> {
+    async readAll() {
         return await this.prismaService.position.findMany({
             include: {
-                squad: true
-            }
+                squad: true,
+            },
         });
     }
 
     async create(createPositionDto: CreatePositionDto) {
-        await this.prismaService.position.create({
-            data: {
-                name: createPositionDto.name,
-                gsName: createPositionDto.gsName,
-                gsLevel: createPositionDto.gsLevel,
-                jobDescription: createPositionDto.jobDescription,
-                weeklyHours: createPositionDto.weeklyHours,
-                squadId: createPositionDto.squadId,
-            },
-        });
+        try {
+            await this.prismaService.position.create({
+                data: {
+                    name: createPositionDto.name,
+                    gsName: createPositionDto.gsName,
+                    gsLevel: createPositionDto.gsLevel,
+                    jobDescription: createPositionDto.jobDescription,
+                    weeklyHours: createPositionDto.weeklyHours,
+                    squad: {
+                        connect: {
+                            id: createPositionDto.squadId,
+                        },
+                    },
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new NotFoundException('Squad Not Found');
+                }
+            }
+            throw error;
+        }
     }
 
     async delete(id: number) {
@@ -74,13 +87,17 @@ export class PositionService {
                     gsLevel: updatePositionDto.gsLevel,
                     jobDescription: updatePositionDto.jobDescription,
                     weeklyHours: updatePositionDto.weeklyHours,
-                    squadId: updatePositionDto.squadId,
+                    squad: {
+                        connect: {
+                            id: updatePositionDto.squadId,
+                        },
+                    },
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Position Not Found');
+                    throw new NotFoundException('Position or Squad Not Found');
                 }
             }
             throw error;

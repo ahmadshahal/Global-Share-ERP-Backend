@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Squad } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
@@ -9,14 +9,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class SquadService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number): Promise<Squad> {
+    async readOne(id: number) {
         const squad = await this.prismaService.squad.findFirst({
             where: {
                 id: id,
             },
             include: {
-                positions: true
-            }
+                positions: true,
+            },
         });
         if (!squad) {
             throw new NotFoundException('Squad Not Found');
@@ -24,11 +24,11 @@ export class SquadService {
         return squad;
     }
 
-    async readAll(): Promise<Squad[]> {
+    async readAll() {
         return await this.prismaService.squad.findMany({
             include: {
-                positions: true
-            }
+                positions: true,
+            },
         });
     }
 
@@ -45,10 +45,10 @@ export class SquadService {
                         statuses: {
                             createMany: {
                                 data: [
-                                    { statusId: 1 },
-                                    { statusId: 2 },
-                                    { statusId: 3 },
-                                    { statusId: 4 },
+                                    { name: 'Todo', crucial: true },
+                                    { name: 'InProgress', crucial: true },
+                                    { name: 'Done', crucial: true },
+                                    { name: 'Approved', crucial: true },
                                 ],
                             },
                         },
@@ -75,7 +75,11 @@ export class SquadService {
         }
     }
 
-    async update(id: number, updateSquadDto: UpdateSquadDto, image: Express.Multer.File) {
+    async update(
+        id: number,
+        updateSquadDto: UpdateSquadDto,
+        image: Express.Multer.File,
+    ) {
         // TODO: Upload the image to Google Drive and add the link in the DB.
         try {
             await this.prismaService.squad.update({

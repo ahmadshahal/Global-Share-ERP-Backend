@@ -45,10 +45,10 @@ export class CreateTaskDto {
     @IsNotEmpty()
     @IsNumber()
     @Type(() => Number)
-    squadId: number;
+    statusId: number;
 
     @IsNotEmpty()
     @IsNumber()
     @Type(() => Number)
-    statusId: number;
+    assignedToId: number;
 }

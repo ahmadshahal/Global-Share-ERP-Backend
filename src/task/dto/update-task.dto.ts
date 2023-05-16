@@ -52,4 +52,9 @@ export class UpdateTaskDto {
     @IsNumber()
     @Type(() => Number)
     statusId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    assignedToId: number;
 }

@@ -45,7 +45,11 @@ export class AuthService {
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
-                    positionId: signupDto.positionId
+                    position: {
+                        connect: {
+                            id: signupDto.positionId
+                        }
+                    }
                 },
             });
             return await this.signToken(user.id, user.email);
@@ -53,6 +57,9 @@ export class AuthService {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
                     throw new BadRequestException('Credentials Taken');
+                }
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new BadRequestException('Position Not Found');
                 }
             }
             throw error;

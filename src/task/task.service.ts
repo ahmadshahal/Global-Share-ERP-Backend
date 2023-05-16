@@ -1,47 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, Comment } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
-import { CreateTaskDto } from './dto/in/create-task.dto';
-import { exclude } from 'src/utils/utils';
-import { toTaskOutDto } from './mappers/task.mapper';
-import { UpdateTaskDto } from './dto/in/update-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
     async readBySquad(squadId: number) {
-        const board = await this.prismaService.board.findUnique({
-            where: {
-                squadId: squadId,
-            },
-        });
-        if (!board) {
-            throw new NotFoundException('Squad Not Found');
-        }
         const tasks = await this.prismaService.task.findMany({
             where: {
-                statusBoard: {
-                    boardId: board.id
-                }
-            },
-            include: {
-                assignedBy: true,
-                statusBoard: {
-                    select: {
-                        status: true,
+                status: {
+                    board: {
+                        squadId: squadId,
                     },
                 },
             },
+            include: {
+                assignedBy: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
+                },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
+                },
+                status: true,
+                comments: true,
+            },
         });
-        return tasks.map((task) =>
-            toTaskOutDto({
-                task: task,
-                status: task.statusBoard.status,
-                assignedBy: exclude(task.assignedBy, ['password']) as User,
-            }),
-        );
+        return tasks;
     }
 
     async readOne(id: number) {
@@ -50,74 +48,93 @@ export class TaskService {
                 id: id,
             },
             include: {
-                assignedBy: true,
-                statusBoard: {
+                assignedBy: {
                     select: {
-                        status: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
                     },
                 },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
+                },
+                status: true,
+                comments: true,
             },
         });
         if (!task) {
             throw new NotFoundException('Task Not Found');
         }
-        return toTaskOutDto({
-            task: task,
-            status: task.statusBoard.status,
-            assignedBy: exclude(task.assignedBy, ['password']) as User,
-        });
+        return task;
     }
 
     async readAll() {
         const tasks = await this.prismaService.task.findMany({
             include: {
-                assignedBy: true,
-                statusBoard: {
+                assignedBy: {
                     select: {
-                        status: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
                     },
                 },
+                assignedTo: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    },
+                },
+                status: true,
+                comments: true,
             },
         });
-        return tasks.map((task) =>
-            toTaskOutDto({
-                task: task,
-                status: task.statusBoard.status,
-                assignedBy: exclude(task.assignedBy, ['password']) as User,
-            }),
-        );
+        return tasks;
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {
-        const board = await this.prismaService.board.findUnique({
-            where: {
-                squadId: createTaskDto.squadId,
-            },
-        });
-        if (!board) {
-            throw new NotFoundException('Squad Not Found');
+        try {
+            await this.prismaService.task.create({
+                data: {
+                    title: createTaskDto.title,
+                    description: createTaskDto.description,
+                    url: createTaskDto.url,
+                    deadline: createTaskDto.deadline,
+                    priority: createTaskDto.priority,
+                    difficulty: createTaskDto.difficulty,
+                    assignedBy: {
+                        connect: {
+                            id: assignedById,
+                        },
+                    },
+                    status: {
+                        connect: {
+                            id: createTaskDto.statusId,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: createTaskDto.assignedToId,
+                        },
+                    },
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new NotFoundException('User or Status Not Found');
+                }
+            }
+            throw error;
         }
-        const statusBoard = await this.prismaService.statusBoard.findFirst({
-            where: {
-                statusId: createTaskDto.statusId,
-                boardId: board.id,
-            },
-        });
-        if (!statusBoard) {
-            throw new NotFoundException('Status Not Found');
-        }
-        await this.prismaService.task.create({
-            data: {
-                title: createTaskDto.title,
-                description: createTaskDto.description,
-                url: createTaskDto.url,
-                deadline: createTaskDto.deadline,
-                priority: createTaskDto.priority,
-                difficulty: createTaskDto.difficulty,
-                assignedById: assignedById,
-                statusBoardId: statusBoard.id,
-            },
-        });
     }
 
     async delete(id: number) {
@@ -139,27 +156,6 @@ export class TaskService {
 
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
-            const task = await this.prismaService.task.findFirst({
-                where: {
-                    id: id,
-                },
-                include: {
-                    statusBoard: true,
-                }
-            });
-            if (!task) {
-                throw new NotFoundException('Task Not Found');
-            }
-            const newStatusBoard =
-                await this.prismaService.statusBoard.findFirst({
-                    where: {
-                        statusId: updateTaskDto.statusId,
-                        boardId: task.statusBoard.boardId,
-                    },
-                });
-            if (!newStatusBoard) {
-                throw new NotFoundException('Status Not Found');
-            }
             await this.prismaService.task.update({
                 where: {
                     id: id,
@@ -171,13 +167,22 @@ export class TaskService {
                     deadline: updateTaskDto.deadline,
                     priority: updateTaskDto.priority,
                     difficulty: updateTaskDto.difficulty,
-                    statusBoardId: newStatusBoard.id,
+                    status: {
+                        connect: {
+                            id: updateTaskDto.statusId,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: updateTaskDto.assignedToId,
+                        },
+                    },
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Task or Status Not Found');
+                    throw new NotFoundException('Task, User, or Status Not Found');
                 }
             }
             throw error;
