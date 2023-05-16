@@ -2,10 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, User, Comment } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
-import { CreateTaskDto } from './dto/in/create-task.dto';
-import { exclude } from 'src/utils/utils';
-import { UpdateTaskDto } from './dto/in/update-task.dto';
-import { TaskOutDto } from './dto/out/task.out.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -21,20 +19,19 @@ export class TaskService {
                 },
             },
             include: {
-                assignedBy: true,
+                assignedBy: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    }
+                },
                 status: true,
                 comments: true,
             },
         });
-        return tasks.map(
-            (task) =>
-                new TaskOutDto({
-                    task: task,
-                    status: task.status,
-                    assignedBy: exclude(task.assignedBy, ['password']) as User,
-                    comments: task.comments,
-                }),
-        );
+        return tasks;
     }
 
     async readOne(id: number) {
@@ -43,7 +40,14 @@ export class TaskService {
                 id: id,
             },
             include: {
-                assignedBy: true,
+                assignedBy: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    }
+                },
                 status: true,
                 comments: true,
             },
@@ -51,31 +55,25 @@ export class TaskService {
         if (!task) {
             throw new NotFoundException('Task Not Found');
         }
-        return new TaskOutDto({
-            task: task,
-            status: task.status,
-            assignedBy: exclude(task.assignedBy, ['password']) as User,
-            comments: task.comments,
-        });
+        return task;
     }
 
     async readAll() {
         const tasks = await this.prismaService.task.findMany({
             include: {
-                assignedBy: true,
+                assignedBy: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        middleName: true,
+                    }
+                },
                 status: true,
                 comments: true,
             },
         });
-        return tasks.map(
-            (task) =>
-                new TaskOutDto({
-                    task: task,
-                    status: task.status,
-                    assignedBy: exclude(task.assignedBy, ['password']) as User,
-                    comments: task.comments,
-                }),
-        );
+        return tasks;
     }
 
     async create(createTaskDto: CreateTaskDto, assignedById: number) {

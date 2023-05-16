@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
-import { CreateTaskDto } from './dto/in/create-task.dto';
-import { UpdateTaskDto } from './dto/in/update-task.dto';
 import { UserId } from 'src/auth/decorator/user-id.decorator';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @UseGuards(JwtGuard)
 @Controller('task')
