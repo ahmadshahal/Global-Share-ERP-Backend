@@ -3,7 +3,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Status, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -34,12 +34,17 @@ export class StatusService {
             await this.prismaService.status.create({
                 data: {
                     name: createStatusDto.name,
+                    board: {
+                        connect: {
+                            squadId: createStatusDto.squadId
+                        }
+                    }
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
-                    throw new BadRequestException('Status already exists');
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new BadRequestException('Squad not found');
                 }
             }
             throw error;

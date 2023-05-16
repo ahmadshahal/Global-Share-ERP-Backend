@@ -58,49 +58,41 @@ model Position {
 }
 
 model Board {
-    id           Int           @id @default(autoincrement())
-    squadId      Int           @unique
-    squad        Squad         @relation(fields: [squadId], references: [id])
-    statusBoards StatusBoard[]
+    id       Int      @id @default(autoincrement())
+    squadId  Int      @unique
+    squad    Squad    @relation(fields: [squadId], references: [id])
+    statuses Status[]
 
     @@index([squadId])
 }
 
 model Status {
-    id           Int           @id @default(autoincrement())
-    name         String        @unique
-    crucial      Boolean       @default(false)
-    statusBoards StatusBoard[]
-}
-
-model StatusBoard {
-    id       Int    @id @default(autoincrement())
-    boardId  Int
-    board    Board  @relation(fields: [boardId], references: [id])
-    statusId Int
-    status   Status @relation(fields: [statusId], references: [id])
-    tasks    Task[]
+    id      Int     @id @default(autoincrement())
+    name    String
+    crucial Boolean @default(false)
+    boardId Int
+    board   Board   @relation(fields: [boardId], references: [id])
+    tasks   Task[]
 
     @@index([boardId])
-    @@index([statusId])
 }
 
 model Task {
-    id            Int         @id @default(autoincrement())
-    title         String
-    description   String
-    url           String?
-    deadline      DateTime
-    priority      Priority    @default(NORMAL)
-    difficulty    Difficulty  @default(MEDIUM)
-    assignedById  Int
-    assignedBy    User        @relation(fields: [assignedById], references: [id])
-    statusBoardId Int
-    statusBoard   StatusBoard @relation(fields: [statusBoardId], references: [id])
-    comments      Comment[]
+    id           Int        @id @default(autoincrement())
+    title        String
+    description  String
+    url          String?
+    deadline     DateTime
+    priority     Priority   @default(NORMAL)
+    difficulty   Difficulty @default(MEDIUM)
+    assignedById Int
+    assignedBy   User       @relation(fields: [assignedById], references: [id])
+    statusId     Int
+    status       Status     @relation(fields: [statusId], references: [id])
+    comments     Comment[]
 
     @@index([assignedById])
-    @@index([statusBoardId])
+    @@index([statusId])
 }
 
 model Comment {

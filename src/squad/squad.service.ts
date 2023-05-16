@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Squad } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
@@ -34,11 +34,6 @@ export class SquadService {
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
         // TODO: Upload the image to Google Drive and add the link in the DB.
-        const crucialStatuses = await this.prismaService.status.findMany({
-            where: {
-                crucial: true,
-            },
-        });
         await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
@@ -47,11 +42,14 @@ export class SquadService {
                 imageUrl: 'http://image.path.com',
                 board: {
                     create: {
-                        statusBoards: {
+                        statuses: {
                             createMany: {
-                                data: crucialStatuses.map((status) => {
-                                    return { statusId: status.id };
-                                }),
+                                data: [
+                                    { name: 'Todo', crucial: true },
+                                    { name: 'InProgress', crucial: true },
+                                    { name: 'Done', crucial: true },
+                                    { name: 'Approved', crucial: true },
+                                ],
                             },
                         },
                     },
