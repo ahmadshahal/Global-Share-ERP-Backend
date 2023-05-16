@@ -23,7 +23,6 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     @Post('signup')
     async signup(@Body() signupDto: SignupDto) {
-        console.log(signupDto);
         return { token: await this.authService.signup(signupDto) };
     }
 }
