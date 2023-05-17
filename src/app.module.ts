@@ -8,6 +8,7 @@ import { SquadModule } from './squad/squad.module';
 import { PositionModule } from './position/position.module';
 import { TaskModule } from './task/task.module';
 import { StatusModule } from './status/status.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { StatusModule } from './status/status.module';
         PositionModule,
         TaskModule,
         StatusModule,
+        CommentModule,
     ],
 })
 export class AppModule {}
