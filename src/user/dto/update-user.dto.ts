@@ -61,10 +61,4 @@ export class UpdateUserDto {
     @IsEnum(GsStatus)
     @IsNotEmpty()
     gsStatus: GsStatus;
-
-    // TODO: Should be replaced by vacancyId
-    @IsOptional()
-    @Type(() => Number)
-    @IsNotEmpty()
-    positionId: number;
 }

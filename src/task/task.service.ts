@@ -13,9 +13,7 @@ export class TaskService {
         const tasks = await this.prismaService.task.findMany({
             where: {
                 status: {
-                    board: {
-                        squadId: squadId,
-                    },
+                    squadId: squadId,
                 },
             },
             include: {
@@ -182,7 +180,9 @@ export class TaskService {
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Task, User, or Status Not Found');
+                    throw new NotFoundException(
+                        'Task, User, or Status Not Found',
+                    );
                 }
             }
             throw error;

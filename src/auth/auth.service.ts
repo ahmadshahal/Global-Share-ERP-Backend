@@ -45,11 +45,11 @@ export class AuthService {
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
-                    position: {
-                        connect: {
-                            id: signupDto.positionId
-                        }
-                    }
+                    // position: {
+                    //     connect: {
+                    //         id: signupDto.positionId,
+                    //     },
+                    // },
                 },
             });
             return await this.signToken(user.id, user.email);

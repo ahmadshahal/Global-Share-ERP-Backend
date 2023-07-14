@@ -15,7 +15,7 @@ export class UserService {
                 id: id,
             },
             include: {
-                position: true
+                positions: true,
             },
         });
         if (!user) {
@@ -27,7 +27,7 @@ export class UserService {
     async readAll() {
         const users = await this.prismaService.user.findMany({
             include: {
-                position: true
+                positions: true,
             },
         });
         return users.map((user) => exclude(user, ['password']));
@@ -49,7 +49,6 @@ export class UserService {
                     middleName: updateUserDto.middleName,
                     phoneNumber: updateUserDto.phoneNumber,
                     gsStatus: updateUserDto.gsStatus,
-                    positionId: updateUserDto.positionId,
                 },
             });
         } catch (error) {

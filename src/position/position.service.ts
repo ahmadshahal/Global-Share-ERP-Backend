@@ -39,7 +39,6 @@ export class PositionService {
                     name: createPositionDto.name,
                     gsName: createPositionDto.gsName,
                     gsLevel: createPositionDto.gsLevel,
-                    jobDescription: createPositionDto.jobDescription,
                     weeklyHours: createPositionDto.weeklyHours,
                     squad: {
                         connect: {
@@ -85,7 +84,6 @@ export class PositionService {
                     name: updatePositionDto.name,
                     gsName: updatePositionDto.gsName,
                     gsLevel: updatePositionDto.gsLevel,
-                    jobDescription: updatePositionDto.jobDescription,
                     weeklyHours: updatePositionDto.weeklyHours,
                     squad: {
                         connect: {

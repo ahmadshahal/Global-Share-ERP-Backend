@@ -40,18 +40,14 @@ export class SquadService {
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
                 imageUrl: 'http://image.path.com',
-                board: {
-                    create: {
-                        statuses: {
-                            createMany: {
-                                data: [
-                                    { name: 'Todo', crucial: true },
-                                    { name: 'InProgress', crucial: true },
-                                    { name: 'Done', crucial: true },
-                                    { name: 'Approved', crucial: true },
-                                ],
-                            },
-                        },
+                statuses: {
+                    createMany: {
+                        data: [
+                            { name: 'Todo', crucial: true },
+                            { name: 'InProgress', crucial: true },
+                            { name: 'Done', crucial: true },
+                            { name: 'Approved', crucial: true },
+                        ],
                     },
                 },
             },

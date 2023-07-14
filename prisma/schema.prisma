@@ -39,8 +39,7 @@ model User {
     bio                  String?
     gsStatus             GsStatus              @default(ACTIVE)
     joinDate             DateTime              @default(now())
-    positionId           Int
-    position             PositionUser[]
+    positions             PositionUser[]
     comments             Comment[]
     requests             Request[]
     assignedTasks        Task[]                @relation("assignedBy")

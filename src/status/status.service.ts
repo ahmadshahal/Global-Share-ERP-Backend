@@ -34,11 +34,7 @@ export class StatusService {
             await this.prismaService.status.create({
                 data: {
                     name: createStatusDto.name,
-                    board: {
-                        connect: {
-                            squadId: createStatusDto.squadId
-                        }
-                    }
+                    squadId: createStatusDto.squadId,
                 },
             });
         } catch (error) {
