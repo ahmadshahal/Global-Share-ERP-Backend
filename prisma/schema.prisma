@@ -11,71 +11,200 @@ datasource db {
     relationMode = "prisma"
 }
 
+model Squad {
+    id                   Int                   @id @default(autoincrement())
+    name                 String
+    gsName               String
+    description          String
+    imageUrl             String
+    positions            Position[]
+    statuses             Status[]
+    enterpriseObjectives EnterpriseObjective[] // for the future
+    SquadObjectives      SquadObjective[]
+    goals                Goal[]
+    steps                Step[]
+}
+
 model User {
-    id              Int       @id @default(autoincrement())
-    email           String    @unique
-    password        String
-    phoneNumber     String    @unique
-    firstName       String
-    lastName        String
-    additionalEmail String?   @unique
-    middleName      String?
-    arabicFullName  String?
-    appointlet      String?
-    bio             String?
-    gsStatus        GsStatus  @default(ACTIVE)
-    joinDate        DateTime  @default(now())
-    positionId      Int
-    position        Position  @relation(fields: [positionId], references: [id])
-    comments        Comment[]
-    assignedTasks   Task[]    @relation("assignedBy")
-    assignedToTasks Task[]    @relation("assignedTo")
+    id                   Int                   @id @default(autoincrement())
+    email                String                @unique
+    password             String
+    phoneNumber          String                @unique
+    firstName            String
+    lastName             String
+    additionalEmail      String?               @unique
+    middleName           String?
+    arabicFullName       String?
+    appointlet           String?
+    bio                  String?
+    gsStatus             GsStatus              @default(ACTIVE)
+    joinDate             DateTime              @default(now())
+    positionId           Int
+    position             PositionUser[]
+    comments             Comment[]
+    requests             Request[]
+    assignedTasks        Task[]                @relation("assignedBy")
+    assignedToTasks      Task[]                @relation("assignedTo")
+    doneEvaluations      Evaluation[]
+    enterpriseObjectives EnterpriseObjective[] // for the future
+    SquadObjectives      SquadObjective[]
+    goals                Goal[]
+    steps                Step[]
+}
+
+model Position {
+    id           Int                  @id @default(autoincrement())
+    name         String
+    gsName       String
+    weeklyHours  Int
+    gsLevel      GsLevel
+    squadId      Int
+    squad        Squad                @relation(fields: [squadId], references: [id])
+    users        PositionUser[]
+    competencies PositionCompetency[]
+    vacancies    Vacancy[]
+
+    @@index([squadId])
+}
+
+model Request {
+    id          Int    @id @default(autoincrement())
+    userId      Int
+    user        User   @relation(fields: [userId], references: [id])
+    requestType String
+    reason      String
+    status      String
+
+    @@index([userId])
+}
+
+model PositionUser {
+    id          Int          @id @default(autoincrement())
+    positionId  Int
+    position    Position     @relation(fields: [positionId], references: [id])
+    userId      Int
+    user        User         @relation(fields: [userId], references: [id])
+    startDate   DateTime
+    endDate     DateTime
+    evaluations Evaluation[]
+
+    @@index([userId])
+    @@index([positionId])
+}
+
+model Competency {
+    id          Int                  @id @default(autoincrement())
+    name        String
+    description String?
+    positions   PositionCompetency[]
+}
+
+model PositionCompetency {
+    id           Int          @id @default(autoincrement())
+    weight       Int
+    competencyId Int
+    competency   Competency   @relation(fields: [competencyId], references: [id])
+    positionId   Int
+    position     Position     @relation(fields: [positionId], references: [id])
+    evaluations  Evaluation[]
+
+    @@index([competencyId])
+    @@index([positionId])
+}
+
+model Evaluation {
+    id           Int                @id @default(autoincrement())
+    userId       Int
+    user         PositionUser       @relation(fields: [userId], references: [id])
+    competencyId Int
+    competency   PositionCompetency @relation(fields: [competencyId], references: [id])
+    text         String
+    mark         String?
+    evaluatorId  Int
+    evaluator    User               @relation(fields: [evaluatorId], references: [id])
+    date         DateTime
+
+    @@index([userId])
+    @@index([competencyId])
+    @@index([evaluatorId])
+}
+
+model Vacancy {
+    id           Int               @id @default(autoincrement())
+    positionId   Int
+    position     Position          @relation(fields: [positionId], references: [id])
+    isOpen       Boolean           @default(true)
+    effect       String
+    brief        String
+    tasks        String
+    required     String
+    preferred    String?
+    applications Application[]
+    questions    VacancyQuestion[]
 
     @@index([positionId])
 }
 
-model Squad {
-    id          Int        @id @default(autoincrement())
-    name        String
-    gsName      String
-    description String
-    imageUrl    String
-    positions   Position[]
-    board       Board?
+model Application {
+    id        Int                   @id @default(autoincrement())
+    vacancyId Int
+    vacancy   Vacancy               @relation(fields: [vacancyId], references: [id])
+    status    RecruitmentStatus
+    feedbacks RecruitmentFeedback[]
+    answers   Answer[]
+
+    @@index([vacancyId])
 }
 
-model Position {
-    id             Int     @id @default(autoincrement())
-    name           String
-    gsName         String
-    jobDescription String
-    weeklyHours    Int
-    gsLevel        GsLevel
-    squadId        Int
-    squad          Squad   @relation(fields: [squadId], references: [id])
-    users          User[]
+model RecruitmentFeedback {
+    id            Int               @id @default(autoincrement())
+    applicationId Int
+    application   Application       @relation(fields: [applicationId], references: [id])
+    type          RecruitmentStatus
+    text          String
 
-    @@index([squadId])
+    @@index([applicationId])
 }
 
-model Board {
-    id       Int      @id @default(autoincrement())
-    squadId  Int      @unique
-    squad    Squad    @relation(fields: [squadId], references: [id])
-    statuses Status[]
+model Question {
+    id        Int               @id @default(autoincrement())
+    text      String
+    type      QuestionType
+    positions VacancyQuestion[]
+}
 
-    @@index([squadId])
+model VacancyQuestion {
+    id         Int      @id @default(autoincrement())
+    questionId Int
+    quetion    Question @relation(fields: [questionId], references: [id])
+    vacancyId  Int
+    vacancy    Vacancy  @relation(fields: [vacancyId], references: [id])
+    answers    Answer[]
+
+    @@index([questionId])
+    @@index([vacancyId])
+}
+
+model Answer {
+    id            Int             @id @default(autoincrement())
+    applicationId Int
+    application   Application     @relation(fields: [applicationId], references: [id])
+    questionId    Int
+    questions     VacancyQuestion @relation(fields: [questionId], references: [id])
+
+    @@index([applicationId])
+    @@index([questionId])
 }
 
 model Status {
     id      Int     @id @default(autoincrement())
     name    String
     crucial Boolean @default(false)
-    boardId Int
-    board   Board   @relation(fields: [boardId], references: [id])
+    squadId Int
+    squad   Squad   @relation(fields: [squadId], references: [id])
     tasks   Task[]
 
-    @@index([boardId])
+    @@index([squadId])
 }
 
 model Task {
@@ -93,10 +222,34 @@ model Task {
     assignedById Int
     assignedTo   User       @relation(fields: [assignedToId], references: [id], name: "assignedTo")
     assignedToId Int
+    kpis         TaskKPI[]
+    Step         Step?      @relation(fields: [stepId], references: [id])
+    stepId       Int?
 
     @@index([assignedById])
     @@index([statusId])
     @@index([assignedToId])
+    @@index([stepId])
+}
+
+model KPI {
+    id          Int       @id @default(autoincrement())
+    name        String
+    description String?
+    tasks       TaskKPI[]
+}
+
+model TaskKPI {
+    id          Int     @id @default(autoincrement())
+    grade       Int
+    description String?
+    kpiId       Int
+    KPI         KPI     @relation(fields: [kpiId], references: [id])
+    taskId      Int
+    task        Task    @relation(fields: [taskId], references: [id])
+
+    @@index([kpiId])
+    @@index([taskId])
 }
 
 model Comment {
@@ -109,6 +262,22 @@ model Comment {
 
     @@index([taskId])
     @@index([authorId])
+}
+
+model Email {
+    id                Int               @id @default(autoincrement())
+    title             String
+    body              String
+    recruitmentStatus RecruitmentStatus
+    cc                String
+}
+
+model Feedback {
+    id    Int    @id @default(autoincrement())
+    name  String
+    email String
+    title String
+    body  String
 }
 
 enum GsLevel {
@@ -137,4 +306,108 @@ enum Priority {
     NORMAL
     IMPORTANT
     URGENT
+}
+
+enum RecruitmentStatus {
+    APPLIED
+    HR_APPROVED
+    ORCH_APPROVED
+    HR_INTERVIEW_APPROVED
+    TECH_INTERVIEW_APPROVED
+    REFUSED
+    DONE
+}
+
+enum QuestionType {
+    SHORT
+    LONG
+    FILE
+    CHECKBOX
+    RADIO
+}
+
+// tables will be used in the future
+model Theme {
+    id                   Int                   @id @default(autoincrement())
+    name                 String
+    description          String?
+    startDate            DateTime?
+    endDate              DateTime?
+    enterpriseObjectives EnterpriseObjective[]
+}
+
+model EnterpriseObjective {
+    id              Int              @id @default(autoincrement())
+    name            String
+    description     String?
+    startDate       DateTime?
+    endDate         DateTime?
+    themeId         Int
+    theme           Theme            @relation(fields: [themeId], references: [id])
+    inChargeUserId  Int?
+    inChargeUser    User?            @relation(fields: [inChargeUserId], references: [id])
+    squadId         Int?
+    squad           Squad?           @relation(fields: [squadId], references: [id])
+    squadObjectives SquadObjective[]
+
+    @@index([themeId])
+    @@index([inChargeUserId])
+    @@index([squadId])
+}
+
+model SquadObjective {
+    id                    Int                 @id @default(autoincrement())
+    name                  String
+    description           String?
+    startDate             DateTime?
+    endDate               DateTime?
+    enterpriseObjectiveId Int
+    enterpriseObjective   EnterpriseObjective @relation(fields: [enterpriseObjectiveId], references: [id])
+    inChargeUserId        Int?
+    inChargeUser          User?               @relation(fields: [inChargeUserId], references: [id])
+    squadId               Int?
+    squad                 Squad?              @relation(fields: [squadId], references: [id])
+    goals                 Goal[]
+
+    @@index([enterpriseObjectiveId])
+    @@index([inChargeUserId])
+    @@index([squadId])
+}
+
+model Goal {
+    id               Int            @id @default(autoincrement())
+    name             String
+    description      String?
+    startDate        DateTime?
+    endDate          DateTime?
+    squadObjectiveId Int
+    squadObjective   SquadObjective @relation(fields: [squadObjectiveId], references: [id])
+    inChargeUserId   Int?
+    inChargeUser     User?          @relation(fields: [inChargeUserId], references: [id])
+    squadId          Int?
+    squad            Squad?         @relation(fields: [squadId], references: [id])
+    steps            Step[]
+
+    @@index([squadObjectiveId])
+    @@index([inChargeUserId])
+    @@index([squadId])
+}
+
+model Step {
+    id             Int       @id @default(autoincrement())
+    name           String
+    description    String?
+    startDate      DateTime?
+    endDate        DateTime?
+    goalId         Int
+    goal           Goal      @relation(fields: [goalId], references: [id])
+    inChargeUserId Int?
+    inChargeUser   User?     @relation(fields: [inChargeUserId], references: [id])
+    squadId        Int?
+    squad          Squad?    @relation(fields: [squadId], references: [id])
+    tasks          Task[]
+
+    @@index([goalId])
+    @@index([inChargeUserId])
+    @@index([squadId])
 }
