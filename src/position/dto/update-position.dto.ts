@@ -1,6 +1,13 @@
-import { GsLevel } from "@prisma/client";
-import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, MaxLength, MinLength } from "class-validator";
+import { GsLevel } from '@prisma/client';
+import { Type } from 'class-transformer';
+import {
+    IsEnum,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    MaxLength,
+    MinLength,
+} from 'class-validator';
 
 export class UpdatePositionDto {
     @IsOptional()
@@ -14,12 +21,6 @@ export class UpdatePositionDto {
     @MinLength(3)
     @MaxLength(50)
     gsName: string;
-
-    @IsOptional()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(250)
-    jobDescription: string;
 
     @IsOptional()
     @IsNotEmpty()

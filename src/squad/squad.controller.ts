@@ -62,7 +62,7 @@ export class SquadController {
         @UploadedFile(
             new ParseFilePipe({
                 validators: SquadImageValidator,
-                // ?: fileIsRequired: false,
+                fileIsRequired: false,
             }),
         )
         image: Express.Multer.File,

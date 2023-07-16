@@ -1,7 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Post,
+} from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
 
 @Controller('position')
 export class PositionController {
@@ -38,5 +49,19 @@ export class PositionController {
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
         await this.positionService.delete(id);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('/user')
+    async addUserToPosition(
+        @Body() addUserToPositionDto: AddUserToPositionDto,
+    ) {
+        await this.positionService.addUserToPosition(addUserToPositionDto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Delete('/user/:id')
+    async removeUserFromPosition(@Param('id', ParseIntPipe) id: number) {
+        await this.positionService.removeUserFromPosition(id);
     }
 }

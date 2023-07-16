@@ -9,6 +9,8 @@ import { PositionModule } from './position/position.module';
 import { TaskModule } from './task/task.module';
 import { StatusModule } from './status/status.module';
 import { CommentModule } from './comment/comment.module';
+import { RequestModule } from './request/request.module';
+import { CompetencyModule } from './competency/competency.module';
 
 @Module({
     imports: [
@@ -22,6 +24,8 @@ import { CommentModule } from './comment/comment.module';
         TaskModule,
         StatusModule,
         CommentModule,
+        RequestModule,
+        CompetencyModule,
     ],
 })
 export class AppModule {}

@@ -33,10 +33,4 @@ export class SignupDto {
     @IsNotEmpty()
     @IsMobilePhone()
     phoneNumber: string;
-
-    // TODO: Should be replaced by vacancyId
-    @IsNotEmpty()
-    @IsInt()
-    @Type(() => Number)
-    positionId: number;
 }

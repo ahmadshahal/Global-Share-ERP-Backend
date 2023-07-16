@@ -20,11 +20,6 @@ export class CreatePositionDto {
     gsName: string;
 
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(250)
-    jobDescription: string;
-
-    @IsNotEmpty()
     @IsInt()
     @Type(() => Number)
     weeklyHours: number;

@@ -1,5 +1,4 @@
-import { GsLevel, GsStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { GsStatus } from '@prisma/client';
 import {
     IsEmail,
     IsEnum,

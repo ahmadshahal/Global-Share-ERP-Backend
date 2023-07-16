@@ -11,6 +11,7 @@ datasource db {
     relationMode = "prisma"
 }
 
+// done
 model Squad {
     id                   Int                   @id @default(autoincrement())
     name                 String
@@ -25,6 +26,7 @@ model Squad {
     steps                Step[]
 }
 
+// done
 model User {
     id                   Int                   @id @default(autoincrement())
     email                String                @unique
@@ -50,7 +52,7 @@ model User {
     goals                Goal[]
     steps                Step[]
 }
-
+//done
 model Position {
     id           Int                  @id @default(autoincrement())
     name         String
@@ -76,7 +78,7 @@ model Request {
 
     @@index([userId])
 }
-
+//done
 model PositionUser {
     id          Int          @id @default(autoincrement())
     positionId  Int
@@ -90,7 +92,7 @@ model PositionUser {
     @@index([userId])
     @@index([positionId])
 }
-
+// done
 model Competency {
     id          Int                  @id @default(autoincrement())
     name        String
@@ -127,7 +129,7 @@ model Evaluation {
     @@index([competencyId])
     @@index([evaluatorId])
 }
-
+//done
 model Vacancy {
     id           Int               @id @default(autoincrement())
     positionId   Int
@@ -143,7 +145,7 @@ model Vacancy {
 
     @@index([positionId])
 }
-
+// done
 model Application {
     id        Int                   @id @default(autoincrement())
     vacancyId Int
