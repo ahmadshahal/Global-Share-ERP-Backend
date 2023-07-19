@@ -8,11 +8,13 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('vacancy')
 export class VacancyController {
     constructor(private vacancyService: VacancyService) {}

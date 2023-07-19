@@ -7,11 +7,13 @@ import {
     Param,
     Delete,
     ParseIntPipe,
+    UseGuards,
 } from '@nestjs/common';
 import { CompetencyService } from './competency.service';
 import { CreateCompetencyDto } from './dto/create-competency.dto';
 import { UpdateCompetencyDto } from './dto/update-competency.dto';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('competency')
 export class CompetencyController {
     constructor(private readonly competencyService: CompetencyService) {}

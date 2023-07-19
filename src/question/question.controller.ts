@@ -6,11 +6,13 @@ import {
     Put,
     Param,
     Delete,
+    UseGuards,
 } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('question')
 export class QuestionController {
     constructor(private readonly questionService: QuestionService) {}

@@ -7,12 +7,14 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import { CreateKpiDto } from './dto/create-kpi.dto';
 import { UpdateKpiDto } from './dto/update-kpi.dto';
 import { KpiService } from './kpi.service';
 import { KPI } from '@prisma/client';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('kpis')
 export class KpiController {
     constructor(private readonly kpiService: KpiService) {}

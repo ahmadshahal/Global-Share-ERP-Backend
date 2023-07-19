@@ -6,11 +6,13 @@ import {
     Patch,
     Param,
     Delete,
+    UseGuards,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('request')
 export class RequestController {
     constructor(private readonly requestService: RequestService) {}

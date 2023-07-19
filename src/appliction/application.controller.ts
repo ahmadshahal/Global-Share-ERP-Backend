@@ -7,11 +7,14 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
+@UseGuards(JwtGuard)
 @Controller('application')
 export class ApplicationController {
     constructor(private applicationService: ApplicationService) {}

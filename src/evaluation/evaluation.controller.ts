@@ -6,11 +6,13 @@ import {
     Put,
     Param,
     Delete,
+    UseGuards,
 } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
-
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+@UseGuards(JwtGuard)
 @Controller('evaluations')
 export class EvaluationController {
     constructor(private readonly evaluationService: EvaluationService) {}

@@ -8,12 +8,15 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
+@UseGuards(JwtGuard)
 @Controller('position')
 export class PositionController {
     constructor(private positionService: PositionService) {}
