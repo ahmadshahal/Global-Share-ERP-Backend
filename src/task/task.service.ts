@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Task } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -9,7 +9,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(squadId: number) {
+    async readBySquad(squadId: number): Promise<Task[]> {
         const tasks = await this.prismaService.task.findMany({
             where: {
                 status: {
@@ -35,13 +35,15 @@ export class TaskService {
                 },
                 status: true,
                 comments: true,
+                kpis: true,
+                step: true,
             },
         });
         return tasks;
     }
 
-    async readOne(id: number) {
-        const task = await this.prismaService.task.findFirst({
+    async readOne(id: number): Promise<Task> {
+        const task = await this.prismaService.task.findUnique({
             where: {
                 id: id,
             },
@@ -64,6 +66,8 @@ export class TaskService {
                 },
                 status: true,
                 comments: true,
+                kpis: true,
+                step: true,
             },
         });
         if (!task) {
@@ -72,7 +76,7 @@ export class TaskService {
         return task;
     }
 
-    async readAll() {
+    async readAll(): Promise<Task[]> {
         const tasks = await this.prismaService.task.findMany({
             include: {
                 assignedBy: {
@@ -93,42 +97,98 @@ export class TaskService {
                 },
                 status: true,
                 comments: true,
+                kpis: true,
+                step: true,
             },
         });
         return tasks;
     }
 
-    async create(createTaskDto: CreateTaskDto, assignedById: number) {
+    async create(createTaskDto: CreateTaskDto): Promise<Task> {
         try {
-            await this.prismaService.task.create({
+            const {
+                title,
+                description,
+                url,
+                deadline,
+                priority,
+                difficulty,
+                statusId,
+                assignedById,
+                assignedToId,
+                stepId,
+            } = createTaskDto;
+            return await this.prismaService.task.create({
                 data: {
-                    title: createTaskDto.title,
-                    description: createTaskDto.description,
-                    url: createTaskDto.url,
-                    deadline: createTaskDto.deadline,
-                    priority: createTaskDto.priority,
-                    difficulty: createTaskDto.difficulty,
-                    assignedBy: {
-                        connect: {
-                            id: assignedById,
-                        },
-                    },
-                    status: {
-                        connect: {
-                            id: createTaskDto.statusId,
-                        },
-                    },
-                    assignedTo: {
-                        connect: {
-                            id: createTaskDto.assignedToId,
-                        },
-                    },
+                    title,
+                    description,
+                    url,
+                    deadline: new Date(deadline),
+                    priority,
+                    difficulty,
+                    status: { connect: { id: statusId } },
+                    assignedBy: { connect: { id: assignedById } },
+                    assignedTo: { connect: { id: assignedToId } },
+                    step: stepId ? { connect: { id: stepId } } : undefined,
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('User or Status Not Found');
+                }
+            }
+            throw error;
+        }
+    }
+
+    async update(id: number, updateTaskDto: UpdateTaskDto) {
+        try {
+            const {
+                title,
+                description,
+                url,
+                deadline,
+                priority,
+                difficulty,
+                statusId,
+                assignedById,
+                assignedToId,
+                stepId,
+            } = updateTaskDto;
+            await this.prismaService.task.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    title,
+                    description,
+                    url,
+                    deadline: new Date(deadline),
+                    priority,
+                    difficulty,
+                    status: { connect: { id: statusId } },
+                    assignedBy: { connect: { id: assignedById } },
+                    assignedTo: { connect: { id: assignedToId } },
+                    step: stepId
+                        ? { connect: { id: stepId } }
+                        : { disconnect: true },
+                },
+                include: {
+                    comments: true,
+                    assignedBy: true,
+                    assignedTo: true,
+                    kpis: true,
+                    step: true,
+                    status: true,
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new NotFoundException(
+                        'Task, User, or Status Not Found',
+                    );
                 }
             }
             throw error;
@@ -146,43 +206,6 @@ export class TaskService {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Task Not Found');
-                }
-            }
-            throw error;
-        }
-    }
-
-    async update(id: number, updateTaskDto: UpdateTaskDto) {
-        try {
-            await this.prismaService.task.update({
-                where: {
-                    id: id,
-                },
-                data: {
-                    title: updateTaskDto.title,
-                    description: updateTaskDto.description,
-                    url: updateTaskDto.url,
-                    deadline: updateTaskDto.deadline,
-                    priority: updateTaskDto.priority,
-                    difficulty: updateTaskDto.difficulty,
-                    status: {
-                        connect: {
-                            id: updateTaskDto.statusId,
-                        },
-                    },
-                    assignedTo: {
-                        connect: {
-                            id: updateTaskDto.assignedToId,
-                        },
-                    },
-                },
-            });
-        } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException(
-                        'Task, User, or Status Not Found',
-                    );
                 }
             }
             throw error;

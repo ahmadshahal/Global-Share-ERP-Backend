@@ -113,6 +113,7 @@ model PositionCompetency {
     @@index([positionId])
 }
 
+//done
 model Evaluation {
     id           Int                @id @default(autoincrement())
     userId       Int
@@ -156,7 +157,7 @@ model Application {
 
     @@index([vacancyId])
 }
-
+// done
 model RecruitmentFeedback {
     id            Int               @id @default(autoincrement())
     applicationId Int
@@ -167,6 +168,7 @@ model RecruitmentFeedback {
     @@index([applicationId])
 }
 
+// done
 model Question {
     id        Int               @id @default(autoincrement())
     text      String
@@ -196,7 +198,7 @@ model Answer {
     @@index([applicationId])
     @@index([questionId])
 }
-
+// done
 model Status {
     id      Int     @id @default(autoincrement())
     name    String
@@ -208,6 +210,7 @@ model Status {
     @@index([squadId])
 }
 
+// done
 model Task {
     id           Int        @id @default(autoincrement())
     title        String
@@ -224,7 +227,7 @@ model Task {
     assignedTo   User       @relation(fields: [assignedToId], references: [id], name: "assignedTo")
     assignedToId Int
     kpis         TaskKPI[]
-    Step         Step?      @relation(fields: [stepId], references: [id])
+    step         Step?      @relation(fields: [stepId], references: [id])
     stepId       Int?
 
     @@index([assignedById])
@@ -232,7 +235,7 @@ model Task {
     @@index([assignedToId])
     @@index([stepId])
 }
-
+//done
 model KPI {
     id          Int       @id @default(autoincrement())
     name        String
@@ -252,7 +255,7 @@ model TaskKPI {
     @@index([kpiId])
     @@index([taskId])
 }
-
+// done
 model Comment {
     id       Int    @id @default(autoincrement())
     content  String

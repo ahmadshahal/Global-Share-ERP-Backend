@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, Comment } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
@@ -13,10 +13,14 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number) {
-        const comment = await this.prismaService.comment.findFirst({
+    async readOne(id: number): Promise<Comment> {
+        const comment = await this.prismaService.comment.findUnique({
             where: {
                 id: id,
+            },
+            include: {
+                task: true,
+                author: { select: { firstName: true, lastName: true } },
             },
         });
         if (!comment) {
@@ -25,13 +29,21 @@ export class CommentService {
         return comment;
     }
 
-    async readAll() {
-        return await this.prismaService.comment.findMany();
+    async readAll(): Promise<Comment[]> {
+        return await this.prismaService.comment.findMany({
+            include: {
+                task: true,
+                author: { select: { firstName: true, lastName: true } },
+            },
+        });
     }
 
-    async create(createCommentDto: CreateCommentDto, authorId: number) {
+    async create(
+        createCommentDto: CreateCommentDto,
+        authorId: number,
+    ): Promise<Comment> {
         try {
-            await this.prismaService.comment.create({
+            return await this.prismaService.comment.create({
                 data: {
                     content: createCommentDto.content,
                     author: {
@@ -56,9 +68,9 @@ export class CommentService {
         }
     }
 
-    async delete(id: number) {
+    async delete(id: number): Promise<Comment> {
         try {
-            await this.prismaService.comment.delete({
+            return await this.prismaService.comment.delete({
                 where: {
                     id: id,
                 },
@@ -73,9 +85,12 @@ export class CommentService {
         }
     }
 
-    async update(id: number, updateCommentDto: UpdateCommentDto) {
+    async update(
+        id: number,
+        updateCommentDto: UpdateCommentDto,
+    ): Promise<Comment> {
         try {
-            await this.prismaService.comment.update({
+            return await this.prismaService.comment.update({
                 where: {
                     id: id,
                 },

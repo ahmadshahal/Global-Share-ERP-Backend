@@ -1,9 +1,4 @@
-import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateStatusDto } from './create-status.dto';
 
-export class UpdateStatusDto {
-    @IsOptional()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(50)
-    name: string;
-}
+export class UpdateStatusDto extends PartialType(CreateStatusDto) {}

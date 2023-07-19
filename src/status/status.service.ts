@@ -3,7 +3,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Status } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -13,11 +13,12 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 export class StatusService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number) {
-        const status = await this.prismaService.status.findFirst({
+    async readOne(id: number): Promise<Status> {
+        const status = await this.prismaService.status.findUnique({
             where: {
                 id: id,
             },
+            include: { tasks: true, squad: true },
         });
         if (!status) {
             throw new NotFoundException('Status Not Found');
@@ -25,13 +26,15 @@ export class StatusService {
         return status;
     }
 
-    async readAll() {
-        return await this.prismaService.status.findMany();
+    async readAll(): Promise<Status[]> {
+        return await this.prismaService.status.findMany({
+            include: { tasks: true, squad: true },
+        });
     }
 
-    async create(createStatusDto: CreateStatusDto) {
+    async create(createStatusDto: CreateStatusDto): Promise<Status> {
         try {
-            await this.prismaService.status.create({
+            return await this.prismaService.status.create({
                 data: {
                     name: createStatusDto.name,
                     squadId: createStatusDto.squadId,
@@ -47,28 +50,32 @@ export class StatusService {
         }
     }
 
-    async delete(id: number) {
+    async delete(id: number): Promise<Status> {
         const task = await this.readOne(id);
         if (task.crucial)
             throw new BadRequestException(
                 'Deletion of crucial statuses is forbidden',
             );
-        await this.prismaService.status.delete({
+        return await this.prismaService.status.delete({
             where: {
                 id: id,
             },
         });
     }
 
-    async update(id: number, updateStatusDto: UpdateStatusDto) {
+    async update(
+        id: number,
+        updateStatusDto: UpdateStatusDto,
+    ): Promise<Status> {
         try {
-            await this.prismaService.status.update({
+            return await this.prismaService.status.update({
                 where: {
                     id: id,
                 },
                 data: {
                     name: updateStatusDto.name,
                 },
+                include: { tasks: true, squad: true },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
-import { UserId } from 'src/auth/decorator/user-id.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -41,11 +40,8 @@ export class TaskController {
 
     @HttpCode(HttpStatus.CREATED)
     @Post()
-    async create(
-        @UserId() userId: number,
-        @Body() createTaskDto: CreateTaskDto,
-    ) {
-        await this.taskService.create(createTaskDto, userId);
+    async create(@Body() createTaskDto: CreateTaskDto) {
+        await this.taskService.create(createTaskDto);
     }
 
     @HttpCode(HttpStatus.OK)

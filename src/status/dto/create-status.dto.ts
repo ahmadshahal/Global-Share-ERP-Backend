@@ -1,14 +1,21 @@
-import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator';
+import {
+    IsBoolean,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+} from 'class-validator';
 
 export class CreateStatusDto {
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(50)
+    @IsString()
     name: string;
-    
+
+    @IsOptional()
+    @IsBoolean()
+    crucial?: boolean;
+
     @IsNotEmpty()
     @IsNumber()
-    @Type(() => Number)
     squadId: number;
 }

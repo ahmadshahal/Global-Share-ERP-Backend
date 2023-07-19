@@ -23,11 +23,9 @@ export class CreateTaskDto {
     description: string;
 
     @IsOptional()
-    @IsNotEmpty()
     @IsUrl()
     @MinLength(3)
-    @MaxLength(50)
-    url: string;
+    url?: string;
 
     @IsNotEmpty()
     @IsDate()
@@ -51,4 +49,12 @@ export class CreateTaskDto {
     @IsNumber()
     @Type(() => Number)
     assignedToId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    assignedById: number;
+
+    @IsOptional()
+    @IsNumber()
+    stepId?: number;
 }

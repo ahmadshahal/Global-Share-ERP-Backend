@@ -11,6 +11,10 @@ import { StatusModule } from './status/status.module';
 import { CommentModule } from './comment/comment.module';
 import { RequestModule } from './request/request.module';
 import { CompetencyModule } from './competency/competency.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
+import { QuestionModule } from './question/question.module';
+import { RecruitmentFeedbackModule } from './recruitmentFeedback/recruitment-feedback.module';
+import { KpiModule } from './KPI/kpi.module';
 
 @Module({
     imports: [
@@ -26,6 +30,10 @@ import { CompetencyModule } from './competency/competency.module';
         CommentModule,
         RequestModule,
         CompetencyModule,
+        EvaluationModule,
+        QuestionModule,
+        RecruitmentFeedbackModule,
+        KpiModule,
     ],
 })
 export class AppModule {}

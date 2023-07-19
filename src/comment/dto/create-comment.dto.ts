@@ -1,6 +1,5 @@
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, MaxLength, MinLength } from "class-validator";
-
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator';
 
 export class CreateCommentDto {
     @IsNotEmpty()
@@ -12,4 +11,9 @@ export class CreateCommentDto {
     @IsNumber()
     @Type(() => Number)
     taskId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    authorId: number;
 }
