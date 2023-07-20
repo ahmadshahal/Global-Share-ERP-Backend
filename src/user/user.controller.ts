@@ -41,12 +41,12 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @Post()
     async update(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
-        await this.userService.update(id, updateUserDto);
+        return await this.userService.update(id, updateUserDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.userService.delete(id);
+        return await this.userService.delete(id);
     }
 }

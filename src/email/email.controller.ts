@@ -20,30 +20,30 @@ export class EmailController {
     constructor(private readonly emailService: EmailService) {}
 
     @Post()
-    create(@Body() createEmailDto: CreateEmailDto) {
-        return this.emailService.create(createEmailDto);
+    async create(@Body() createEmailDto: CreateEmailDto) {
+        return await this.emailService.create(createEmailDto);
     }
 
     @Get()
-    readAll() {
-        return this.emailService.readAll();
+    async readAll() {
+        return await this.emailService.readAll();
     }
 
     @Get(':id')
-    readOne(@Param('id', ParseIntPipe) id: number) {
-        return this.emailService.readOne(id);
+    async readOne(@Param('id', ParseIntPipe) id: number) {
+        return await this.emailService.readOne(id);
     }
 
     @Put(':id')
-    update(
+    async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateEmailDto: UpdateEmailDto,
     ) {
-        return this.emailService.update(id, updateEmailDto);
+        return await this.emailService.update(id, updateEmailDto);
     }
 
     @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.emailService.delete(id);
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return await this.emailService.delete(id);
     }
 }

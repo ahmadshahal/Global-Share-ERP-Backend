@@ -19,30 +19,30 @@ export class CompetencyController {
     constructor(private readonly competencyService: CompetencyService) {}
 
     @Post()
-    create(@Body() createCompetencyDto: CreateCompetencyDto) {
-        return this.competencyService.create(createCompetencyDto);
+    async create(@Body() createCompetencyDto: CreateCompetencyDto) {
+        return await this.competencyService.create(createCompetencyDto);
     }
 
     @Get()
-    readAll() {
-        return this.competencyService.readAll();
+    async readAll() {
+        return await this.competencyService.readAll();
     }
 
     @Get(':id')
-    readOne(@Param('id', ParseIntPipe) id: number) {
-        return this.competencyService.readOne(id);
+    async readOne(@Param('id', ParseIntPipe) id: number) {
+        return await this.competencyService.readOne(id);
     }
 
     @Put(':id')
-    update(
+    async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCompetencyDto: UpdateCompetencyDto,
     ) {
-        return this.competencyService.update(id, updateCompetencyDto);
+        return await this.competencyService.update(id, updateCompetencyDto);
     }
 
     @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.competencyService.delete(id);
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return await this.competencyService.delete(id);
     }
 }

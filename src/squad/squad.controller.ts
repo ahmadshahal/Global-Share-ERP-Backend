@@ -50,7 +50,7 @@ export class SquadController {
         )
         image: Express.Multer.File,
     ) {
-        await this.squadService.create(createSquadDto, image);
+        return await this.squadService.create(createSquadDto, image);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -67,12 +67,12 @@ export class SquadController {
         )
         image: Express.Multer.File,
     ) {
-        await this.squadService.update(id, updateSquadDto, image);
+        return await this.squadService.update(id, updateSquadDto, image);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.squadService.delete(id);
+        return await this.squadService.delete(id);
     }
 }

@@ -18,22 +18,22 @@ export class FeedbackController {
     constructor(private readonly feedbackService: FeedbackService) {}
 
     @Post()
-    create(@Body() createFeedbackDto: CreateFeedbackDto) {
-        return this.feedbackService.create(createFeedbackDto);
+    async create(@Body() createFeedbackDto: CreateFeedbackDto) {
+        return await this.feedbackService.create(createFeedbackDto);
     }
 
     @Get()
-    readAll() {
-        return this.feedbackService.readAll();
+    async readAll() {
+        return await this.feedbackService.readAll();
     }
 
     @Get(':id')
-    readOne(@Param('id', ParseIntPipe) id: number) {
-        return this.feedbackService.readOne(id);
+    async readOne(@Param('id', ParseIntPipe) id: number) {
+        return await this.feedbackService.readOne(id);
     }
 
     @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.feedbackService.delete(id);
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return await this.feedbackService.delete(id);
     }
 }

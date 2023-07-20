@@ -41,7 +41,7 @@ export class TaskController {
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(@Body() createTaskDto: CreateTaskDto) {
-        await this.taskService.create(createTaskDto);
+        return await this.taskService.create(createTaskDto);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -50,12 +50,12 @@ export class TaskController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateTaskDto: UpdateTaskDto,
     ) {
-        await this.taskService.update(id, updateTaskDto);
+        return await this.taskService.update(id, updateTaskDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.taskService.delete(id);
+        return await this.taskService.delete(id);
     }
 }

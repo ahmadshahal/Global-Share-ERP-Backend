@@ -20,35 +20,37 @@ export class RecruitmentFeedbackController {
     ) {}
 
     @Post()
-    create(@Body() createRecruitmentFeedbackDto: CreateRecruitmentFeedbackDto) {
-        return this.recruitmentFeedbackService.create(
+    async create(
+        @Body() createRecruitmentFeedbackDto: CreateRecruitmentFeedbackDto,
+    ) {
+        return await this.recruitmentFeedbackService.create(
             createRecruitmentFeedbackDto,
         );
     }
 
     @Get()
-    readAll() {
-        return this.recruitmentFeedbackService.readAll();
+    async readAll() {
+        return await this.recruitmentFeedbackService.readAll();
     }
 
     @Get(':id')
-    readOne(@Param('id') id: string) {
-        return this.recruitmentFeedbackService.readOne(+id);
+    async readOne(@Param('id') id: string) {
+        return await this.recruitmentFeedbackService.readOne(+id);
     }
 
     @Put(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() updateRecruitmentFeedbackDto: UpdateRecruitmentFeedbackDto,
     ) {
-        return this.recruitmentFeedbackService.update(
+        return await this.recruitmentFeedbackService.update(
             +id,
             updateRecruitmentFeedbackDto,
         );
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.recruitmentFeedbackService.remove(+id);
+    async remove(@Param('id') id: string) {
+        return await this.recruitmentFeedbackService.remove(+id);
     }
 }

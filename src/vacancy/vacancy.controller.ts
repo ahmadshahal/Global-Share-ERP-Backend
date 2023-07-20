@@ -57,7 +57,7 @@ export class VacancyController {
     async readQuestionsOfVacancy(
         @Param('vacancyId', ParseIntPipe) vacancyId: number,
     ) {
-        return this.vacancyService.readQuestionsOfVacancy(vacancyId);
+        return await this.vacancyService.readQuestionsOfVacancy(vacancyId);
     }
 
     @Post(':vacancyId/questions')

@@ -35,7 +35,7 @@ export class StatusController {
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(@Body() createStatusDto: CreateStatusDto) {
-        await this.statusService.create(createStatusDto);
+        return await this.statusService.create(createStatusDto);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -44,12 +44,12 @@ export class StatusController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateStatusDto: UpdateStatusDto,
     ) {
-        await this.statusService.update(id, updateStatusDto);
+        return await this.statusService.update(id, updateStatusDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.statusService.delete(id);
+        return await this.statusService.delete(id);
     }
 }

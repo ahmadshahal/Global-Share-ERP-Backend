@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { UpdateApplicationDto } from './dto/update-application.dto';
+// import { UpdateApplicationDto } from './dto/update-application.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
 @UseGuards(JwtGuard)
@@ -34,17 +34,17 @@ export class ApplicationController {
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(@Body() createApplicationDto: CreateApplicationDto) {
-        await this.applicationService.create(createApplicationDto);
+        return await this.applicationService.create(createApplicationDto);
     }
 
-    @HttpCode(HttpStatus.OK)
-    @Post(':id')
-    async update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() updateApplicationDto: UpdateApplicationDto,
-    ) {
-        await this.applicationService.update(id, updateApplicationDto);
-    }
+    // @HttpCode(HttpStatus.OK)
+    // @Post(':id')
+    // async update(
+    //     @Param('id', ParseIntPipe) id: number,
+    //     @Body() updateApplicationDto: UpdateApplicationDto,
+    // ) {
+    //     await this.applicationService.update(id, updateApplicationDto);
+    // }
 
     // @HttpCode(HttpStatus.OK)
     // @Delete(':id')

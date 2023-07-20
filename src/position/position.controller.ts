@@ -39,7 +39,7 @@ export class PositionController {
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(@Body() createPositionDto: CreatePositionDto) {
-        await this.positionService.create(createPositionDto);
+        return await this.positionService.create(createPositionDto);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -48,13 +48,13 @@ export class PositionController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updatePositionDto: UpdatePositionDto,
     ) {
-        await this.positionService.update(id, updatePositionDto);
+        return await this.positionService.update(id, updatePositionDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.positionService.delete(id);
+        return await this.positionService.delete(id);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -63,7 +63,7 @@ export class PositionController {
         @Body() addUserToPositionDto: AddUserToPositionDto,
         @Param('positionId', ParseIntPipe) positionId: number,
     ) {
-        await this.positionService.addUserToPosition(
+        return await this.positionService.addUserToPosition(
             addUserToPositionDto,
             positionId,
         );
@@ -72,7 +72,7 @@ export class PositionController {
     @HttpCode(HttpStatus.OK)
     @Delete(':positionId/user/:id')
     async removeUserFromPosition(@Param('id', ParseIntPipe) id: number) {
-        await this.positionService.removeUserFromPosition(id);
+        return await this.positionService.removeUserFromPosition(id);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -80,12 +80,12 @@ export class PositionController {
     async readUsersOfPosition(
         @Param('positionId', ParseIntPipe) positionId: number,
     ) {
-        return this.positionService.positionUsers(positionId);
+        return await this.positionService.positionUsers(positionId);
     }
 
     @Get(':positionId/competency')
     async readCompetenciesOfPosition(@Param('positionId') positionId: number) {
-        return this.positionService.positionCompetencies(positionId);
+        return await this.positionService.positionCompetencies(positionId);
     }
 
     @Post(':positionId/competency')

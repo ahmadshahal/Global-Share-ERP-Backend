@@ -39,7 +39,7 @@ export class CommentController {
         @UserId() userId: number,
         @Body() createCommentDto: CreateCommentDto,
     ) {
-        await this.commentService.create(createCommentDto, userId);
+        return await this.commentService.create(createCommentDto, userId);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -48,12 +48,12 @@ export class CommentController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCommentDto: UpdateCommentDto,
     ) {
-        await this.commentService.update(id, updateCommentDto);
+        return await this.commentService.update(id, updateCommentDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.commentService.delete(id);
+        return await this.commentService.delete(id);
     }
 }

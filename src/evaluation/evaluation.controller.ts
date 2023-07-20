@@ -18,30 +18,30 @@ export class EvaluationController {
     constructor(private readonly evaluationService: EvaluationService) {}
 
     @Post()
-    create(@Body() createEvaluationDto: CreateEvaluationDto) {
-        return this.evaluationService.create(createEvaluationDto);
+    async create(@Body() createEvaluationDto: CreateEvaluationDto) {
+        return await this.evaluationService.create(createEvaluationDto);
     }
 
     @Get()
-    findAll() {
-        return this.evaluationService.readAll();
+    async findAll() {
+        return await this.evaluationService.readAll();
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.evaluationService.readOne(+id);
+    async findOne(@Param('id') id: string) {
+        return await this.evaluationService.readOne(+id);
     }
 
     @Put(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() updateEvaluationDto: UpdateEvaluationDto,
     ) {
-        return this.evaluationService.update(+id, updateEvaluationDto);
+        return await this.evaluationService.update(+id, updateEvaluationDto);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.evaluationService.remove(+id);
+    async remove(@Param('id') id: string) {
+        return await this.evaluationService.remove(+id);
     }
 }
