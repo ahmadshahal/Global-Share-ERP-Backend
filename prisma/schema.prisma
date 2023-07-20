@@ -41,7 +41,7 @@ model User {
     bio                  String?
     gsStatus             GsStatus              @default(ACTIVE)
     joinDate             DateTime              @default(now())
-    positions             PositionUser[]
+    positions            PositionUser[]
     comments             Comment[]
     requests             Request[]
     assignedTasks        Task[]                @relation("assignedBy")
@@ -52,6 +52,7 @@ model User {
     goals                Goal[]
     steps                Step[]
 }
+
 //done
 model Position {
     id           Int                  @id @default(autoincrement())
@@ -67,6 +68,7 @@ model Position {
 
     @@index([squadId])
 }
+
 // todo
 model Request {
     id          Int    @id @default(autoincrement())
@@ -78,6 +80,7 @@ model Request {
 
     @@index([userId])
 }
+
 //done
 model PositionUser {
     id          Int          @id @default(autoincrement())
@@ -92,6 +95,7 @@ model PositionUser {
     @@index([userId])
     @@index([positionId])
 }
+
 // done
 model Competency {
     id          Int                  @id @default(autoincrement())
@@ -99,6 +103,7 @@ model Competency {
     description String?
     positions   PositionCompetency[]
 }
+
 // done
 model PositionCompetency {
     id           Int          @id @default(autoincrement())
@@ -130,6 +135,7 @@ model Evaluation {
     @@index([competencyId])
     @@index([evaluatorId])
 }
+
 //done
 model Vacancy {
     id           Int               @id @default(autoincrement())
@@ -146,6 +152,7 @@ model Vacancy {
 
     @@index([positionId])
 }
+
 // done
 model Application {
     id        Int                   @id @default(autoincrement())
@@ -157,6 +164,7 @@ model Application {
 
     @@index([vacancyId])
 }
+
 // done
 model RecruitmentFeedback {
     id            Int               @id @default(autoincrement())
@@ -175,30 +183,33 @@ model Question {
     type      QuestionType
     positions VacancyQuestion[]
 }
+
 //todo
 model VacancyQuestion {
     id         Int      @id @default(autoincrement())
     questionId Int
-    quetion    Question @relation(fields: [questionId], references: [id])
+    question   Question @relation(fields: [questionId], references: [id])
     vacancyId  Int
     vacancy    Vacancy  @relation(fields: [vacancyId], references: [id])
-    answers    Answer[]
+    answer     Answer?
 
     @@index([questionId])
     @@index([vacancyId])
 }
+
 //todo
 model Answer {
     id            Int             @id @default(autoincrement())
     text          String
     applicationId Int
     application   Application     @relation(fields: [applicationId], references: [id])
-    questionId    Int
-    questions     VacancyQuestion @relation(fields: [questionId], references: [id])
+    questionId    Int             @unique
+    question      VacancyQuestion @relation(fields: [questionId], references: [id])
 
     @@index([applicationId])
     @@index([questionId])
 }
+
 // done
 model Status {
     id      Int     @id @default(autoincrement())
@@ -236,6 +247,7 @@ model Task {
     @@index([assignedToId])
     @@index([stepId])
 }
+
 //done
 model KPI {
     id          Int       @id @default(autoincrement())
@@ -243,6 +255,7 @@ model KPI {
     description String?
     tasks       TaskKPI[]
 }
+
 // todo
 model TaskKPI {
     id          Int     @id @default(autoincrement())
@@ -256,6 +269,7 @@ model TaskKPI {
     @@index([kpiId])
     @@index([taskId])
 }
+
 // done
 model Comment {
     id       Int    @id @default(autoincrement())
@@ -268,6 +282,7 @@ model Comment {
     @@index([taskId])
     @@index([authorId])
 }
+
 //done
 model Email {
     id                Int               @id @default(autoincrement())
@@ -276,6 +291,7 @@ model Email {
     recruitmentStatus RecruitmentStatus
     cc                String
 }
+
 //done
 model Feedback {
     id    Int    @id @default(autoincrement())
