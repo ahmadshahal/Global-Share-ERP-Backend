@@ -15,6 +15,10 @@ import { EvaluationModule } from './evaluation/evaluation.module';
 import { QuestionModule } from './question/question.module';
 import { RecruitmentFeedbackModule } from './recruitmentFeedback/recruitment-feedback.module';
 import { KpiModule } from './KPI/kpi.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { ApplicationModule } from './appliction/application.module';
+import { EmailModule } from './email/email.module';
+import { VacancyModule } from './vacancy/vacancy.module';
 
 @Module({
     imports: [
@@ -34,6 +38,10 @@ import { KpiModule } from './KPI/kpi.module';
         QuestionModule,
         RecruitmentFeedbackModule,
         KpiModule,
+        FeedbackModule,
+        ApplicationModule,
+        EmailModule,
+        VacancyModule,
     ],
 })
 export class AppModule {}

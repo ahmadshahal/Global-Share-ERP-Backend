@@ -1,16 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+    Position,
+    PositionCompetency,
+    PositionUser,
+    Prisma,
+} from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
+import { AddCompetencyToPositionDto } from './dto/add-competency-to-position.dto';
+import { UpdatePositionCompetencyDto } from './dto/update-competency-position.dto';
 
 @Injectable()
 export class PositionService {
     constructor(private prismaService: PrismaService) {}
 
-    async readOne(id: number) {
+    async readOne(id: number): Promise<Position> {
         const position = await this.prismaService.position.findFirst({
             where: {
                 id: id,
@@ -25,7 +32,7 @@ export class PositionService {
         return position;
     }
 
-    async readAll() {
+    async readAll(): Promise<Position[]> {
         return await this.prismaService.position.findMany({
             include: {
                 squad: true,
@@ -33,9 +40,9 @@ export class PositionService {
         });
     }
 
-    async create(createPositionDto: CreatePositionDto) {
+    async create(createPositionDto: CreatePositionDto): Promise<Position> {
         try {
-            await this.prismaService.position.create({
+            return await this.prismaService.position.create({
                 data: {
                     name: createPositionDto.name,
                     gsName: createPositionDto.gsName,
@@ -58,9 +65,9 @@ export class PositionService {
         }
     }
 
-    async delete(id: number) {
+    async delete(id: number): Promise<Position> {
         try {
-            await this.prismaService.position.delete({
+            return await this.prismaService.position.delete({
                 where: {
                     id: id,
                 },
@@ -75,9 +82,12 @@ export class PositionService {
         }
     }
 
-    async update(id: number, updatePositionDto: UpdatePositionDto) {
+    async update(
+        id: number,
+        updatePositionDto: UpdatePositionDto,
+    ): Promise<Position> {
         try {
-            await this.prismaService.position.update({
+            return await this.prismaService.position.update({
                 where: {
                     id: id,
                 },
@@ -103,13 +113,16 @@ export class PositionService {
         }
     }
 
-    async addUserToPosition(addUserToPositionDto: AddUserToPositionDto) {
+    async addUserToPosition(
+        addUserToPositionDto: AddUserToPositionDto,
+        positionId: number,
+    ): Promise<PositionUser> {
         try {
-            await this.prismaService.positionUser.create({
+            return await this.prismaService.positionUser.create({
                 data: {
                     position: {
                         connect: {
-                            id: addUserToPositionDto.positionId,
+                            id: positionId,
                         },
                     },
                     user: {
@@ -131,9 +144,9 @@ export class PositionService {
         }
     }
 
-    async removeUserFromPosition(id: number) {
+    async removeUserFromPosition(id: number): Promise<PositionUser> {
         try {
-            await this.prismaService.positionUser.delete({
+            return await this.prismaService.positionUser.delete({
                 where: { id },
             });
         } catch (error) {
@@ -144,5 +157,106 @@ export class PositionService {
             }
             throw error;
         }
+    }
+
+    async positionUsers(id: number): Promise<PositionUser[]> {
+        return this.prismaService.positionUser.findMany({
+            where: {
+                positionId: id,
+            },
+            include: {
+                user: true,
+            },
+        });
+    }
+
+    async positionCompetencies(id: number): Promise<PositionCompetency[]> {
+        return await this.prismaService.positionCompetency.findMany({
+            where: {
+                positionId: id,
+            },
+            include: {
+                competency: true,
+            },
+        });
+    }
+
+    async createPositionCompetency(
+        createPositionCompetencyDto: AddCompetencyToPositionDto,
+        positionId: number,
+    ): Promise<PositionCompetency> {
+        const { weight, competencyId } = createPositionCompetencyDto;
+
+        return await this.prismaService.positionCompetency.create({
+            data: {
+                weight,
+                competencyId,
+                positionId,
+            },
+            include: {
+                competency: true,
+                position: true,
+                evaluations: true,
+            },
+        });
+    }
+
+    async updatePositionCompetency(
+        id: number,
+        updatePositionCompetencyDto: UpdatePositionCompetencyDto,
+    ): Promise<PositionCompetency> {
+        const { weight } = updatePositionCompetencyDto;
+
+        return await this.prismaService.positionCompetency.update({
+            data: {
+                weight,
+            },
+            where: {
+                id,
+            },
+            include: {
+                competency: true,
+                position: true,
+                evaluations: true,
+            },
+        });
+    }
+
+    async deletePositionCompetency(id: number): Promise<PositionCompetency> {
+        const positionCompetency =
+            await this.prismaService.positionCompetency.findUnique({
+                where: {
+                    id,
+                },
+                include: {
+                    evaluations: true,
+                },
+            });
+
+        if (!positionCompetency) {
+            throw new NotFoundException(
+                `PositionCompetency with ID ${id} not found`,
+            );
+        }
+
+        if (positionCompetency.evaluations.length > 0) {
+            throw new Error(
+                `Cannot delete PositionCompetency with ID ${id} because it has associated Evaluation records`,
+            );
+        }
+
+        const deletedPositionCompetency =
+            await this.prismaService.positionCompetency.delete({
+                where: {
+                    id,
+                },
+                include: {
+                    competency: true,
+                    position: true,
+                    evaluations: true,
+                },
+            });
+
+        return deletedPositionCompetency;
     }
 }

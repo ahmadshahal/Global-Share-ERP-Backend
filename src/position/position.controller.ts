@@ -8,12 +8,15 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Put,
     UseGuards,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
+import { AddCompetencyToPositionDto } from './dto/add-competency-to-position.dto';
+import { UpdatePositionCompetencyDto } from './dto/update-competency-position.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
 @UseGuards(JwtGuard)
@@ -55,16 +58,60 @@ export class PositionController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post('/user')
+    @Post(':positionId/user')
     async addUserToPosition(
         @Body() addUserToPositionDto: AddUserToPositionDto,
+        @Param('positionId', ParseIntPipe) positionId: number,
     ) {
-        await this.positionService.addUserToPosition(addUserToPositionDto);
+        await this.positionService.addUserToPosition(
+            addUserToPositionDto,
+            positionId,
+        );
     }
 
     @HttpCode(HttpStatus.OK)
-    @Delete('/user/:id')
+    @Delete(':positionId/user/:id')
     async removeUserFromPosition(@Param('id', ParseIntPipe) id: number) {
         await this.positionService.removeUserFromPosition(id);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('/:positionId/user')
+    async readUsersOfPosition(
+        @Param('positionId', ParseIntPipe) positionId: number,
+    ) {
+        return this.positionService.positionUsers(positionId);
+    }
+
+    @Get(':positionId/competency')
+    async readCompetenciesOfPosition(@Param('positionId') positionId: number) {
+        return this.positionService.positionCompetencies(positionId);
+    }
+
+    @Post(':positionId/competency')
+    async addCompetencyToPosition(
+        @Body() addCompetencyToPositionDto: AddCompetencyToPositionDto,
+        @Param('positionId', ParseIntPipe) positionId: number,
+    ) {
+        return await this.positionService.createPositionCompetency(
+            addCompetencyToPositionDto,
+            positionId,
+        );
+    }
+
+    @Put(':positionId/competency/:id')
+    async UpdatePositionCompetency(
+        @Body() updatePositionCompetencyDto: UpdatePositionCompetencyDto,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return await this.positionService.updatePositionCompetency(
+            id,
+            updatePositionCompetencyDto,
+        );
+    }
+
+    @Delete(':positionId/competency/:id')
+    async DeletePositionCompetency(@Param('id', ParseIntPipe) id: number) {
+        return await this.positionService.deletePositionCompetency(id);
     }
 }

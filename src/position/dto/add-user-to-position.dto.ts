@@ -4,9 +4,6 @@ export class AddUserToPositionDto {
     @IsNotEmpty()
     userId: number;
 
-    @IsNotEmpty()
-    positionId: number;
-
     @IsDate()
     startDate: Date;
 

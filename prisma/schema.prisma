@@ -67,7 +67,7 @@ model Position {
 
     @@index([squadId])
 }
-
+// todo
 model Request {
     id          Int    @id @default(autoincrement())
     userId      Int
@@ -99,7 +99,7 @@ model Competency {
     description String?
     positions   PositionCompetency[]
 }
-
+// done
 model PositionCompetency {
     id           Int          @id @default(autoincrement())
     weight       Int
@@ -175,7 +175,7 @@ model Question {
     type      QuestionType
     positions VacancyQuestion[]
 }
-
+//todo
 model VacancyQuestion {
     id         Int      @id @default(autoincrement())
     questionId Int
@@ -187,9 +187,10 @@ model VacancyQuestion {
     @@index([questionId])
     @@index([vacancyId])
 }
-
+//todo
 model Answer {
     id            Int             @id @default(autoincrement())
+    text          String
     applicationId Int
     application   Application     @relation(fields: [applicationId], references: [id])
     questionId    Int
@@ -242,7 +243,7 @@ model KPI {
     description String?
     tasks       TaskKPI[]
 }
-
+// todo
 model TaskKPI {
     id          Int     @id @default(autoincrement())
     grade       Int
@@ -275,7 +276,7 @@ model Email {
     recruitmentStatus RecruitmentStatus
     cc                String
 }
-
+//done
 model Feedback {
     id    Int    @id @default(autoincrement())
     name  String
