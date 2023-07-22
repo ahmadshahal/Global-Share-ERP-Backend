@@ -24,6 +24,10 @@ export class ApplicationService {
                         },
                     },
                 },
+                answers: {
+                    include: { question: true },
+                },
+                feedbacks: true,
             },
         });
         if (!application) {
@@ -58,6 +62,16 @@ export class ApplicationService {
                     vacancy: {
                         connect: {
                             id: createApplicationDto.vacancyId,
+                        },
+                    },
+                    answers: {
+                        createMany: {
+                            data: createApplicationDto.answers.map(
+                                (answer) => ({
+                                    questionId: answer.questionId,
+                                    text: answer.text,
+                                }),
+                            ),
                         },
                     },
                 },
