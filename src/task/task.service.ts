@@ -117,6 +117,7 @@ export class TaskService {
                 assignedById,
                 assignedToId,
                 stepId,
+                kpis,
             } = createTaskDto;
             return await this.prismaService.task.create({
                 data: {
@@ -130,6 +131,15 @@ export class TaskService {
                     assignedBy: { connect: { id: assignedById } },
                     assignedTo: { connect: { id: assignedToId } },
                     step: stepId ? { connect: { id: stepId } } : undefined,
+                    kpis: {
+                        createMany: {
+                            data: kpis.map((kpi) => ({
+                                kpiId: kpi.kpiId,
+                                description: kpi.description || null,
+                                grade: kpi.grade || null,
+                            })),
+                        },
+                    },
                 },
             });
         } catch (error) {
@@ -155,6 +165,7 @@ export class TaskService {
                 assignedById,
                 assignedToId,
                 stepId,
+                kpis,
             } = updateTaskDto;
             await this.prismaService.task.update({
                 where: {
@@ -173,6 +184,16 @@ export class TaskService {
                     step: stepId
                         ? { connect: { id: stepId } }
                         : { disconnect: true },
+                    kpis: {
+                        deleteMany: {},
+                        createMany: {
+                            data: kpis.map((kpi) => ({
+                                kpiId: kpi.kpiId,
+                                description: kpi.description || null,
+                                grade: kpi.grade || null,
+                            })),
+                        },
+                    },
                 },
                 include: {
                     comments: true,

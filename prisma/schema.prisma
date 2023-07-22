@@ -184,7 +184,7 @@ model Question {
     positions VacancyQuestion[]
 }
 
-//todo
+//done
 model VacancyQuestion {
     id         Int      @id @default(autoincrement())
     questionId Int
@@ -197,7 +197,7 @@ model VacancyQuestion {
     @@index([vacancyId])
 }
 
-//todo
+//done
 model Answer {
     id            Int             @id @default(autoincrement())
     text          String
@@ -256,10 +256,10 @@ model KPI {
     tasks       TaskKPI[]
 }
 
-// todo
+// done
 model TaskKPI {
     id          Int     @id @default(autoincrement())
-    grade       Int
+    grade       Int?
     description String?
     kpiId       Int
     KPI         KPI     @relation(fields: [kpiId], references: [id])

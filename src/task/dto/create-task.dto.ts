@@ -1,15 +1,34 @@
 import { Difficulty, Priority } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
+    IsArray,
     IsDate,
     IsEnum,
+    IsInt,
     IsNotEmpty,
     IsNumber,
     IsOptional,
     IsUrl,
     MaxLength,
     MinLength,
+    ValidateNested,
 } from 'class-validator';
+
+class TaskKpiDto {
+    @IsNotEmpty()
+    @IsInt()
+    kpiId: number;
+
+    @IsNotEmpty()
+    @MinLength(3)
+    @MaxLength(250)
+    description?: string;
+
+    @IsOptional()
+    @IsNotEmpty()
+    @IsInt()
+    grade?: number;
+}
 
 export class CreateTaskDto {
     @IsNotEmpty()
@@ -49,6 +68,12 @@ export class CreateTaskDto {
     @IsNumber()
     @Type(() => Number)
     assignedToId: number;
+
+    @IsNotEmpty()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => TaskKpiDto)
+    kpis: TaskKpiDto[];
 
     @IsNotEmpty()
     @IsNumber()
