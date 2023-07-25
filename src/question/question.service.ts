@@ -10,12 +10,13 @@ export class QuestionService {
     constructor(private readonly prisma: PrismaService) {}
 
     async create(createQuestionDto: CreateQuestionDto): Promise<Question> {
-        const { text, type } = createQuestionDto;
+        const { text, type, options } = createQuestionDto;
 
         return await this.prisma.question.create({
             data: {
                 text,
                 type,
+                options: options ? JSON.stringify(options) : null,
             },
         });
     }
@@ -47,13 +48,14 @@ export class QuestionService {
         id: number,
         updateQuestionDto: UpdateQuestionDto,
     ): Promise<Question> {
-        const { text, type } = updateQuestionDto;
+        const { text, type, options } = updateQuestionDto;
         try {
             return await this.prisma.question.update({
                 where: { id },
                 data: {
                     text,
                     type,
+                    options: options ? JSON.stringify(options) : null,
                 },
                 include: {
                     positions: true,

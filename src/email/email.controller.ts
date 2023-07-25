@@ -13,11 +13,15 @@ import { EmailService } from './email.service';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @UseGuards(JwtGuard)
 @Controller('email')
 export class EmailController {
-    constructor(private readonly emailService: EmailService) {}
+    constructor(
+        private readonly emailService: EmailService,
+        private readonly mailerService: MailerService,
+    ) {}
 
     @Post()
     async create(@Body() createEmailDto: CreateEmailDto) {
@@ -45,5 +49,21 @@ export class EmailController {
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         return await this.emailService.delete(id);
+    }
+
+    @Post('/send')
+    async sendTestEmail() {
+        return await this.mailerService
+            .sendMail({
+                to: ['ahmad.alshahal2@gmail.com', 'mhd.zayd.skaff@gmail.com'],
+                subject: 'Welcome To Global Share Platform',
+                text: 'welcome',
+            })
+            .then((success) => {
+                return success;
+            })
+            .catch((error) => {
+                return error;
+            });
     }
 }

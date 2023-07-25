@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -19,6 +19,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { ApplicationModule } from './appliction/application.module';
 import { EmailModule } from './email/email.module';
 import { VacancyModule } from './vacancy/vacancy.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
     imports: [
@@ -42,6 +43,22 @@ import { VacancyModule } from './vacancy/vacancy.module';
         ApplicationModule,
         EmailModule,
         VacancyModule,
+        MailerModule.forRootAsync({
+            useFactory: (configService: ConfigService) => ({
+                transport: {
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    auth: {
+                        user: configService.get('EMAIL'),
+                        pass: configService.get('PASSWORD'),
+                    },
+                },
+                defaults: {
+                    from: '"Global Share" <modules@nestjs.com>',
+                },
+            }),
+            inject: [ConfigService],
+        }),
     ],
 })
 export class AppModule {}

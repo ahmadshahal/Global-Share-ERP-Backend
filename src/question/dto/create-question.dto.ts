@@ -1,5 +1,11 @@
 import { QuestionType } from '@prisma/client';
-import { IsEnum, IsString, IsNotEmpty } from 'class-validator';
+import {
+    IsEnum,
+    IsString,
+    IsNotEmpty,
+    IsOptional,
+    IsArray,
+} from 'class-validator';
 
 export class CreateQuestionDto {
     @IsNotEmpty()
@@ -9,4 +15,8 @@ export class CreateQuestionDto {
     @IsNotEmpty()
     @IsEnum(QuestionType)
     type: QuestionType;
+
+    @IsOptional()
+    @IsArray()
+    options: Array<string>;
 }
