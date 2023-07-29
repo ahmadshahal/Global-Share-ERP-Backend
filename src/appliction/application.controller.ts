@@ -13,13 +13,17 @@ import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 // import { UpdateApplicationDto } from './dto/update-application.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { Action } from '@prisma/client';
+import { authorizationGuard } from 'src/auth/guard/authorization.guard';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, authorizationGuard)
 @Controller('application')
 export class ApplicationController {
     constructor(private applicationService: ApplicationService) {}
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Application' })
     @Get()
     async readAll() {
         return await this.applicationService.readAll();
@@ -32,6 +36,7 @@ export class ApplicationController {
     }
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Delete, subject: 'Application' })
     @Post()
     async create(@Body() createApplicationDto: CreateApplicationDto) {
         return await this.applicationService.create(createApplicationDto);

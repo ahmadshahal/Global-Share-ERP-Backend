@@ -45,6 +45,7 @@ export class AuthService {
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
+                    roleId: signupDto.roleId,
                     // position: {
                     //     connect: {
                     //         id: signupDto.positionId,

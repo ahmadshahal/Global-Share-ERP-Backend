@@ -30,11 +30,14 @@ export class JwtGuard implements CanActivate {
                 where: {
                     id: payload.sub,
                 },
+                include: {
+                    role: true,
+                },
             });
             if (!user) {
                 throw new UnauthorizedException();
             }
-            request['user'] = payload;
+            request['user'] = user;
         } catch {
             throw new UnauthorizedException();
         }
