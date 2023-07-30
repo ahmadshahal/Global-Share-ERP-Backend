@@ -5,6 +5,7 @@ import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GoogleDriveService } from 'src/utils/googleDrive/googleDrive.service';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class SquadService {
@@ -37,9 +38,10 @@ export class SquadService {
     }
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
+        const imageStream = new PassThrough();
         return await this.googleDrive.saveFile(
             'test1',
-            image.buffer.toString(),
+            imageStream.end(image.buffer),
             image.mimetype,
         );
         // TODO: Upload the image to Google Drive and add the link in the DB.

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { google } from 'googleapis';
+import { ConfigService } from '@nestjs/config';
+import { drive_v3, google } from 'googleapis';
+import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
 
 type PartialDriveFile = {
     id: string;
@@ -14,21 +16,16 @@ type SearchResultResponse = {
 };
 @Injectable()
 export class GoogleDriveService {
-    private driveClient;
+    private driveClient: drive_v3.Drive;
 
-    // public constructor(
-    //     clientId: string,
-    //     clientSecret: string,
-    //     redirectUri: string,
-    //     refreshToken: string,
-    // ) {
-    //     this.driveClient = this.createDriveClient(
-    //         clientId,
-    //         clientSecret,
-    //         redirectUri,
-    //         refreshToken,
-    //     );
-    // }
+    public constructor(configService: ConfigService) {
+        this.driveClient = this.createDriveClient(
+            configService.get('DRIVE_CLIENT_ID'),
+            configService.get('DRIVE_CLIENT_SECRET'),
+            configService.get('DRIVE_REDIRECT_URI'),
+            configService.get('DRIVE_REFRESH_TOKEN'),
+        );
+    }
 
     createDriveClient(
         clientId: string,
@@ -50,40 +47,50 @@ export class GoogleDriveService {
         });
     }
 
-    createFolder(folderName: string): Promise<PartialDriveFile> {
+    createFolder = (
+        folderName: string,
+    ): Promise<PartialDriveFile> | GaxiosPromise<drive_v3.Schema$File> => {
         return this.driveClient.files.create({
-            resource: {
+            requestBody: {
                 name: folderName,
                 mimeType: 'application/vnd.google-apps.folder',
             },
             fields: 'id, name',
         });
-    }
+    };
 
-    searchFolder(folderName: string): Promise<PartialDriveFile | null> {
+    searchFolder = (driveClient, folderName) => {
         return new Promise((resolve, reject) => {
-            this.driveClient.files.list(
+            driveClient.files.list(
                 {
                     q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
                     fields: 'files(id, name)',
                 },
-                (err, res: { data: SearchResultResponse }) => {
+                (err, res) => {
                     if (err) {
-                        return reject(err);
+                        reject(`Error searching for folder: ${err}`);
+                        return;
                     }
 
-                    return resolve(res.data.files ? res.data.files[0] : null);
+                    const files = res?.data?.files;
+
+                    if (!files || files.length === 0) {
+                        reject(`Folder not found: ${folderName}`);
+                        return;
+                    }
+
+                    resolve(files[0]);
                 },
             );
         });
-    }
+    };
 
-    saveFile(
+    saveFile = (
         fileName: string,
-        fileBuffer: string,
+        file: any,
         fileMimeType: string,
         folderId?: string,
-    ) {
+    ) => {
         return this.driveClient.files.create({
             requestBody: {
                 name: fileName,
@@ -92,8 +99,8 @@ export class GoogleDriveService {
             },
             media: {
                 mimeType: fileMimeType,
-                body: fileBuffer,
+                body: file,
             },
         });
-    }
+    };
 }
