@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateSquadDto {
     @IsOptional()
@@ -18,4 +18,6 @@ export class UpdateSquadDto {
     @MinLength(3)
     @MaxLength(250)
     description: string;
+
+    imageUrl: string;
 }

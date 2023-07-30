@@ -8,6 +8,7 @@ import {
     ParseIntPipe,
     Post,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -16,6 +17,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { Action } from '@prisma/client';
 import { authorizationGuard } from 'src/auth/guard/authorization.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard, authorizationGuard)
 @Controller('application')
@@ -36,7 +38,7 @@ export class ApplicationController {
     }
 
     @HttpCode(HttpStatus.CREATED)
-    @Permissions({ action: Action.Delete, subject: 'Application' })
+    // @Permissions({ action: Action.Delete, subject: 'Application' })
     @Post()
     async create(@Body() createApplicationDto: CreateApplicationDto) {
         return await this.applicationService.create(createApplicationDto);

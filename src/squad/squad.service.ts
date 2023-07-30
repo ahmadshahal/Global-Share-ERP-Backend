@@ -39,18 +39,17 @@ export class SquadService {
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
         const imageStream = new PassThrough();
-        return await this.googleDrive.saveFile(
-            'test1',
+        const res = await this.googleDrive.saveFile(
+            createSquadDto.gsName,
             imageStream.end(image.buffer),
             image.mimetype,
         );
-        // TODO: Upload the image to Google Drive and add the link in the DB.
         await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: 'http://image.path.com',
+                imageUrl: res.data.webViewLink || res.data.webContentLink,
                 statuses: {
                     createMany: {
                         data: [
@@ -87,18 +86,30 @@ export class SquadService {
         updateSquadDto: UpdateSquadDto,
         image: Express.Multer.File,
     ) {
-        // TODO: Upload the image to Google Drive and add the link in the DB.
         try {
+            if (image) {
+                const imageStream = new PassThrough();
+                const res = await this.googleDrive.saveFile(
+                    updateSquadDto.gsName,
+                    imageStream.end(image.buffer),
+                    image.mimetype,
+                );
+                updateSquadDto.imageUrl =
+                    res.data.webViewLink || res.data.webContentLink;
+            }
+            const data: any = {
+                name: updateSquadDto.name,
+                gsName: updateSquadDto.gsName,
+                description: updateSquadDto.description,
+            };
+            if (updateSquadDto.imageUrl) {
+                data.imageUrl = updateSquadDto.imageUrl;
+            }
             await this.prismaService.squad.update({
                 where: {
                     id: id,
                 },
-                data: {
-                    name: updateSquadDto.name,
-                    gsName: updateSquadDto.gsName,
-                    description: updateSquadDto.description,
-                    imageUrl: 'http://image.path.com',
-                },
+                data,
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

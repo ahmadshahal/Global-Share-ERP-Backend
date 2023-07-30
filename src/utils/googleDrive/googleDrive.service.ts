@@ -8,12 +8,6 @@ type PartialDriveFile = {
     name: string;
 };
 
-type SearchResultResponse = {
-    kind: 'drive#fileList';
-    nextPageToken: string;
-    incompleteSearch: boolean;
-    files: PartialDriveFile[];
-};
 @Injectable()
 export class GoogleDriveService {
     private driveClient: drive_v3.Drive;
@@ -85,13 +79,13 @@ export class GoogleDriveService {
         });
     };
 
-    saveFile = (
+    saveFile = async (
         fileName: string,
         file: any,
         fileMimeType: string,
         folderId?: string,
     ) => {
-        return this.driveClient.files.create({
+        const fileRes = await this.driveClient.files.create({
             requestBody: {
                 name: fileName,
                 mimeType: fileMimeType,
@@ -101,6 +95,15 @@ export class GoogleDriveService {
                 mimeType: fileMimeType,
                 body: file,
             },
+            fields: '*',
         });
+        await this.driveClient.permissions.create({
+            fileId: fileRes.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone',
+            },
+        });
+        return fileRes;
     };
 }
