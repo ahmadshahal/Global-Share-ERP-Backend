@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -15,6 +16,14 @@ export class EmailService {
     constructor(private readonly prismaService: PrismaService) {}
     async create(createEmailDto: CreateEmailDto): Promise<Email> {
         const { title, body, recruitmentStatus, cc } = createEmailDto;
+        const oldEmail = await this.prismaService.email.findFirst({
+            where: { recruitmentStatus: createEmailDto.recruitmentStatus },
+        });
+        if (oldEmail) {
+            throw new BadRequestException(
+                'An email with the same status already exists',
+            );
+        }
         return await this.prismaService.email.create({
             data: {
                 title,
