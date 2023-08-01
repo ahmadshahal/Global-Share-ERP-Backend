@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    HttpException,
+    HttpStatus,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -56,11 +58,27 @@ export class StatusService {
             throw new BadRequestException(
                 'Deletion of crucial statuses is forbidden',
             );
-        return await this.prismaService.status.delete({
-            where: {
-                id: id,
-            },
-        });
+        try {
+            return await this.prismaService.status.delete({
+                where: {
+                    id: id,
+                },
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === PrismaErrorCodes.RecordsNotFound) {
+                    throw new NotFoundException('Task Not Found');
+                }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related status',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
+            }
+            throw error;
+        }
     }
 
     async update(

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Task } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -228,6 +233,13 @@ export class TaskService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Task Not Found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related task',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

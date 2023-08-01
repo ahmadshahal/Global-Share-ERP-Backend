@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { CreateKpiDto } from './dto/create-kpi.dto';
 import { UpdateKpiDto } from './dto/update-kpi.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -67,6 +72,13 @@ export class KpiService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('KPI not found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related KPI',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

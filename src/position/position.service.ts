@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import {
     Position,
     PositionCompetency,
@@ -77,6 +82,13 @@ export class PositionService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Position Not Found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related Position',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

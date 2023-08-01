@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { CreateRecruitmentFeedbackDto } from './dto/create-recruitment-feedback.dto';
 import { UpdateRecruitmentFeedbackDto } from './dto/update-recruitment-feedback.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -79,6 +84,13 @@ export class RecruitmentFeedbackService {
                         'Recruitment Feedback not found',
                     );
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related Feedback',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

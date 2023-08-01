@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
@@ -84,6 +89,13 @@ export class QuestionService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Question Not Found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related Question',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

@@ -381,10 +381,12 @@ enum QuestionType {
     RADIO
 }
 
-
-
-
-
+enum RequestType {
+    HeartAddition
+    HeartDeletion
+    Freeze
+    Protection
+}
 
  // ? -----------------------------------------------------------------------//
 // tables will be used in the future

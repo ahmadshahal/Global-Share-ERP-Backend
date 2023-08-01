@@ -1,13 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Application, RecruitmentStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateApplicationDto } from './dto/update-application.dto';
+import { GoogleDriveService } from 'src/utils/googleDrive/googleDrive.service';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class ApplicationService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private readonly googleDriveService: GoogleDriveService,
+    ) {}
 
     async readOne(id: number): Promise<Application> {
         const application = await this.prismaService.application.findUnique({
@@ -56,6 +66,24 @@ export class ApplicationService {
         createApplicationDto: CreateApplicationDto,
     ): Promise<Application> {
         try {
+            const answers = [];
+            createApplicationDto.answers.map(async (answer) => {
+                if (answer.file) {
+                    const fileStream = new PassThrough();
+                    const res = await this.googleDriveService.saveFile(
+                        Date.now().toString(),
+                        fileStream.end(answer.file.buffer),
+                        answer.file.mimetype,
+                    );
+                    answers.push({
+                        ...answer,
+                        fileUrl:
+                            res.data.webViewLink || res.data.webContentLink,
+                    });
+                } else {
+                    answers.push(answer);
+                }
+            });
             return await this.prismaService.application.create({
                 data: {
                     status: RecruitmentStatus.APPLIED,
@@ -65,14 +93,7 @@ export class ApplicationService {
                         },
                     },
                     answers: {
-                        createMany: {
-                            data: createApplicationDto.answers.map(
-                                (answer) => ({
-                                    questionId: answer.questionId,
-                                    text: answer.text,
-                                }),
-                            ),
-                        },
+                        createMany: { data: answers },
                     },
                 },
             });
@@ -98,6 +119,13 @@ export class ApplicationService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Application Not Found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new HttpException(
+                    'Unable to delete a related Application',
+                    HttpStatus.BAD_REQUEST,
+                    { description: 'Bad Request' },
+                );
             }
             throw error;
         }

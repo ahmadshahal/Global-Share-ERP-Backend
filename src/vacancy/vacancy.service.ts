@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Vacancy, VacancyQuestion } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
@@ -110,6 +115,13 @@ export class VacancyService {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Squad Not Found');
+                }
+                if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                    throw new HttpException(
+                        'Unable to delete a related squad',
+                        HttpStatus.BAD_REQUEST,
+                        { description: 'Bad Request' },
+                    );
                 }
             }
             throw error;

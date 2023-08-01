@@ -7,6 +7,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    UploadedFiles,
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { Action } from '@prisma/client';
 import { authorizationGuard } from 'src/auth/guard/authorization.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard, authorizationGuard)
 @Controller('application')
@@ -40,7 +41,13 @@ export class ApplicationController {
     @HttpCode(HttpStatus.CREATED)
     // @Permissions({ action: Action.Delete, subject: 'Application' })
     @Post()
-    async create(@Body() createApplicationDto: CreateApplicationDto) {
+    @UseInterceptors(FilesInterceptor('files'))
+    async create(
+        @Body() createApplicationDto: CreateApplicationDto,
+        @UploadedFiles() files: Express.Multer.File[],
+    ) {
+        console.log(files);
+        return createApplicationDto;
         return await this.applicationService.create(createApplicationDto);
     }
 

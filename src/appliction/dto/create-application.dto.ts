@@ -1,19 +1,27 @@
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+    IsArray,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AnswerDto {
     @IsNotEmpty()
-    @IsString()
     questionId: number;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     text: string;
+
+    @IsOptional()
+    file: any;
 }
 
 export class CreateApplicationDto {
     @IsNotEmpty()
-    @IsString()
     vacancyId: number;
 
     @IsNotEmpty()
