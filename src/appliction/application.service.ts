@@ -11,12 +11,14 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { GoogleDriveService } from 'src/utils/googleDrive/googleDrive.service';
 import { PassThrough } from 'stream';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class ApplicationService {
     constructor(
         private prismaService: PrismaService,
         private readonly googleDriveService: GoogleDriveService,
+        private mailService: MailerService,
     ) {}
 
     async readOne(id: number): Promise<Application> {
@@ -87,6 +89,7 @@ export class ApplicationService {
             return await this.prismaService.application.create({
                 data: {
                     status: RecruitmentStatus.APPLIED,
+                    email: createApplicationDto.email,
                     vacancy: {
                         connect: {
                             id: createApplicationDto.vacancyId,
@@ -149,18 +152,36 @@ export class ApplicationService {
             ) {
                 throw new Error('Invalid status update.');
             }
-            return await this.prismaService.application.update({
-                where: { id },
-                data: {
-                    status: updateApplicationDto.status,
-                    feedbacks: {
-                        create: {
-                            text: updateApplicationDto.reason,
-                            type: updateApplicationDto.status,
+            const updatedApplication =
+                await this.prismaService.application.update({
+                    where: { id },
+                    data: {
+                        status: updateApplicationDto.status,
+                        feedbacks: {
+                            create: {
+                                text: updateApplicationDto.reason,
+                                type: updateApplicationDto.status,
+                            },
                         },
                     },
-                },
+                });
+            const email = await this.prismaService.email.findFirst({
+                where: { recruitmentStatus: updateApplicationDto.status },
             });
+            this.mailService
+                .sendMail({
+                    to: [application.email],
+                    subject: email.title,
+                    text: email.body,
+                    cc: email.cc.split(','),
+                })
+                .then((success) => {
+                    return success;
+                })
+                .catch((error) => {
+                    return error;
+                });
+            return updatedApplication;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {

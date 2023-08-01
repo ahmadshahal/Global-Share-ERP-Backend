@@ -189,6 +189,7 @@ model Vacancy {
 // done
 model Application {
     id        Int                   @id @default(autoincrement())
+    email     String
     vacancyId Int
     vacancy   Vacancy               @relation(fields: [vacancyId], references: [id])
     status    RecruitmentStatus

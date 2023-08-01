@@ -1,6 +1,5 @@
 import {
     IsArray,
-    IsInt,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -23,6 +22,9 @@ class AnswerDto {
 export class CreateApplicationDto {
     @IsNotEmpty()
     vacancyId: number;
+
+    @IsNotEmpty()
+    email: string;
 
     @IsNotEmpty()
     @IsArray()
