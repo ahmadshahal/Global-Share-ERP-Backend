@@ -12,36 +12,37 @@ import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { Request } from '@prisma/client';
 @UseGuards(JwtGuard)
 @Controller('request')
 export class RequestController {
     constructor(private readonly requestService: RequestService) {}
 
     @Post()
-    create(@Body() createRequestDto: CreateRequestDto) {
+    create(@Body() createRequestDto: CreateRequestDto): Promise<Request> {
         return this.requestService.create(createRequestDto);
     }
 
     @Get()
-    findAll() {
-        return this.requestService.findAll();
+    findAll(): Promise<Request[]> {
+        return this.requestService.readAll();
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.requestService.findOne(+id);
+    findOne(@Param('id') id: string): Promise<Request> {
+        return this.requestService.readOne(+id);
     }
 
     @Patch(':id')
     update(
         @Param('id') id: string,
         @Body() updateRequestDto: UpdateRequestDto,
-    ) {
+    ): Promise<Request> {
         return this.requestService.update(+id, updateRequestDto);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
+    remove(@Param('id') id: string): Promise<Request> {
         return this.requestService.remove(+id);
     }
 }

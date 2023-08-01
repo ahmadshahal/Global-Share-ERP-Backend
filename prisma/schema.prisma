@@ -65,6 +65,11 @@ model User {
     arabicFullName       String?
     appointlet           String?
     bio                  String?
+    tasksCompleted       Int                   @default(0)
+    volunteeredHours     Float                   @default(0)
+    heartsCount          Int                   @default(0)
+    freezeCardsCount     Int                   @default(0)
+    protectionCardsCount Int                   @default(0)
     gsStatus             GsStatus              @default(ACTIVE)
     joinDate             DateTime              @default(now())
     positions            PositionUser[]
@@ -96,14 +101,15 @@ model Position {
     @@index([squadId])
 }
 
-// todo
+// done
 model Request {
     id          Int    @id @default(autoincrement())
     userId      Int
     user        User   @relation(fields: [userId], references: [id])
-    requestType String
-    reason      String
-    status      String
+    requestType RequestType
+    reason      String?
+    status      RequestStatus   @default(Pending)
+    date        DateTime
 
     @@index([userId])
 }
@@ -386,6 +392,12 @@ enum RequestType {
     HeartDeletion
     Freeze
     Protection
+}
+
+enum RequestStatus {
+    Pending
+    OrchApproved
+    Approved
 }
 
  // ? -----------------------------------------------------------------------//
