@@ -34,11 +34,13 @@ export class SquadService {
         return squad;
     }
 
-    async readAll() {
+    async readAll(skip: number = 0, take: number = 10) {
         return await this.prismaService.squad.findMany({
             include: {
                 positions: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

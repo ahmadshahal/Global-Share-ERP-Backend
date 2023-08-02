@@ -34,7 +34,7 @@ export class VacancyService {
         return vacancy;
     }
 
-    async readAll(): Promise<Vacancy[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Vacancy[]> {
         return await this.prismaService.vacancy.findMany({
             include: {
                 position: {
@@ -43,6 +43,8 @@ export class VacancyService {
                     },
                 },
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

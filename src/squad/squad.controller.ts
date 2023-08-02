@@ -9,6 +9,7 @@ import {
     ParseFilePipe,
     ParseIntPipe,
     Post,
+    Query,
     UploadedFile,
     UseGuards,
     UseInterceptors,
@@ -27,8 +28,8 @@ export class SquadController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.squadService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.squadService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -7,6 +7,8 @@ import {
     Param,
     Delete,
     UseGuards,
+    Query,
+    ParseIntPipe,
 } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
@@ -23,8 +25,8 @@ export class EvaluationController {
     }
 
     @Get()
-    async findAll() {
-        return await this.evaluationService.readAll();
+    async findAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.evaluationService.readAll(skip, take);
     }
 
     @Get(':id')

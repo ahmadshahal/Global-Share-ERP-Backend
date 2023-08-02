@@ -8,6 +8,7 @@ import {
     Delete,
     ParseIntPipe,
     UseGuards,
+    Query,
 } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { CreateEmailDto } from './dto/create-email.dto';
@@ -29,8 +30,8 @@ export class EmailController {
     }
 
     @Get()
-    async readAll() {
-        return await this.emailService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.emailService.readAll(skip, take);
     }
 
     @Get(':id')

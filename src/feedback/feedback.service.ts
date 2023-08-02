@@ -19,8 +19,11 @@ export class FeedbackService {
         });
     }
 
-    async readAll(): Promise<Feedback[]> {
-        return await this.prismaService.feedback.findMany();
+    async readAll(skip: number = 0, take: number = 10): Promise<Feedback[]> {
+        return await this.prismaService.feedback.findMany({
+            skip: skip,
+            take: take == 0 ? undefined : take
+        });
     }
 
     async readOne(id: number): Promise<Feedback> {

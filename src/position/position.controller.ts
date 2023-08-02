@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Post,
     Put,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
@@ -26,8 +27,8 @@ export class PositionController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.positionService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.positionService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -7,6 +7,8 @@ import {
     Param,
     Delete,
     UseGuards,
+    ParseIntPipe,
+    Query,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
@@ -24,8 +26,8 @@ export class RequestController {
     }
 
     @Get()
-    findAll(): Promise<Request[]> {
-        return this.requestService.readAll();
+    findAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number): Promise<Request[]> {
+        return this.requestService.readAll(skip, take);
     }
 
     @Get(':id')

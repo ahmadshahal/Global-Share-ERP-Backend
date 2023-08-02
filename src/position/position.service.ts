@@ -37,11 +37,13 @@ export class PositionService {
         return position;
     }
 
-    async readAll(): Promise<Position[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Position[]> {
         return await this.prismaService.position.findMany({
             include: {
                 squad: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

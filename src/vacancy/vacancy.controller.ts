@@ -8,6 +8,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
@@ -22,8 +23,8 @@ export class VacancyController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.vacancyService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.vacancyService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

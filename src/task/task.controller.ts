@@ -8,6 +8,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
@@ -22,8 +23,11 @@ export class TaskController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.taskService.readAll();
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
+        return await this.taskService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -34,8 +38,12 @@ export class TaskController {
 
     @HttpCode(HttpStatus.OK)
     @Get('squad/:id')
-    async readBySquad(@Param('id', ParseIntPipe) squadId: number) {
-        return await this.taskService.readBySquad(squadId);
+    async readBySquad(
+        @Param('id', ParseIntPipe) squadId: number,
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
+        return await this.taskService.readBySquad(squadId, skip, take);
     }
 
     @HttpCode(HttpStatus.CREATED)

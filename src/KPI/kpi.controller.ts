@@ -7,6 +7,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { CreateKpiDto } from './dto/create-kpi.dto';
@@ -25,8 +26,8 @@ export class KpiController {
     }
 
     @Get()
-    async readAll(): Promise<KPI[]> {
-        return await this.kpiService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number): Promise<KPI[]> {
+        return await this.kpiService.readAll(skip, take);
     }
 
     @Get(':id')

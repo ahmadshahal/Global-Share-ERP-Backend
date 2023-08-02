@@ -29,12 +29,14 @@ export class CommentService {
         return comment;
     }
 
-    async readAll(): Promise<Comment[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Comment[]> {
         return await this.prismaService.comment.findMany({
             include: {
                 task: true,
                 author: { select: { firstName: true, lastName: true } },
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

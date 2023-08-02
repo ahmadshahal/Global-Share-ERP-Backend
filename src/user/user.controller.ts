@@ -8,6 +8,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -34,8 +35,8 @@ export class UserController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.userService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.userService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

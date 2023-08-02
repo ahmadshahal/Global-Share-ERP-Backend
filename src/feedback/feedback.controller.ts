@@ -7,6 +7,7 @@ import {
     Delete,
     ParseIntPipe,
     UseGuards,
+    Query,
 } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
@@ -23,8 +24,8 @@ export class FeedbackController {
     }
 
     @Get()
-    async readAll() {
-        return await this.feedbackService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.feedbackService.readAll(skip, take);
     }
 
     @Get(':id')

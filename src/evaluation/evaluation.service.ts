@@ -32,13 +32,15 @@ export class EvaluationService {
         });
     }
 
-    async readAll(): Promise<Evaluation[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Evaluation[]> {
         return this.prisma.evaluation.findMany({
             include: {
                 user: true,
                 competency: true,
                 evaluator: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

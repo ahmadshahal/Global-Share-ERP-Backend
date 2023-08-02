@@ -8,6 +8,7 @@ import {
     Delete,
     ParseIntPipe,
     UseGuards,
+    Query,
 } from '@nestjs/common';
 import { CompetencyService } from './competency.service';
 import { CreateCompetencyDto } from './dto/create-competency.dto';
@@ -24,8 +25,8 @@ export class CompetencyController {
     }
 
     @Get()
-    async readAll() {
-        return await this.competencyService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.competencyService.readAll(skip, take);
     }
 
     @Get(':id')

@@ -24,9 +24,11 @@ export class KpiService {
         });
     }
 
-    async readAll(): Promise<KPI[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<KPI[]> {
         return await this.prismaService.kPI.findMany({
             include: { tasks: true },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

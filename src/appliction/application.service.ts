@@ -48,7 +48,7 @@ export class ApplicationService {
         return application;
     }
 
-    async readAll(): Promise<Application[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Application[]> {
         return await this.prismaService.application.findMany({
             include: {
                 vacancy: {
@@ -61,6 +61,8 @@ export class ApplicationService {
                     },
                 },
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

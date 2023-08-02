@@ -7,6 +7,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
     UploadedFiles,
     UseGuards,
     UseInterceptors,
@@ -28,8 +29,8 @@ export class ApplicationController {
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Application' })
     @Get()
-    async readAll() {
-        return await this.applicationService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.applicationService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

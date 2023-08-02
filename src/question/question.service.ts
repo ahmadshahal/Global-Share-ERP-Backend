@@ -26,11 +26,13 @@ export class QuestionService {
         });
     }
 
-    async readAll(): Promise<Question[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Question[]> {
         return await this.prisma.question.findMany({
             include: {
                 positions: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

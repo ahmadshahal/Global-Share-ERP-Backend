@@ -7,6 +7,8 @@ import {
     Param,
     Delete,
     UseGuards,
+    Query,
+    ParseIntPipe,
 } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -23,8 +25,8 @@ export class QuestionController {
     }
 
     @Get()
-    async readAll() {
-        return await this.questionService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.questionService.readAll(skip, take);
     }
 
     @Get(':id')

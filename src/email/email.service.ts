@@ -34,8 +34,11 @@ export class EmailService {
         });
     }
 
-    async readAll() {
-        return await this.prismaService.email.findMany();
+    async readAll(skip: number = 0, take: number = 10) {
+        return await this.prismaService.email.findMany({
+            skip: skip,
+            take: take == 0 ? undefined : take
+        });
     }
 
     async readOne(id: number) {

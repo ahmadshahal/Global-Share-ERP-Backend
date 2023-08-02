@@ -14,7 +14,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(squadId: number): Promise<Task[]> {
+    async readBySquad(squadId: number, skip: number = 0, take: number = 10): Promise<Task[]> {
         const tasks = await this.prismaService.task.findMany({
             where: {
                 status: {
@@ -43,6 +43,8 @@ export class TaskService {
                 kpis: true,
                 step: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
         return tasks;
     }
@@ -81,7 +83,7 @@ export class TaskService {
         return task;
     }
 
-    async readAll(): Promise<Task[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Task[]> {
         const tasks = await this.prismaService.task.findMany({
             include: {
                 assignedBy: {
@@ -105,6 +107,8 @@ export class TaskService {
                 kpis: true,
                 step: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
         return tasks;
     }

@@ -7,6 +7,8 @@ import {
     Param,
     Delete,
     UseGuards,
+    ParseIntPipe,
+    Query,
 } from '@nestjs/common';
 import { CreateRecruitmentFeedbackDto } from './dto/create-recruitment-feedback.dto';
 import { UpdateRecruitmentFeedbackDto } from './dto/update-recruitment-feedback.dto';
@@ -29,8 +31,8 @@ export class RecruitmentFeedbackController {
     }
 
     @Get()
-    async readAll() {
-        return await this.recruitmentFeedbackService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.recruitmentFeedbackService.readAll(skip, take);
     }
 
     @Get(':id')

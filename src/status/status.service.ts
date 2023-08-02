@@ -28,9 +28,11 @@ export class StatusService {
         return status;
     }
 
-    async readAll(): Promise<Status[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<Status[]> {
         return await this.prismaService.status.findMany({
             include: { tasks: true, squad: true },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

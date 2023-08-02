@@ -29,11 +29,13 @@ export class UserService {
         return exclude(user, ['password']);
     }
 
-    async readAll() {
+    async readAll(skip: number = 0, take: number = 10) {
         const users = await this.prismaService.user.findMany({
             include: {
                 positions: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
         return users.map((user) => exclude(user, ['password']));
     }

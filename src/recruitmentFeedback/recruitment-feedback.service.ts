@@ -27,9 +27,11 @@ export class RecruitmentFeedbackService {
         });
     }
 
-    async readAll(): Promise<RecruitmentFeedback[]> {
+    async readAll(skip: number = 0, take: number = 10): Promise<RecruitmentFeedback[]> {
         return await this.prismaService.recruitmentFeedback.findMany({
             include: { application: true },
+            skip: skip,
+            take: take == 0 ? undefined : take
         });
     }
 

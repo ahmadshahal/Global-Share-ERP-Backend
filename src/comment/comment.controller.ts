@@ -8,6 +8,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
@@ -23,8 +24,8 @@ export class CommentController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll() {
-        return await this.commentService.readAll();
+    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+        return await this.commentService.readAll(skip, take);
     }
 
     @HttpCode(HttpStatus.OK)
