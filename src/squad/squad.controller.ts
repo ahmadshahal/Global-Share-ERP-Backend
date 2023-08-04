@@ -9,6 +9,7 @@ import {
     ParseFilePipe,
     ParseIntPipe,
     Post,
+    Put,
     Query,
     UploadedFile,
     UseGuards,
@@ -20,13 +21,17 @@ import { UpdateSquadDto } from './dto/update-squad.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SquadImageValidator } from './validator/squad.validator';
+import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
+import { Action } from '@prisma/client';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('squad')
 export class SquadController {
     constructor(private squadService: SquadService) {}
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Squad' })
     @Get()
     async readAll(
         @Query('skip', ParseIntPipe) skip: number,
@@ -36,12 +41,14 @@ export class SquadController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Squad' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.squadService.readOne(id);
     }
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Create, subject: 'Squad' })
     @Post()
     @UseInterceptors(FileInterceptor('image'))
     async create(
@@ -58,7 +65,8 @@ export class SquadController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post(':id')
+    @Permissions({ action: Action.Update, subject: 'Squad' })
+    @Put(':id')
     @UseInterceptors(FileInterceptor('image'))
     async update(
         @Param('id', ParseIntPipe) id: number,
@@ -75,6 +83,7 @@ export class SquadController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'Squad' })
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
         return await this.squadService.delete(id);

@@ -16,18 +16,23 @@ import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
-@UseGuards(JwtGuard)
+import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
+import { Action } from '@prisma/client';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
+@UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('question')
 export class QuestionController {
     constructor(private readonly questionService: QuestionService) {}
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Create, subject: 'Question' })
     @Post()
     async create(@Body() createQuestionDto: CreateQuestionDto) {
         return await this.questionService.create(createQuestionDto);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Question' })
     @Get()
     async readAll(
         @Query('skip', ParseIntPipe) skip: number,
@@ -37,12 +42,14 @@ export class QuestionController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Question' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.questionService.readOne(id);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Update, subject: 'Question' })
     @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
@@ -52,6 +59,7 @@ export class QuestionController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'Question' })
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         return await this.questionService.remove(id);

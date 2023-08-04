@@ -8,6 +8,7 @@ import {
     Param,
     ParseIntPipe,
     Post,
+    Put,
     Query,
     UseGuards,
 } from '@nestjs/common';
@@ -16,13 +17,17 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { UserId } from 'src/auth/decorator/user-id.decorator';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
+import { Action } from '@prisma/client';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('comment')
 export class CommentController {
     constructor(private commentService: CommentService) {}
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Comment' })
     @Get()
     async readAll(
         @Query('skip', ParseIntPipe) skip: number,
@@ -32,12 +37,14 @@ export class CommentController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Comment' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.commentService.readOne(id);
     }
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Create, subject: 'Comment' })
     @Post()
     async create(
         @UserId() userId: number,
@@ -47,7 +54,8 @@ export class CommentController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post(':id')
+    @Permissions({ action: Action.Update, subject: 'Comment' })
+    @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCommentDto: UpdateCommentDto,
@@ -56,6 +64,7 @@ export class CommentController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'Comment' })
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
         return await this.commentService.delete(id);

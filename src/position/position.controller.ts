@@ -17,13 +17,17 @@ import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
+import { Action } from '@prisma/client';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('position')
 export class PositionController {
     constructor(private positionService: PositionService) {}
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Position' })
     @Get()
     async readAll(
         @Query('skip', ParseIntPipe) skip: number,
@@ -33,19 +37,22 @@ export class PositionController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Position' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.positionService.readOne(id);
     }
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Create, subject: 'Position' })
     @Post()
     async create(@Body() createPositionDto: CreatePositionDto) {
         return await this.positionService.create(createPositionDto);
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post(':id')
+    @Permissions({ action: Action.Update, subject: 'Position' })
+    @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updatePositionDto: UpdatePositionDto,
@@ -54,12 +61,14 @@ export class PositionController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'Position' })
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
         return await this.positionService.delete(id);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Create, subject: 'PositionUser' })
     @Post(':positionId/user')
     async addUserToPosition(
         @Body() addUserToPositionDto: AddUserToPositionDto,
@@ -72,19 +81,25 @@ export class PositionController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'PositionUser' })
     @Delete(':positionId/user/:id')
     async removeUserFromPosition(@Param('id', ParseIntPipe) id: number) {
         return await this.positionService.removeUserFromPosition(id);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'PositionUser' })
     @Get('/:positionId/user')
     async readUsersOfPosition(
         @Param('positionId', ParseIntPipe) positionId: number,
         @Query('skip', ParseIntPipe) skip: number,
         @Query('take', ParseIntPipe) take: number,
     ) {
-        return await this.positionService.readUsersOfPosition(positionId, skip, take);
+        return await this.positionService.readUsersOfPosition(
+            positionId,
+            skip,
+            take,
+        );
     }
 
     /*

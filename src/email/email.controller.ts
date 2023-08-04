@@ -17,8 +17,11 @@ import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { MailerService } from '@nestjs-modules/mailer';
+import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
+import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { Action } from '@prisma/client';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('email')
 export class EmailController {
     constructor(
@@ -27,12 +30,14 @@ export class EmailController {
     ) {}
 
     @HttpCode(HttpStatus.CREATED)
+    @Permissions({ action: Action.Create, subject: 'Email' })
     @Post()
     async create(@Body() createEmailDto: CreateEmailDto) {
         return await this.emailService.create(createEmailDto);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Email' })
     @Get()
     async readAll(
         @Query('skip', ParseIntPipe) skip: number,
@@ -42,12 +47,14 @@ export class EmailController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Email' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.emailService.readOne(id);
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Update, subject: 'Email' })
     @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
@@ -57,6 +64,7 @@ export class EmailController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Delete, subject: 'Email' })
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         return await this.emailService.delete(id);

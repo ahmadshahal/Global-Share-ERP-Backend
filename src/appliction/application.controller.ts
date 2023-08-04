@@ -9,6 +9,7 @@ import {
     ParseFilePipe,
     ParseIntPipe,
     Post,
+    Put,
     Query,
     UploadedFiles,
     UseGuards,
@@ -72,7 +73,7 @@ export class ApplicationController {
 
     @Permissions({ action: Action.Update, subject: 'Application' })
     @HttpCode(HttpStatus.OK)
-    @Post(':id')
+    @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateApplicationDto: UpdateApplicationDto,
