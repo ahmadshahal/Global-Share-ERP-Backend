@@ -10,6 +10,10 @@ export class AuthorizationGuard implements CanActivate {
         private readonly prismaService: PrismaService,
     ) {}
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        // TESTING..
+        return true;
+        
+        /*
         const requiredPermission = this.reflector.getAllAndOverride(
             Permission_KEY,
             [context.getHandler(), context.getClass()],
@@ -34,5 +38,6 @@ export class AuthorizationGuard implements CanActivate {
         console.log(permission, requiredPermission);
         if (user.role.name == 'Admin') return true;
         return permission.roles.some((role) => role.roleId == user.roleId);
+        */
     }
 }

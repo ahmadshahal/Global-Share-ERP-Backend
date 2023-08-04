@@ -2,6 +2,7 @@ import * as argon from 'argon2';
 import { PrismaClient, Action, Prisma } from '@prisma/client';
 const prismaService = new PrismaClient();
 async function main() {
+    /*
     await prismaService.user.deleteMany();
     await prismaService.rolePermission.deleteMany();
     await prismaService.role.deleteMany();
@@ -39,6 +40,7 @@ async function main() {
             },
         },
     });
+    */
     // const hr_member = await prismaService.role.create({
     //     data: {
     //         name: 'HR_Member',
