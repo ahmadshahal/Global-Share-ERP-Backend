@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ApplicationController } from './application.controller';
 import { ApplicationService } from './application.service';
-import { GoogleDriveModule } from 'src/utils/googleDrive/googleDrive.module';
+import { DriveModule } from 'src/drive/drive.module';
 
 @Module({
     controllers: [ApplicationController],
     providers: [ApplicationService],
-    imports: [GoogleDriveModule],
+    imports: [DriveModule],
 })
 export class ApplicationModule {}

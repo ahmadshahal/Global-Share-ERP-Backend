@@ -20,7 +20,7 @@ import { ApplicationModule } from './appliction/application.module';
 import { EmailModule } from './email/email.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { GoogleDriveModule } from './utils/googleDrive/googleDrive.module';
+import { DriveModule } from './drive/drive.module';
 
 @Module({
     imports: [
@@ -60,7 +60,7 @@ import { GoogleDriveModule } from './utils/googleDrive/googleDrive.module';
             }),
             inject: [ConfigService],
         }),
-        GoogleDriveModule,
+        DriveModule,
     ],
 })
 export class AppModule {}

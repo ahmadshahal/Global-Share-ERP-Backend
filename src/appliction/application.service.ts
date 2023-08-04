@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { GoogleDriveService } from 'src/utils/googleDrive/googleDrive.service';
+import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -17,7 +17,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class ApplicationService {
     constructor(
         private prismaService: PrismaService,
-        private readonly googleDriveService: GoogleDriveService,
+        private readonly driveService: DriveService,
         private mailService: MailerService,
     ) {}
 
@@ -74,7 +74,7 @@ export class ApplicationService {
             createApplicationDto.answers.map(async (answer) => {
                 if (answer.file) {
                     const fileStream = new PassThrough();
-                    const res = await this.googleDriveService.saveFile(
+                    const res = await this.driveService.saveFile(
                         Date.now().toString(),
                         fileStream.end(answer.file.buffer),
                         answer.file.mimetype,

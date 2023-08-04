@@ -9,7 +9,7 @@ type PartialDriveFile = {
 };
 
 @Injectable()
-export class GoogleDriveService {
+export class DriveService {
     private driveClient: drive_v3.Drive;
 
     public constructor(configService: ConfigService) {

@@ -9,14 +9,14 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateSquadDto } from './dto/create-squad.dto';
 import { UpdateSquadDto } from './dto/update-squad.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GoogleDriveService } from 'src/utils/googleDrive/googleDrive.service';
+import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 
 @Injectable()
 export class SquadService {
     constructor(
         private prismaService: PrismaService,
-        private readonly googleDrive: GoogleDriveService,
+        private readonly driveService: DriveService,
     ) {}
 
     async readOne(id: number) {
@@ -46,7 +46,7 @@ export class SquadService {
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
         const imageStream = new PassThrough();
-        const res = await this.googleDrive.saveFile(
+        const res = await this.driveService.saveFile(
             createSquadDto.gsName,
             imageStream.end(image.buffer),
             image.mimetype,
@@ -103,7 +103,7 @@ export class SquadService {
         try {
             if (image) {
                 const imageStream = new PassThrough();
-                const res = await this.googleDrive.saveFile(
+                const res = await this.driveService.saveFile(
                     updateSquadDto.gsName,
                     imageStream.end(image.buffer),
                     image.mimetype,
