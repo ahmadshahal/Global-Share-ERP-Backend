@@ -36,4 +36,8 @@ export class SignupDto {
     @IsNotEmpty()
     @IsInt()
     roleId: number;
+
+    @IsNotEmpty()
+    @IsInt()
+    positionId: number;
 }

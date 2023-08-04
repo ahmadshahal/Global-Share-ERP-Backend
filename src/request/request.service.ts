@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -17,33 +16,42 @@ export class RequestService {
     constructor(private prismaService: PrismaService) {}
 
     async create(createRequestDto: CreateRequestDto): Promise<Request> {
-        const { userId, requestType, reason } = createRequestDto;
         return await this.prismaService.request.create({
             data: {
-                userId,
-                requestType,
-                reason,
+                user: {
+                    connect: {
+                        id: createRequestDto.userId,
+                    },
+                },
+                requestType: createRequestDto.requestType,
+                reason: createRequestDto.reason,
                 status: RequestStatus.Pending,
                 date: new Date(),
             },
-            include: { user: true },
+            include: {
+                user: true,
+            },
         });
     }
 
     async readAll(skip: number = 0, take: number = 10): Promise<Request[]> {
         return this.prismaService.request.findMany({
-            include: { user: true },
+            include: {
+                user: true,
+            },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number): Promise<Request> {
-        return this.prismaService.request.findFirst({
+        return this.prismaService.request.findUnique({
             where: {
                 id,
             },
-            include: { user: true },
+            include: {
+                user: true,
+            },
         });
     }
 
@@ -51,56 +59,77 @@ export class RequestService {
         id: number,
         updateRequestDto: UpdateRequestDto,
     ): Promise<Request> {
-        const { userId, reason, status } = updateRequestDto;
         try {
             const request = await this.prismaService.request.findUnique({
-                where: { id: userId },
-                include: { user: true },
+                where: {
+                    id: updateRequestDto.userId,
+                },
+                include: {
+                    user: true,
+                },
             });
+            if (!request) {
+                throw new NotFoundException('Request Not Found');
+            }
             return await this.prismaService.$transaction(
                 async (prismaService) => {
-                    if (status == RequestStatus.Approved) {
-                        if (request.requestType == RequestType.Freeze) {
+                    if (updateRequestDto.status != RequestStatus.Approved) {
+                        return;
+                    }
+                    switch (request.requestType) {
+                        case RequestType.Freeze:
                             await prismaService.user.update({
-                                where: { id: request.userId },
+                                where: {
+                                    id: request.userId,
+                                },
                                 data: {
                                     gsStatus: GsStatus.FREEZE,
-                                    freezeCardsCount: { decrement: 1 },
+                                    freezeCardsCount: {
+                                        decrement: 1,
+                                    },
                                 },
                             });
-                        }
-                        if (request.requestType == RequestType.Protection) {
+                        case RequestType.Protection:
                             await prismaService.user.update({
-                                where: { id: request.userId },
+                                where: {
+                                    id: request.userId,
+                                },
                                 data: {
-                                    protectionCardsCount: { decrement: 1 },
+                                    protectionCardsCount: {
+                                        decrement: 1,
+                                    },
                                 },
                             });
-                        }
-                        if (request.requestType == RequestType.HeartAddition) {
+                        case RequestType.HeartAddition:
                             await prismaService.user.update({
-                                where: { id: request.userId },
+                                where: {
+                                    id: request.userId,
+                                },
                                 data: {
-                                    heartsCount: { increment: 1 },
+                                    heartsCount: {
+                                        increment: 1,
+                                    },
                                 },
                             });
-                        }
-                        if (request.requestType == RequestType.HeartDeletion) {
+                        case RequestType.HeartDeletion:
                             await prismaService.user.update({
-                                where: { id: request.userId },
+                                where: {
+                                    id: request.userId,
+                                },
                                 data: {
-                                    heartsCount: { decrement: 1 },
+                                    heartsCount: {
+                                        decrement: 1,
+                                    },
                                 },
                             });
-                        }
                     }
                     return await prismaService.request.update({
                         where: {
                             id,
                         },
                         data: {
-                            reason,
-                            status,
+                            reason: updateRequestDto.reason,
+                            status: updateRequestDto.status,
                         },
                     });
                 },
@@ -121,7 +150,9 @@ export class RequestService {
                 where: {
                     id,
                 },
-                include: { user: true },
+                include: {
+                    user: true,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -129,10 +160,8 @@ export class RequestService {
                     throw new NotFoundException('Request Not Found');
                 }
                 if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                    throw new HttpException(
+                    throw new BadRequestException(
                         'Unable to delete a related request',
-                        HttpStatus.BAD_REQUEST,
-                        { description: 'Bad Request' },
                     );
                 }
             }

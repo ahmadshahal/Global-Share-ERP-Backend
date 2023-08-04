@@ -1,23 +1,4 @@
-import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateSquadDto } from './create-squad.dto';
 
-export class UpdateSquadDto {
-    @IsOptional()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(50)
-    name: string;
-
-    @IsOptional()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(50)
-    gsName: string;
-
-    @IsOptional()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(250)
-    description: string;
-
-    imageUrl: string;
-}
+export class UpdateSquadDto extends PartialType(CreateSquadDto) {}

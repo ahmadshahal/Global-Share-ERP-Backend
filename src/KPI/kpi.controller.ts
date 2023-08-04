@@ -3,48 +3,57 @@ import {
     Controller,
     Delete,
     Get,
+    HttpCode,
+    HttpStatus,
     Param,
     ParseIntPipe,
-    Patch,
     Post,
+    Put,
     Query,
     UseGuards,
 } from '@nestjs/common';
 import { CreateKpiDto } from './dto/create-kpi.dto';
 import { UpdateKpiDto } from './dto/update-kpi.dto';
 import { KpiService } from './kpi.service';
-import { KPI } from '@prisma/client';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 @UseGuards(JwtGuard)
 @Controller('kpis')
 export class KpiController {
     constructor(private readonly kpiService: KpiService) {}
 
+    @HttpCode(HttpStatus.CREATED)
     @Post()
-    async create(@Body() createKpiDto: CreateKpiDto): Promise<KPI> {
+    async create(@Body() createKpiDto: CreateKpiDto) {
         return await this.kpiService.create(createKpiDto);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number): Promise<KPI[]> {
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return await this.kpiService.readAll(skip, take);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get(':id')
-    async readOne(@Param('id', ParseIntPipe) id: number): Promise<KPI> {
+    async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.kpiService.readOne(id);
     }
 
-    @Patch(':id')
+    @HttpCode(HttpStatus.OK)
+    @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateKpiDto: UpdateKpiDto,
-    ): Promise<KPI> {
+    ) {
         return await this.kpiService.update(id, updateKpiDto);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number): Promise<KPI> {
+    async remove(@Param('id', ParseIntPipe) id: number) {
         return await this.kpiService.remove(id);
     }
 }

@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -20,7 +19,7 @@ export class SquadService {
     ) {}
 
     async readOne(id: number) {
-        const squad = await this.prismaService.squad.findFirst({
+        const squad = await this.prismaService.squad.findUnique({
             where: {
                 id: id,
             },
@@ -45,18 +44,17 @@ export class SquadService {
     }
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {
-        const imageStream = new PassThrough();
-        const res = await this.driveService.saveFile(
+        const resource = await this.driveService.saveFile(
             createSquadDto.gsName,
-            imageStream.end(image.buffer),
+            new PassThrough().end(image.buffer),
             image.mimetype,
         );
-        await this.prismaService.squad.create({
+        return await this.prismaService.squad.create({
             data: {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: res.data.webViewLink || res.data.webContentLink,
+                imageUrl: resource.data.webViewLink || resource.data.webContentLink,
                 statuses: {
                     createMany: {
                         data: [
@@ -73,7 +71,7 @@ export class SquadService {
 
     async delete(id: number) {
         try {
-            await this.prismaService.squad.delete({
+            return await this.prismaService.squad.delete({
                 where: {
                     id: id,
                 },
@@ -84,10 +82,8 @@ export class SquadService {
                     throw new NotFoundException('Squad Not Found');
                 }
                 if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                    throw new HttpException(
+                    throw new BadRequestException(
                         'Unable to delete a related squad',
-                        HttpStatus.BAD_REQUEST,
-                        { description: 'Bad Request' },
                     );
                 }
             }
@@ -101,29 +97,25 @@ export class SquadService {
         image: Express.Multer.File,
     ) {
         try {
+            var imageUrl = undefined
             if (image) {
-                const imageStream = new PassThrough();
-                const res = await this.driveService.saveFile(
+                const resource = await this.driveService.saveFile(
                     updateSquadDto.gsName,
-                    imageStream.end(image.buffer),
+                    new PassThrough().end(image.buffer),
                     image.mimetype,
                 );
-                updateSquadDto.imageUrl =
-                    res.data.webViewLink || res.data.webContentLink;
+                imageUrl = resource.data.webViewLink || resource.data.webContentLink;
             }
-            const data: any = {
-                name: updateSquadDto.name,
-                gsName: updateSquadDto.gsName,
-                description: updateSquadDto.description,
-            };
-            if (updateSquadDto.imageUrl) {
-                data.imageUrl = updateSquadDto.imageUrl;
-            }
-            await this.prismaService.squad.update({
+            return await this.prismaService.squad.update({
                 where: {
                     id: id,
                 },
-                data,
+                data: {
+                    name: updateSquadDto.name,
+                    description: updateSquadDto.description,
+                    gsName: updateSquadDto.gsName,
+                    imageUrl: imageUrl
+                }
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

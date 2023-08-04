@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -15,27 +14,32 @@ export class KpiService {
     constructor(private readonly prismaService: PrismaService) {}
 
     async create(createKpiDto: CreateKpiDto): Promise<KPI> {
-        const { name, description } = createKpiDto;
         return await this.prismaService.kPI.create({
             data: {
-                name,
-                description,
+                name: createKpiDto.name,
+                description: createKpiDto.description,
             },
         });
     }
 
     async readAll(skip: number = 0, take: number = 10): Promise<KPI[]> {
         return await this.prismaService.kPI.findMany({
-            include: { tasks: true },
+            include: {
+                tasks: true,
+            },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number): Promise<KPI> {
         const kpi = await this.prismaService.kPI.findUnique({
-            where: { id },
-            include: { tasks: true },
+            where: {
+                id,
+            },
+            include: {
+                tasks: true,
+            },
         });
         if (!kpi) {
             throw new NotFoundException('KPI not found');
@@ -44,13 +48,12 @@ export class KpiService {
     }
 
     async update(id: number, updateKpiDto: UpdateKpiDto): Promise<KPI> {
-        const { name, description } = updateKpiDto;
         try {
             return await this.prismaService.kPI.update({
                 where: { id },
                 data: {
-                    name,
-                    description,
+                    name: updateKpiDto.name,
+                    description: updateKpiDto.description,
                 },
                 include: { tasks: true },
             });
@@ -67,7 +70,9 @@ export class KpiService {
     async remove(id: number): Promise<KPI> {
         try {
             return await this.prismaService.kPI.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -76,10 +81,8 @@ export class KpiService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related KPI',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

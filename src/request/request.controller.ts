@@ -9,6 +9,9 @@ import {
     UseGuards,
     ParseIntPipe,
     Query,
+    HttpCode,
+    HttpStatus,
+    Put,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
@@ -20,31 +23,39 @@ import { Request } from '@prisma/client';
 export class RequestController {
     constructor(private readonly requestService: RequestService) {}
 
+    @HttpCode(HttpStatus.CREATED)
     @Post()
-    create(@Body() createRequestDto: CreateRequestDto): Promise<Request> {
+    async create(@Body() createRequestDto: CreateRequestDto) {
         return this.requestService.create(createRequestDto);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get()
-    findAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number): Promise<Request[]> {
+    async findAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return this.requestService.readAll(skip, take);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get(':id')
-    findOne(@Param('id') id: string): Promise<Request> {
-        return this.requestService.readOne(+id);
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.requestService.readOne(id);
     }
 
-    @Patch(':id')
-    update(
-        @Param('id') id: string,
+    @HttpCode(HttpStatus.OK)
+    @Put(':id')
+    async update(
+        @Param('id', ParseIntPipe) id: number,
         @Body() updateRequestDto: UpdateRequestDto,
-    ): Promise<Request> {
-        return this.requestService.update(+id, updateRequestDto);
+    ) {
+        return this.requestService.update(id, updateRequestDto);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Delete(':id')
-    remove(@Param('id') id: string): Promise<Request> {
-        return this.requestService.remove(+id);
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return this.requestService.remove(id);
     }
 }

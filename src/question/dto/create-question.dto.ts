@@ -1,10 +1,12 @@
 import { QuestionType } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
     IsEnum,
     IsString,
     IsNotEmpty,
     IsOptional,
     IsArray,
+    ValidateNested,
 } from 'class-validator';
 
 export class CreateQuestionDto {
@@ -18,5 +20,7 @@ export class CreateQuestionDto {
 
     @IsOptional()
     @IsArray()
-    options: Array<string>;
+    @ValidateNested({ each: true })
+    @Type(() => String)
+    options: string[];
 }

@@ -22,13 +22,15 @@ export class FeedbackService {
     async readAll(skip: number = 0, take: number = 10): Promise<Feedback[]> {
         return await this.prismaService.feedback.findMany({
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number): Promise<Feedback> {
         const feedback = await this.prismaService.feedback.findUnique({
-            where: { id },
+            where: {
+                id,
+            },
         });
         if (!feedback) {
             throw new NotFoundException('Feedback Not Found');
@@ -39,7 +41,9 @@ export class FeedbackService {
     async delete(id: number): Promise<Feedback> {
         try {
             return await this.prismaService.feedback.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

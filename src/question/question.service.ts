@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -15,13 +14,13 @@ export class QuestionService {
     constructor(private readonly prisma: PrismaService) {}
 
     async create(createQuestionDto: CreateQuestionDto): Promise<Question> {
-        const { text, type, options } = createQuestionDto;
-
         return await this.prisma.question.create({
             data: {
-                text,
-                type,
-                options: options ? JSON.stringify(options) : null,
+                text: createQuestionDto.text,
+                type: createQuestionDto.type,
+                options: createQuestionDto.options
+                    ? JSON.stringify(createQuestionDto.options)
+                    : undefined,
             },
         });
     }
@@ -32,13 +31,15 @@ export class QuestionService {
                 positions: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number): Promise<Question> {
         const question = await this.prisma.question.findUnique({
-            where: { id },
+            where: {
+                id,
+            },
             include: {
                 positions: true,
             },
@@ -55,14 +56,17 @@ export class QuestionService {
         id: number,
         updateQuestionDto: UpdateQuestionDto,
     ): Promise<Question> {
-        const { text, type, options } = updateQuestionDto;
         try {
             return await this.prisma.question.update({
-                where: { id },
+                where: {
+                    id,
+                },
                 data: {
-                    text,
-                    type,
-                    options: options ? JSON.stringify(options) : null,
+                    text: updateQuestionDto.text,
+                    type: updateQuestionDto.type,
+                    options: updateQuestionDto.options
+                        ? JSON.stringify(updateQuestionDto.options)
+                        : null,
                 },
                 include: {
                     positions: true,
@@ -81,7 +85,9 @@ export class QuestionService {
     async remove(id: number): Promise<Question> {
         try {
             return await this.prisma.question.delete({
-                where: { id },
+                where: {
+                    id,
+                },
                 include: {
                     positions: true,
                 },
@@ -93,10 +99,8 @@ export class QuestionService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Question',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

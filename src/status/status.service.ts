@@ -1,7 +1,5 @@
 import {
     BadRequestException,
-    HttpException,
-    HttpStatus,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -32,7 +30,7 @@ export class StatusService {
         return await this.prismaService.status.findMany({
             include: { tasks: true, squad: true },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
@@ -41,7 +39,11 @@ export class StatusService {
             return await this.prismaService.status.create({
                 data: {
                     name: createStatusDto.name,
-                    squadId: createStatusDto.squadId,
+                    squad: {
+                        connect: {
+                            id: createStatusDto.squadId,
+                        },
+                    },
                 },
             });
         } catch (error) {
@@ -56,10 +58,11 @@ export class StatusService {
 
     async delete(id: number): Promise<Status> {
         const task = await this.readOne(id);
-        if (task.crucial)
+        if (task.crucial) {
             throw new BadRequestException(
                 'Deletion of crucial statuses is forbidden',
             );
+        }
         try {
             return await this.prismaService.status.delete({
                 where: {
@@ -73,10 +76,8 @@ export class StatusService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related status',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;
@@ -95,7 +96,10 @@ export class StatusService {
                 data: {
                     name: updateStatusDto.name,
                 },
-                include: { tasks: true, squad: true },
+                include: {
+                    tasks: true,
+                    squad: true,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

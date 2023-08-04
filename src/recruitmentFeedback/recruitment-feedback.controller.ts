@@ -9,6 +9,8 @@ import {
     UseGuards,
     ParseIntPipe,
     Query,
+    HttpCode,
+    HttpStatus,
 } from '@nestjs/common';
 import { CreateRecruitmentFeedbackDto } from './dto/create-recruitment-feedback.dto';
 import { UpdateRecruitmentFeedbackDto } from './dto/update-recruitment-feedback.dto';
@@ -21,6 +23,7 @@ export class RecruitmentFeedbackController {
         private readonly recruitmentFeedbackService: RecruitmentFeedbackService,
     ) {}
 
+    @HttpCode(HttpStatus.CREATED)
     @Post()
     async create(
         @Body() createRecruitmentFeedbackDto: CreateRecruitmentFeedbackDto,
@@ -30,29 +33,36 @@ export class RecruitmentFeedbackController {
         );
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return await this.recruitmentFeedbackService.readAll(skip, take);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Get(':id')
-    async readOne(@Param('id') id: string) {
-        return await this.recruitmentFeedbackService.readOne(+id);
+    async readOne(@Param('id', ParseIntPipe) id: number) {
+        return await this.recruitmentFeedbackService.readOne(id);
     }
 
+    @HttpCode(HttpStatus.OK)
     @Put(':id')
     async update(
-        @Param('id') id: string,
+        @Param('id', ParseIntPipe) id: number,
         @Body() updateRecruitmentFeedbackDto: UpdateRecruitmentFeedbackDto,
     ) {
         return await this.recruitmentFeedbackService.update(
-            +id,
+            id,
             updateRecruitmentFeedbackDto,
         );
     }
 
+    @HttpCode(HttpStatus.OK)
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        return await this.recruitmentFeedbackService.remove(+id);
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return await this.recruitmentFeedbackService.remove(id);
     }
 }

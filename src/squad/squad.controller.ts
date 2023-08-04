@@ -28,7 +28,10 @@ export class SquadController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return await this.squadService.readAll(skip, take);
     }
 
@@ -46,7 +49,7 @@ export class SquadController {
         @UploadedFile(
             new ParseFilePipe({
                 validators: SquadImageValidator,
-                fileIsRequired: false,
+                fileIsRequired: true,
             }),
         )
         image: Express.Multer.File,

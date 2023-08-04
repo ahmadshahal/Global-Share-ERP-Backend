@@ -1,7 +1,5 @@
 import {
     BadRequestException,
-    HttpException,
-    HttpStatus,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -15,21 +13,24 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 export class EmailService {
     constructor(private readonly prismaService: PrismaService) {}
     async create(createEmailDto: CreateEmailDto): Promise<Email> {
-        const { title, body, recruitmentStatus, cc } = createEmailDto;
         const oldEmail = await this.prismaService.email.findFirst({
-            where: { recruitmentStatus: createEmailDto.recruitmentStatus },
+            where: {
+                recruitmentStatus: createEmailDto.recruitmentStatus,
+            },
         });
+
         if (oldEmail) {
             throw new BadRequestException(
                 'An email with the same status already exists',
             );
         }
+
         return await this.prismaService.email.create({
             data: {
-                title,
-                body,
-                recruitmentStatus,
-                cc,
+                title: createEmailDto.title,
+                body: createEmailDto.body,
+                recruitmentStatus: createEmailDto.recruitmentStatus,
+                cc: createEmailDto.cc,
             },
         });
     }
@@ -37,13 +38,15 @@ export class EmailService {
     async readAll(skip: number = 0, take: number = 10) {
         return await this.prismaService.email.findMany({
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number) {
         const email = await this.prismaService.email.findUnique({
-            where: { id },
+            where: {
+                id,
+            },
         });
         if (!email) {
             throw new NotFoundException('Email Not Found');
@@ -52,22 +55,22 @@ export class EmailService {
     }
 
     async update(id: number, updateEmailDto: UpdateEmailDto) {
-        const { title, body, recruitmentStatus, cc } = updateEmailDto;
-
         try {
             return await this.prismaService.email.update({
-                where: { id },
+                where: {
+                    id,
+                },
                 data: {
-                    title,
-                    body,
-                    recruitmentStatus,
-                    cc,
+                    title: updateEmailDto.title,
+                    body: updateEmailDto.body,
+                    recruitmentStatus: updateEmailDto.recruitmentStatus,
+                    cc: updateEmailDto.cc,
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Competency Not Found');
+                    throw new NotFoundException('Email Not Found');
                 }
             }
             throw error;
@@ -77,19 +80,19 @@ export class EmailService {
     async delete(id: number) {
         try {
             return await this.prismaService.email.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Competency Not Found');
+                    throw new NotFoundException('Email Not Found');
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Email',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

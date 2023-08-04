@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +12,7 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 @Injectable()
 export class CompetencyService {
     constructor(private readonly prismaService: PrismaService) {}
+
     async create(createCompetencyDto: CreateCompetencyDto) {
         return await this.prismaService.competency.create({
             data: {
@@ -25,13 +25,15 @@ export class CompetencyService {
     async readAll(skip: number = 0, take: number = 10) {
         return await this.prismaService.competency.findMany({
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number) {
         const competency = await this.prismaService.competency.findUnique({
-            where: { id },
+            where: {
+                id,
+            },
         });
         if (!competency) {
             throw new NotFoundException('Competency Not Found');
@@ -42,7 +44,9 @@ export class CompetencyService {
     async update(id: number, updateCompetencyDto: UpdateCompetencyDto) {
         try {
             return await this.prismaService.competency.update({
-                where: { id },
+                where: {
+                    id,
+                },
                 data: {
                     name: updateCompetencyDto.name,
                     description: updateCompetencyDto.description,
@@ -61,7 +65,9 @@ export class CompetencyService {
     async delete(id: number) {
         try {
             return await this.prismaService.competency.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -70,10 +76,8 @@ export class CompetencyService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Competency',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

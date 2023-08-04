@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -17,17 +16,26 @@ export class EvaluationService {
     async create(
         createEvaluationDto: CreateEvaluationDto,
     ): Promise<Evaluation> {
-        const { userId, competencyId, text, mark, evaluatorId, date } =
-            createEvaluationDto;
-
         return await this.prisma.evaluation.create({
             data: {
-                userId,
-                competencyId,
-                text,
-                mark,
-                evaluatorId,
-                date,
+                user: {
+                    connect: {
+                        id: createEvaluationDto.userId,
+                    },
+                },
+                competency: {
+                    connect: {
+                        id: createEvaluationDto.competencyId,
+                    },
+                },
+                text: createEvaluationDto.text,
+                mark: createEvaluationDto.mark,
+                evaluator: {
+                    connect: {
+                        id: createEvaluationDto.evaluatorId,
+                    },
+                },
+                date: createEvaluationDto.date,
             },
         });
     }
@@ -40,13 +48,15 @@ export class EvaluationService {
                 evaluator: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async readOne(id: number): Promise<Evaluation> {
         const evaluation = await this.prisma.evaluation.findUnique({
-            where: { id },
+            where: {
+                id,
+            },
             include: {
                 user: true,
                 competency: true,
@@ -65,18 +75,28 @@ export class EvaluationService {
         id: number,
         updateEvaluationDto: UpdateEvaluationDto,
     ): Promise<Evaluation> {
-        const { userId, competencyId, text, mark, evaluatorId, date } =
-            updateEvaluationDto;
         try {
             return await this.prisma.evaluation.update({
                 where: { id },
                 data: {
-                    userId,
-                    competencyId,
-                    text,
-                    mark,
-                    evaluatorId,
-                    date,
+                    user: {
+                        connect: {
+                            id: updateEvaluationDto.userId,
+                        },
+                    },
+                    competency: {
+                        connect: {
+                            id: updateEvaluationDto.competencyId,
+                        },
+                    },
+                    text: updateEvaluationDto.text,
+                    mark: updateEvaluationDto.mark,
+                    evaluator: {
+                        connect: {
+                            id: updateEvaluationDto.evaluatorId,
+                        },
+                    },
+                    date: updateEvaluationDto.date,
                 },
                 include: {
                     user: true,
@@ -97,7 +117,9 @@ export class EvaluationService {
     async remove(id: number): Promise<Evaluation> {
         try {
             return await this.prisma.evaluation.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -106,10 +128,8 @@ export class EvaluationService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Evaluation',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

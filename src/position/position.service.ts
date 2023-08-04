@@ -1,29 +1,21 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import {
-    Position,
-    PositionCompetency,
-    PositionUser,
-    Prisma,
-} from '@prisma/client';
+import { Position, PositionUser, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
-import { AddCompetencyToPositionDto } from './dto/add-competency-to-position.dto';
-import { UpdatePositionCompetencyDto } from './dto/update-competency-position.dto';
 
 @Injectable()
 export class PositionService {
     constructor(private prismaService: PrismaService) {}
 
     async readOne(id: number): Promise<Position> {
-        const position = await this.prismaService.position.findFirst({
+        const position = await this.prismaService.position.findUnique({
             where: {
                 id: id,
             },
@@ -43,7 +35,7 @@ export class PositionService {
                 squad: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
@@ -86,10 +78,8 @@ export class PositionService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Position',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;
@@ -161,7 +151,9 @@ export class PositionService {
     async removeUserFromPosition(id: number): Promise<PositionUser> {
         try {
             return await this.prismaService.positionUser.delete({
-                where: { id },
+                where: {
+                    id,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -173,7 +165,11 @@ export class PositionService {
         }
     }
 
-    async positionUsers(id: number): Promise<PositionUser[]> {
+    async readUsersOfPosition(
+        id: number,
+        skip: number = 0,
+        take: number = 10,
+    ): Promise<PositionUser[]> {
         return this.prismaService.positionUser.findMany({
             where: {
                 positionId: id,
@@ -181,9 +177,12 @@ export class PositionService {
             include: {
                 user: true,
             },
+            skip: skip,
+            take: take == 0 ? undefined : take,
         });
     }
 
+    /*
     async positionCompetencies(id: number): Promise<PositionCompetency[]> {
         return await this.prismaService.positionCompetency.findMany({
             where: {
@@ -273,4 +272,5 @@ export class PositionService {
 
         return deletedPositionCompetency;
     }
+    */
 }

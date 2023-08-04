@@ -19,6 +19,7 @@ class TaskKpiDto {
     @IsInt()
     kpiId: number;
 
+    @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(250)
@@ -69,7 +70,7 @@ export class CreateTaskDto {
     @Type(() => Number)
     assignedToId: number;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => TaskKpiDto)

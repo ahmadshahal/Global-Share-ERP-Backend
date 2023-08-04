@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateEvaluationDto {
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     userId: number;
 
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     competencyId: number;
 
@@ -13,13 +13,15 @@ export class CreateEvaluationDto {
     @IsNotEmpty()
     text: string;
 
+    @IsNotEmpty()
     @IsString()
     mark: string;
 
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     evaluatorId: number;
 
+    @IsDate()
     @IsNotEmpty()
     date: Date;
 }

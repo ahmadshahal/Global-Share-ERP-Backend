@@ -14,9 +14,6 @@ class AnswerDto {
     @IsOptional()
     @IsString()
     text: string;
-
-    @IsOptional()
-    file: any;
 }
 
 export class CreateApplicationDto {

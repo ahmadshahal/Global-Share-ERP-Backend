@@ -12,25 +12,26 @@ datasource db {
 }
 
 model Role {
-    id          Int         @id @default(autoincrement())
-    name        String      @unique
+    id          Int              @id @default(autoincrement())
+    name        String           @unique
     permissions RolePermission[]
     users       User[]
 }
 
 model Permission {
-    id          Int         @id @default(autoincrement())
-    action      Action
-    subject     String
-    roles       RolePermission[]
+    id      Int              @id @default(autoincrement())
+    action  Action
+    subject String
+    roles   RolePermission[]
 }
 
 model RolePermission {
-    id              Int         @id @default(autoincrement())
-    roleId          Int
-    role            Role        @relation(fields: [roleId],references: [id])
-    permissionId    Int
-    permission      Permission  @relation(fields: [permissionId],references: [id])
+    id           Int        @id @default(autoincrement())
+    roleId       Int
+    role         Role       @relation(fields: [roleId], references: [id])
+    permissionId Int
+    permission   Permission @relation(fields: [permissionId], references: [id])
+
     @@index([roleId])
     @@index([permissionId])
 }
@@ -50,11 +51,10 @@ model Squad {
     steps                Step[]
 }
 
-// done
 model User {
     id                   Int                   @id @default(autoincrement())
     roleId               Int
-    role                 Role                  @relation(fields: [roleId],references: [id])
+    role                 Role                  @relation(fields: [roleId], references: [id])
     email                String                @unique
     password             String
     phoneNumber          String                @unique
@@ -66,7 +66,7 @@ model User {
     appointlet           String?
     bio                  String?
     tasksCompleted       Int                   @default(0)
-    volunteeredHours     Float                   @default(0)
+    volunteeredHours     Float                 @default(0)
     heartsCount          Int                   @default(0)
     freezeCardsCount     Int                   @default(0)
     protectionCardsCount Int                   @default(0)
@@ -82,10 +82,10 @@ model User {
     SquadObjectives      SquadObjective[]
     goals                Goal[]
     steps                Step[]
+
     @@index([roleId])
 }
 
-//done
 model Position {
     id           Int                  @id @default(autoincrement())
     name         String
@@ -101,20 +101,18 @@ model Position {
     @@index([squadId])
 }
 
-// done
 model Request {
-    id          Int    @id @default(autoincrement())
+    id          Int           @id @default(autoincrement())
     userId      Int
-    user        User   @relation(fields: [userId], references: [id])
+    user        User          @relation(fields: [userId], references: [id])
     requestType RequestType
     reason      String?
-    status      RequestStatus   @default(Pending)
+    status      RequestStatus @default(Pending)
     date        DateTime
 
     @@index([userId])
 }
 
-//done
 model PositionUser {
     id          Int          @id @default(autoincrement())
     positionId  Int
@@ -129,47 +127,6 @@ model PositionUser {
     @@index([positionId])
 }
 
-// done
-model Competency {
-    id          Int                  @id @default(autoincrement())
-    name        String
-    description String?
-    positions   PositionCompetency[]
-}
-
-// done
-model PositionCompetency {
-    id           Int          @id @default(autoincrement())
-    weight       Int
-    competencyId Int
-    competency   Competency   @relation(fields: [competencyId], references: [id])
-    positionId   Int
-    position     Position     @relation(fields: [positionId], references: [id])
-    evaluations  Evaluation[]
-
-    @@index([competencyId])
-    @@index([positionId])
-}
-
-//done
-model Evaluation {
-    id           Int                @id @default(autoincrement())
-    userId       Int
-    user         PositionUser       @relation(fields: [userId], references: [id])
-    competencyId Int
-    competency   PositionCompetency @relation(fields: [competencyId], references: [id])
-    text         String
-    mark         String?
-    evaluatorId  Int
-    evaluator    User               @relation(fields: [evaluatorId], references: [id])
-    date         DateTime
-
-    @@index([userId])
-    @@index([competencyId])
-    @@index([evaluatorId])
-}
-
-//done
 model Vacancy {
     id           Int               @id @default(autoincrement())
     positionId   Int
@@ -186,7 +143,6 @@ model Vacancy {
     @@index([positionId])
 }
 
-// done
 model Application {
     id        Int                   @id @default(autoincrement())
     email     String
@@ -199,7 +155,6 @@ model Application {
     @@index([vacancyId])
 }
 
-// done
 model RecruitmentFeedback {
     id            Int               @id @default(autoincrement())
     applicationId Int
@@ -210,7 +165,6 @@ model RecruitmentFeedback {
     @@index([applicationId])
 }
 
-// done
 model Question {
     id        Int               @id @default(autoincrement())
     text      String
@@ -219,7 +173,6 @@ model Question {
     positions VacancyQuestion[]
 }
 
-//done
 model VacancyQuestion {
     id         Int      @id @default(autoincrement())
     questionId Int
@@ -232,7 +185,6 @@ model VacancyQuestion {
     @@index([vacancyId])
 }
 
-//done
 model Answer {
     id            Int             @id @default(autoincrement())
     text          String
@@ -245,7 +197,6 @@ model Answer {
     @@index([questionId])
 }
 
-// done
 model Status {
     id      Int     @id @default(autoincrement())
     name    String
@@ -257,7 +208,6 @@ model Status {
     @@index([squadId])
 }
 
-// done
 model Task {
     id           Int        @id @default(autoincrement())
     title        String
@@ -283,29 +233,6 @@ model Task {
     @@index([stepId])
 }
 
-//done
-model KPI {
-    id          Int       @id @default(autoincrement())
-    name        String
-    description String?
-    tasks       TaskKPI[]
-}
-
-// done
-model TaskKPI {
-    id          Int     @id @default(autoincrement())
-    grade       Int?
-    description String?
-    kpiId       Int
-    KPI         KPI     @relation(fields: [kpiId], references: [id])
-    taskId      Int
-    task        Task    @relation(fields: [taskId], references: [id])
-
-    @@index([kpiId])
-    @@index([taskId])
-}
-
-// done
 model Comment {
     id       Int    @id @default(autoincrement())
     content  String
@@ -318,7 +245,6 @@ model Comment {
     @@index([authorId])
 }
 
-//done
 model Email {
     id                Int               @id @default(autoincrement())
     title             String
@@ -327,7 +253,6 @@ model Email {
     cc                String
 }
 
-//done
 model Feedback {
     id    Int    @id @default(autoincrement())
     name  String
@@ -351,6 +276,7 @@ enum Action {
     Read
     Delete
 }
+
 enum GsStatus {
     ACTIVE
     FREEZE
@@ -361,7 +287,6 @@ enum Difficulty {
     LOW
     MEDIUM
     HIGH
-    // TODO: Map each difficulty to a number value.
 }
 
 enum Priority {
@@ -401,8 +326,29 @@ enum RequestStatus {
     Approved
 }
 
- // ? -----------------------------------------------------------------------//
-// tables will be used in the future
+// ? -----------------------------------------------------------------------//
+// Future Tables
+
+model KPI {
+    id          Int       @id @default(autoincrement())
+    name        String
+    description String?
+    tasks       TaskKPI[]
+}
+
+model TaskKPI {
+    id          Int     @id @default(autoincrement())
+    grade       Int?
+    description String?
+    kpiId       Int
+    KPI         KPI     @relation(fields: [kpiId], references: [id])
+    taskId      Int
+    task        Task    @relation(fields: [taskId], references: [id])
+
+    @@index([kpiId])
+    @@index([taskId])
+}
+
 model Theme {
     id                   Int                   @id @default(autoincrement())
     name                 String
@@ -410,6 +356,43 @@ model Theme {
     startDate            DateTime?
     endDate              DateTime?
     enterpriseObjectives EnterpriseObjective[]
+}
+
+model Competency {
+    id          Int                  @id @default(autoincrement())
+    name        String
+    description String?
+    positions   PositionCompetency[]
+}
+
+model PositionCompetency {
+    id           Int          @id @default(autoincrement())
+    weight       Int
+    competencyId Int
+    competency   Competency   @relation(fields: [competencyId], references: [id])
+    positionId   Int
+    position     Position     @relation(fields: [positionId], references: [id])
+    evaluations  Evaluation[]
+
+    @@index([competencyId])
+    @@index([positionId])
+}
+
+model Evaluation {
+    id           Int                @id @default(autoincrement())
+    userId       Int
+    user         PositionUser       @relation(fields: [userId], references: [id])
+    competencyId Int
+    competency   PositionCompetency @relation(fields: [competencyId], references: [id])
+    text         String
+    mark         String?
+    evaluatorId  Int
+    evaluator    User               @relation(fields: [evaluatorId], references: [id])
+    date         DateTime
+
+    @@index([userId])
+    @@index([competencyId])
+    @@index([evaluatorId])
 }
 
 model EnterpriseObjective {

@@ -4,7 +4,7 @@ import { Permission_KEY } from '../decorator/permissions.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class authorizationGuard implements CanActivate {
+export class AuthorizationGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
         private readonly prismaService: PrismaService,

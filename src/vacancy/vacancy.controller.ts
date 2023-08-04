@@ -15,7 +15,7 @@ import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
-import { AddQuestionToVacancyDto } from './dto/add-question-to-vacancy.dto';
+
 @UseGuards(JwtGuard)
 @Controller('vacancy')
 export class VacancyController {
@@ -23,7 +23,10 @@ export class VacancyController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return await this.vacancyService.readAll(skip, take);
     }
 
@@ -54,26 +57,18 @@ export class VacancyController {
         return await this.vacancyService.delete(id);
     }
 
+    
+    @HttpCode(HttpStatus.OK)
     @Get(':vacancyId/questions')
     async readQuestionsOfVacancy(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
         @Param('vacancyId', ParseIntPipe) vacancyId: number,
     ) {
-        return await this.vacancyService.readQuestionsOfVacancy(vacancyId);
-    }
-
-    @Post(':vacancyId/questions')
-    async addQuestionToVacancy(
-        @Body() addQuestionToVacancyDto: AddQuestionToVacancyDto,
-        @Param('vacancyId', ParseIntPipe) vacancyId: number,
-    ) {
-        return await this.vacancyService.addQuestionToVacancy(
-            addQuestionToVacancyDto,
+        return await this.vacancyService.readQuestionsOfVacancy(
             vacancyId,
+            skip,
+            take,
         );
-    }
-
-    @Delete(':vacancyId/questions/:id')
-    async deleteQuestionFromVacancy(@Param('id', ParseIntPipe) id: number) {
-        return await this.vacancyService.removeQuestionFromVacancy(id);
     }
 }

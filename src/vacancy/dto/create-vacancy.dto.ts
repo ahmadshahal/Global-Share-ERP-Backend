@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 
 export class CreateVacancyDto {
     @IsNotEmpty()
@@ -19,4 +20,11 @@ export class CreateVacancyDto {
     @IsNotEmpty()
     @IsInt()
     positionId: number;
+
+    
+    @IsNotEmpty()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => Number)
+    questionsIds: number[];
 }

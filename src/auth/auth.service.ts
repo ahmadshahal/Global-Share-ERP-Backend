@@ -46,11 +46,11 @@ export class AuthService {
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
                     roleId: signupDto.roleId,
-                    // position: {
-                    //     connect: {
-                    //         id: signupDto.positionId,
-                    //     },
-                    // },
+                    positions: {
+                        connect: {
+                            id: signupDto.positionId
+                        }
+                    }
                 },
             });
             return await this.signToken(user.id, user.email);

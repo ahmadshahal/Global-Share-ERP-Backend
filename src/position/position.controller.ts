@@ -16,8 +16,6 @@ import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
-import { AddCompetencyToPositionDto } from './dto/add-competency-to-position.dto';
-import { UpdatePositionCompetencyDto } from './dto/update-competency-position.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
 @UseGuards(JwtGuard)
@@ -27,7 +25,10 @@ export class PositionController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async readAll(@Query('skip', ParseIntPipe) skip: number, @Query('take', ParseIntPipe) take: number) {
+    async readAll(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
         return await this.positionService.readAll(skip, take);
     }
 
@@ -80,10 +81,13 @@ export class PositionController {
     @Get('/:positionId/user')
     async readUsersOfPosition(
         @Param('positionId', ParseIntPipe) positionId: number,
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
     ) {
-        return await this.positionService.positionUsers(positionId);
+        return await this.positionService.readUsersOfPosition(positionId, skip, take);
     }
 
+    /*
     @Get(':positionId/competency')
     async readCompetenciesOfPosition(@Param('positionId') positionId: number) {
         return await this.positionService.positionCompetencies(positionId);
@@ -115,4 +119,5 @@ export class PositionController {
     async DeletePositionCompetency(@Param('id', ParseIntPipe) id: number) {
         return await this.positionService.deletePositionCompetency(id);
     }
+    */
 }

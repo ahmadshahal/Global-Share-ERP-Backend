@@ -1,13 +1,11 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Vacancy, VacancyQuestion } from '@prisma/client';
+import { Prisma, Vacancy } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
-import { AddQuestionToVacancyDto } from './dto/add-question-to-vacancy.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 
@@ -44,7 +42,7 @@ export class VacancyService {
                 },
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
@@ -63,12 +61,19 @@ export class VacancyService {
                             id: createVacancyDto.positionId,
                         },
                     },
+                    questions: {
+                        createMany: {
+                            data: createVacancyDto.questionsIds.map((id) => ({
+                                questionId: id
+                            })),
+                        },
+                    },
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Position Not Found');
+                    throw new NotFoundException('Position or Question Not Found');
                 }
             }
             throw error;
@@ -77,7 +82,7 @@ export class VacancyService {
 
     async delete(id: number) {
         try {
-            await this.prismaService.vacancy.delete({
+            return await this.prismaService.vacancy.delete({
                 where: {
                     id: id,
                 },
@@ -111,18 +116,28 @@ export class VacancyService {
                             id: updateVacancyDto.positionId,
                         },
                     },
+                    questions: {
+                        deleteMany: {
+                            vacancyId: updateVacancyDto.questionsIds ? id : undefined
+                        },
+                        createMany: {
+                            data: updateVacancyDto.questionsIds?.map((id) => ({
+                                questionId: id
+                            })) ?? [],
+                        }
+                    },
                 },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Squad Not Found');
+                    throw new NotFoundException(
+                        'Vacancy Or Position Not Found',
+                    );
                 }
                 if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                    throw new HttpException(
-                        'Unable to delete a related squad',
-                        HttpStatus.BAD_REQUEST,
-                        { description: 'Bad Request' },
+                    throw new BadRequestException(
+                        'Unable to delete a related Vacancy',
                     );
                 }
             }
@@ -130,7 +145,11 @@ export class VacancyService {
         }
     }
 
-    async readQuestionsOfVacancy(id: number) {
+    async readQuestionsOfVacancy(
+        id: number,
+        skip: number = 0,
+        take: number = 10,
+    ) {
         return await this.prismaService.vacancyQuestion.findMany({
             where: {
                 vacancyId: id,
@@ -139,66 +158,8 @@ export class VacancyService {
                 question: true,
                 answer: true,
             },
+            skip: skip,
+            take: take,
         });
-    }
-
-    async addQuestionToVacancy(
-        addQuestionToVacancyDto: AddQuestionToVacancyDto,
-        vacancyId: number,
-    ): Promise<VacancyQuestion> {
-        const { questionId } = addQuestionToVacancyDto;
-
-        const questionExists = await this.prismaService.question.findUnique({
-            where: {
-                id: questionId,
-            },
-        });
-
-        if (!questionExists) {
-            throw new NotFoundException(
-                `Question with ID ${questionId} not found`,
-            );
-        }
-
-        const vacancyExists = await this.prismaService.vacancy.findUnique({
-            where: {
-                id: vacancyId,
-            },
-        });
-
-        if (!vacancyExists) {
-            throw new NotFoundException(
-                `Vacancy with ID ${vacancyId} not found`,
-            );
-        }
-
-        return await this.prismaService.vacancyQuestion.create({
-            data: {
-                questionId,
-                vacancyId,
-            },
-            include: {
-                question: true,
-                vacancy: true,
-                answer: true,
-            },
-        });
-    }
-
-    async removeQuestionFromVacancy(id: number): Promise<VacancyQuestion> {
-        const deletedVacancyQuestion =
-            await this.prismaService.vacancyQuestion.delete({
-                where: {
-                    id,
-                },
-            });
-
-        if (!deletedVacancyQuestion) {
-            throw new NotFoundException(
-                `VacancyQuestion with ID ${id} not found`,
-            );
-        }
-
-        return deletedVacancyQuestion;
     }
 }

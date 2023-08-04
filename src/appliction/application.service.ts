@@ -1,10 +1,14 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Application, RecruitmentStatus } from '@prisma/client';
+import {
+    Prisma,
+    Application,
+    RecruitmentStatus,
+    QuestionType,
+} from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -37,7 +41,9 @@ export class ApplicationService {
                     },
                 },
                 answers: {
-                    include: { question: true },
+                    include: {
+                        question: true,
+                    },
                 },
                 feedbacks: true,
             },
@@ -62,32 +68,42 @@ export class ApplicationService {
                 },
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
     async create(
         createApplicationDto: CreateApplicationDto,
+        files: Express.Multer.File[],
     ): Promise<Application> {
         try {
-            const answers = [];
-            createApplicationDto.answers.map(async (answer) => {
-                if (answer.file) {
-                    const fileStream = new PassThrough();
-                    const res = await this.driveService.saveFile(
-                        Date.now().toString(),
-                        fileStream.end(answer.file.buffer),
-                        answer.file.mimetype,
-                    );
-                    answers.push({
-                        ...answer,
-                        fileUrl:
-                            res.data.webViewLink || res.data.webContentLink,
-                    });
-                } else {
-                    answers.push(answer);
-                }
+            const applicationFiles = files.map(async (file) => {
+                const res = await this.driveService.saveFile(
+                    Date.now().toString(),
+                    new PassThrough().end(file.buffer),
+                    file.mimetype,
+                );
+                return res.data.webViewLink || res.data.webContentLink;
             });
+
+            const answers: { questionId: number; text: string }[] = [];
+            var fileAnswersCounter = 0;
+            createApplicationDto.answers.forEach(async (answer) => {
+                const question = await this.prismaService.question.findUnique({
+                    where: {
+                        id: answer.questionId,
+                    },
+                });
+                if (!question) {
+                    throw new NotFoundException('Question Not Found');
+                }
+                if (question.type == QuestionType.FILE) {
+                    answer.text = await applicationFiles[fileAnswersCounter];
+                    fileAnswersCounter++;
+                }
+                answers.push(answer);
+            });
+
             return await this.prismaService.application.create({
                 data: {
                     status: RecruitmentStatus.APPLIED,
@@ -98,7 +114,9 @@ export class ApplicationService {
                         },
                     },
                     answers: {
-                        createMany: { data: answers },
+                        createMany: {
+                            data: answers,
+                        },
                     },
                 },
             });
@@ -112,9 +130,9 @@ export class ApplicationService {
         }
     }
 
-    async delete(id: number) {
+    async delete(id: number): Promise<Application> {
         try {
-            await this.prismaService.application.delete({
+            return await this.prismaService.application.delete({
                 where: {
                     id: id,
                 },
@@ -126,16 +144,14 @@ export class ApplicationService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related Application',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;
         }
     }
-    // todo: send emails
+
     async update(
         id: number,
         updateApplicationDto: UpdateApplicationDto,
@@ -143,20 +159,34 @@ export class ApplicationService {
         try {
             const application = await this.prismaService.application.findUnique(
                 {
-                    where: { id },
+                    where: {
+                        id: id,
+                    },
                 },
             );
-            if (
-                !this.validStatusUpdate(
-                    application.status,
-                    updateApplicationDto.status,
-                )
-            ) {
-                throw new Error('Invalid status update.');
+            if (!application) {
+                throw new BadRequestException('Application Not Found');
+            }
+            const isValidStatusUpdate = this.isValidStatusUpdate(
+                application.status,
+                updateApplicationDto.status,
+            );
+            if (!isValidStatusUpdate) {
+                throw new BadRequestException('Invalid status update');
+            }
+            const email = await this.prismaService.email.findFirst({
+                where: { recruitmentStatus: updateApplicationDto.status },
+            });
+            if (!email) {
+                throw new BadRequestException(
+                    'Application Status Has No Emails',
+                );
             }
             const updatedApplication =
                 await this.prismaService.application.update({
-                    where: { id },
+                    where: {
+                        id,
+                    },
                     data: {
                         status: updateApplicationDto.status,
                         feedbacks: {
@@ -167,9 +197,6 @@ export class ApplicationService {
                         },
                     },
                 });
-            const email = await this.prismaService.email.findFirst({
-                where: { recruitmentStatus: updateApplicationDto.status },
-            });
             this.mailService
                 .sendMail({
                     to: [application.email],
@@ -194,36 +221,22 @@ export class ApplicationService {
         }
     }
 
-    validStatusUpdate(
-        oldStatus: RecruitmentStatus,
+    private isValidStatusUpdate(
+        previousStatus: RecruitmentStatus,
         newStatus: RecruitmentStatus,
-    ) {
-        if (newStatus == RecruitmentStatus.REFUSED) return true;
-        if (
-            oldStatus == RecruitmentStatus.APPLIED &&
-            newStatus == RecruitmentStatus.HR_APPROVED
-        )
-            return true;
-        if (
-            oldStatus == RecruitmentStatus.HR_APPROVED &&
-            newStatus == RecruitmentStatus.ORCH_APPROVED
-        )
-            return true;
-        if (
-            oldStatus == RecruitmentStatus.ORCH_APPROVED &&
-            newStatus == RecruitmentStatus.HR_INTERVIEW_APPROVED
-        )
-            return true;
-        if (
-            oldStatus == RecruitmentStatus.HR_INTERVIEW_APPROVED &&
-            newStatus == RecruitmentStatus.TECH_INTERVIEW_APPROVED
-        )
-            return true;
-        if (
-            oldStatus == RecruitmentStatus.TECH_INTERVIEW_APPROVED &&
-            newStatus == RecruitmentStatus.DONE
-        )
-            return true;
-        return false;
+    ): boolean {
+        return (
+            newStatus == RecruitmentStatus.REFUSED ||
+            (previousStatus == RecruitmentStatus.APPLIED &&
+                newStatus == RecruitmentStatus.HR_APPROVED) ||
+            (previousStatus == RecruitmentStatus.HR_APPROVED &&
+                newStatus == RecruitmentStatus.ORCH_APPROVED) ||
+            (previousStatus == RecruitmentStatus.ORCH_APPROVED &&
+                newStatus == RecruitmentStatus.HR_INTERVIEW_APPROVED) ||
+            (previousStatus == RecruitmentStatus.HR_INTERVIEW_APPROVED &&
+                newStatus == RecruitmentStatus.TECH_INTERVIEW_APPROVED) ||
+            (previousStatus == RecruitmentStatus.TECH_INTERVIEW_APPROVED &&
+                newStatus == RecruitmentStatus.DONE)
+        );
     }
 }

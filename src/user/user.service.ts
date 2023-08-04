@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -42,7 +41,7 @@ export class UserService {
 
     async update(id: number, updateUserDto: UpdateUserDto) {
         try {
-            await this.prismaService.user.update({
+            return await this.prismaService.user.update({
                 where: {
                     id: id,
                 },
@@ -70,7 +69,7 @@ export class UserService {
 
     async delete(id: number) {
         try {
-            await this.prismaService.user.delete({
+            return await this.prismaService.user.delete({
                 where: {
                     id: id,
                 },
@@ -82,10 +81,8 @@ export class UserService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related User',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

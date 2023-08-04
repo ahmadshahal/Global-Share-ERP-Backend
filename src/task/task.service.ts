@@ -1,6 +1,5 @@
 import {
-    HttpException,
-    HttpStatus,
+    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -14,7 +13,11 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(squadId: number, skip: number = 0, take: number = 10): Promise<Task[]> {
+    async readBySquad(
+        squadId: number,
+        skip: number = 0,
+        take: number = 10,
+    ): Promise<Task[]> {
         const tasks = await this.prismaService.task.findMany({
             where: {
                 status: {
@@ -44,7 +47,7 @@ export class TaskService {
                 step: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
         return tasks;
     }
@@ -108,44 +111,49 @@ export class TaskService {
                 step: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
         return tasks;
     }
 
     async create(createTaskDto: CreateTaskDto): Promise<Task> {
         try {
-            const {
-                title,
-                description,
-                url,
-                deadline,
-                priority,
-                difficulty,
-                statusId,
-                assignedById,
-                assignedToId,
-                stepId,
-                kpis,
-            } = createTaskDto;
             return await this.prismaService.task.create({
                 data: {
-                    title,
-                    description,
-                    url,
-                    deadline: new Date(deadline),
-                    priority,
-                    difficulty,
-                    status: { connect: { id: statusId } },
-                    assignedBy: { connect: { id: assignedById } },
-                    assignedTo: { connect: { id: assignedToId } },
-                    step: stepId ? { connect: { id: stepId } } : undefined,
+                    title: createTaskDto.title,
+                    description: createTaskDto.description,
+                    url: createTaskDto.url,
+                    deadline: new Date(createTaskDto.deadline),
+                    priority: createTaskDto.priority,
+                    difficulty: createTaskDto.difficulty,
+                    status: {
+                        connect: {
+                            id: createTaskDto.statusId,
+                        },
+                    },
+                    assignedBy: {
+                        connect: {
+                            id: createTaskDto.assignedById,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: createTaskDto.assignedToId,
+                        },
+                    },
+                    step: createTaskDto.stepId
+                        ? {
+                              connect: {
+                                  id: createTaskDto.stepId,
+                              },
+                          }
+                        : undefined,
                     kpis: {
                         createMany: {
-                            data: kpis.map((kpi) => ({
+                            data: createTaskDto.kpis.map((kpi) => ({
                                 kpiId: kpi.kpiId,
-                                description: kpi.description || null,
-                                grade: kpi.grade || null,
+                                description: kpi.description,
+                                grade: kpi.grade,
                             })),
                         },
                     },
@@ -163,44 +171,48 @@ export class TaskService {
 
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
-            const {
-                title,
-                description,
-                url,
-                deadline,
-                priority,
-                difficulty,
-                statusId,
-                assignedById,
-                assignedToId,
-                stepId,
-                kpis,
-            } = updateTaskDto;
-            await this.prismaService.task.update({
+            return await this.prismaService.task.update({
                 where: {
                     id: id,
                 },
                 data: {
-                    title,
-                    description,
-                    url,
-                    deadline: new Date(deadline),
-                    priority,
-                    difficulty,
-                    status: { connect: { id: statusId } },
-                    assignedBy: { connect: { id: assignedById } },
-                    assignedTo: { connect: { id: assignedToId } },
-                    step: stepId
-                        ? { connect: { id: stepId } }
-                        : { disconnect: true },
+                    title: updateTaskDto.title,
+                    description: updateTaskDto.description,
+                    url: updateTaskDto.url,
+                    deadline: new Date(updateTaskDto.deadline),
+                    priority: updateTaskDto.priority,
+                    difficulty: updateTaskDto.difficulty,
+                    status: {
+                        connect: {
+                            id: updateTaskDto.statusId,
+                        },
+                    },
+                    assignedBy: {
+                        connect: {
+                            id: updateTaskDto.assignedById,
+                        },
+                    },
+                    assignedTo: {
+                        connect: {
+                            id: updateTaskDto.assignedToId,
+                        },
+                    },
+                    step: {
+                        connect: {
+                            id: updateTaskDto.stepId,
+                        },
+                    },
                     kpis: {
-                        deleteMany: {},
+                        deleteMany: {
+                            taskId: updateTaskDto.kpis ? id : undefined,
+                        },
                         createMany: {
-                            data: kpis.map((kpi) => ({
-                                kpiId: kpi.kpiId,
-                                description: kpi.description || null,
-                                grade: kpi.grade || null,
-                            })),
+                            data:
+                                updateTaskDto.kpis?.map((kpi) => ({
+                                    kpiId: kpi.kpiId,
+                                    description: kpi.description,
+                                    grade: kpi.grade,
+                                })) ?? [],
                         },
                     },
                 },
@@ -227,7 +239,7 @@ export class TaskService {
 
     async delete(id: number) {
         try {
-            await this.prismaService.task.delete({
+            return await this.prismaService.task.delete({
                 where: {
                     id: id,
                 },
@@ -239,10 +251,8 @@ export class TaskService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new HttpException(
+                throw new BadRequestException(
                     'Unable to delete a related task',
-                    HttpStatus.BAD_REQUEST,
-                    { description: 'Bad Request' },
                 );
             }
             throw error;

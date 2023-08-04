@@ -1,6 +1,7 @@
-import { IsDate, IsNotEmpty } from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty } from 'class-validator';
 
 export class AddUserToPositionDto {
+    @IsInt()
     @IsNotEmpty()
     userId: number;
 

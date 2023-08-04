@@ -20,7 +20,12 @@ export class CommentService {
             },
             include: {
                 task: true,
-                author: { select: { firstName: true, lastName: true } },
+                author: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
             },
         });
         if (!comment) {
@@ -33,10 +38,15 @@ export class CommentService {
         return await this.prismaService.comment.findMany({
             include: {
                 task: true,
-                author: { select: { firstName: true, lastName: true } },
+                author: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
