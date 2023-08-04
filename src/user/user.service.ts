@@ -19,7 +19,11 @@ export class UserService {
                 id: id,
             },
             include: {
-                positions: true,
+                positions: {
+                    include: {
+                        position: true
+                    }
+                }
             },
         });
         if (!user) {
@@ -31,7 +35,11 @@ export class UserService {
     async readAll(skip: number = 0, take: number = 10) {
         const users = await this.prismaService.user.findMany({
             include: {
-                positions: true,
+                positions: {
+                    include: {
+                        position: true
+                    }
+                }
             },
             skip: skip,
             take: take == 0 ? undefined : take

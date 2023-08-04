@@ -1,13 +1,75 @@
 import * as argon from 'argon2';
-import { PrismaClient, Action, Prisma } from '@prisma/client';
+import { PrismaClient, Action, Prisma, GsLevel } from '@prisma/client';
 const prismaService = new PrismaClient();
 async function main() {
-    /*
+    await prismaService.positionUser.deleteMany();
     await prismaService.user.deleteMany();
     await prismaService.rolePermission.deleteMany();
     await prismaService.role.deleteMany();
     await prismaService.permission.deleteMany();
+    await prismaService.vacancy.deleteMany();
+    await prismaService.position.deleteMany();
+    await prismaService.status.deleteMany();
+    await prismaService.squad.deleteMany();
 
+    const squad = await prismaService.squad.create({
+        data: {
+            name: 'Social Media',
+            gsName: 'Radioactive',
+            description: 'Short paragraphs are easier to read and understand.',
+            imageUrl: '',
+        },
+    });
+
+    const position = await prismaService.position.create({
+        data: {
+            name: 'Android Developer',
+            gsLevel: GsLevel.SPECIALIST,
+            gsName: 'Androidy',
+            weeklyHours: 16,
+            squad: {
+                connect: {
+                    id: squad.id,
+                },
+            },
+        },
+    });
+
+    const role = await prismaService.role.create({
+        data: {
+            name: 'Employee',
+            permissions: {
+                createMany: {
+                    data: [],
+                },
+            },
+        },
+    });
+
+    const hashedPassword = await argon.hash('12345678');
+    await prismaService.user.create({
+        data: {
+            email: 'bob@gs.com',
+            password: hashedPassword,
+            phoneNumber: '123456789',
+            firstName: 'bob',
+            lastName: 'doe',
+            roleId: role.id,
+            positions: {
+                createMany: {
+                    data: [
+                        {
+                            positionId: position.id,
+                            startDate: new Date(),
+                            endDate: new Date(),
+                        },
+                    ],
+                },
+            },
+        },
+    });
+
+    /*
     let id = 0;
     const models = Prisma.dmmf.datamodel.models;
     const actions = [Action.Create, Action.Delete, Action.Read, Action.Update];

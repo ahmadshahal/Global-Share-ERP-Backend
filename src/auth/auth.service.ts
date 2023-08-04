@@ -47,8 +47,14 @@ export class AuthService {
                     lastName: signupDto.lastName,
                     roleId: signupDto.roleId,
                     positions: {
-                        connect: {
-                            id: signupDto.positionId
+                        createMany: {
+                            data: [
+                                {
+                                    positionId: signupDto.positionId,
+                                    startDate: new Date(),
+                                    endDate: new Date(),
+                                }
+                            ]
                         }
                     }
                 },
