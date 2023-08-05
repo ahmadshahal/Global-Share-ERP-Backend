@@ -1,5 +1,6 @@
 import {
     IsArray,
+    IsBoolean,
     IsInt,
     IsNotEmpty,
     IsOptional,
@@ -30,6 +31,11 @@ export class CreateVacancyDto {
     @IsNotEmpty()
     @IsInt()
     positionId: number;
+
+    @IsOptional()
+    @IsNotEmpty()
+    @IsBoolean()
+    isOpen: boolean;
 
     @IsNotEmpty()
     @IsArray()

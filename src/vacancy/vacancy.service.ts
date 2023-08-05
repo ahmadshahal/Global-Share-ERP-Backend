@@ -55,7 +55,7 @@ export class VacancyService {
                     preferred: createVacancyDto.preferred,
                     required: createVacancyDto.required,
                     effect: createVacancyDto.effect,
-                    isOpen: true,
+                    isOpen: createVacancyDto.isOpen,
                     positionId: createVacancyDto.positionId,
                     questions: {
                         createMany: {
@@ -78,6 +78,11 @@ export class VacancyService {
 
     async delete(id: number) {
         try {
+            await this.prismaService.vacancyQuestion.deleteMany({
+                where: {
+                    vacancyId: id
+                },
+            });
             return await this.prismaService.vacancy.delete({
                 where: {
                     id: id,
@@ -88,6 +93,11 @@ export class VacancyService {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('Vacancy Not Found');
                 }
+            }
+            if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
+                throw new BadRequestException(
+                    'Unable to delete a related Vacancy',
+                );
             }
             throw error;
         }
@@ -106,11 +116,11 @@ export class VacancyService {
                     preferred: updateVacancyDto.preferred,
                     required: updateVacancyDto.required,
                     effect: updateVacancyDto.effect,
-                    isOpen: true,
+                    isOpen: updateVacancyDto.isOpen,
                     positionId: updateVacancyDto.positionId,
                     questions: {
                         deleteMany: {
-                            vacancyId: updateVacancyDto.questionsIds ? id : undefined
+                            vacancyId: updateVacancyDto.questionsIds ? id : -1
                         },
                         createMany: {
                             data: updateVacancyDto.questionsIds?.map((id) => ({
