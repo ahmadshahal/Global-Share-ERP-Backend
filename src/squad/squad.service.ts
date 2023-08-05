@@ -39,7 +39,7 @@ export class SquadService {
                 positions: true,
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
     }
 
@@ -54,7 +54,8 @@ export class SquadService {
                 name: createSquadDto.name,
                 gsName: createSquadDto.gsName,
                 description: createSquadDto.description,
-                imageUrl: resource.data.webViewLink || resource.data.webContentLink,
+                imageUrl:
+                    resource.data.webViewLink || resource.data.webContentLink,
                 statuses: {
                     createMany: {
                         data: [
@@ -71,6 +72,13 @@ export class SquadService {
 
     async delete(id: number) {
         try {
+            await this.prismaService.status.deleteMany({
+                where: {
+                    squad: {
+                        id: id,
+                    },
+                },
+            });
             return await this.prismaService.squad.delete({
                 where: {
                     id: id,
@@ -83,7 +91,7 @@ export class SquadService {
                 }
                 if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
                     throw new BadRequestException(
-                        'Unable to delete a related squad',
+                        'Unable to delete a related squad or related statuses',
                     );
                 }
             }
@@ -97,14 +105,15 @@ export class SquadService {
         image: Express.Multer.File,
     ) {
         try {
-            var imageUrl = undefined
+            var imageUrl = undefined;
             if (image) {
                 const resource = await this.driveService.saveFile(
                     updateSquadDto.gsName,
                     new PassThrough().end(image.buffer),
                     image.mimetype,
                 );
-                imageUrl = resource.data.webViewLink || resource.data.webContentLink;
+                imageUrl =
+                    resource.data.webViewLink || resource.data.webContentLink;
             }
             return await this.prismaService.squad.update({
                 where: {
@@ -114,8 +123,8 @@ export class SquadService {
                     name: updateSquadDto.name,
                     description: updateSquadDto.description,
                     gsName: updateSquadDto.gsName,
-                    imageUrl: imageUrl
-                }
+                    imageUrl: imageUrl,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
