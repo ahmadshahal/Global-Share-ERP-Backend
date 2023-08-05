@@ -11,9 +11,4 @@ export class CreateCommentDto {
     @IsNumber()
     @Type(() => Number)
     taskId: number;
-
-    @IsNotEmpty()
-    @IsNumber()
-    @Type(() => Number)
-    authorId: number;
 }
