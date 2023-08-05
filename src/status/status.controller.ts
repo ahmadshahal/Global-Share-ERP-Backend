@@ -37,6 +37,17 @@ export class StatusController {
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Status' })
+    @Get('squad/:squadId')
+    async readBySquad(
+        @Param('squadId', ParseIntPipe) squadId: number,
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+    ) {
+        return await this.statusService.readBySquad(squadId, skip, take);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Status' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.statusService.readOne(id);

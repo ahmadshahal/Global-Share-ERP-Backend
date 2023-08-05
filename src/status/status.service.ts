@@ -34,6 +34,23 @@ export class StatusService {
         });
     }
 
+    async readBySquad(
+        squadId: number,
+        skip: number = 0,
+        take: number = 10,
+    ): Promise<Status[]> {
+        return await this.prismaService.status.findMany({
+            include: { tasks: true, squad: true },
+            skip: skip,
+            take: take == 0 ? undefined : take,
+            where: {
+                squad: {
+                    id: squadId,
+                },
+            },
+        });
+    }
+
     async create(createStatusDto: CreateStatusDto): Promise<Status> {
         try {
             return await this.prismaService.status.create({
