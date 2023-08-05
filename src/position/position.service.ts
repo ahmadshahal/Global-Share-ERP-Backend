@@ -100,11 +100,7 @@ export class PositionService {
                     gsName: updatePositionDto.gsName,
                     gsLevel: updatePositionDto.gsLevel,
                     weeklyHours: updatePositionDto.weeklyHours,
-                    squad: {
-                        connect: {
-                            id: updatePositionDto.squadId,
-                        },
-                    },
+                    squadId: updatePositionDto.squadId
                 },
             });
         } catch (error) {
