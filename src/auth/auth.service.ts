@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
+import { addYears } from 'src/utils/utils';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +53,7 @@ export class AuthService {
                                 {
                                     positionId: signupDto.positionId,
                                     startDate: new Date(),
-                                    endDate: new Date(),
+                                    endDate: addYears(new Date(), 4),
                                 }
                             ]
                         }

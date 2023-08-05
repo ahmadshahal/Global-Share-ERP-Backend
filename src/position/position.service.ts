@@ -47,11 +47,7 @@ export class PositionService {
                     gsName: createPositionDto.gsName,
                     gsLevel: createPositionDto.gsLevel,
                     weeklyHours: createPositionDto.weeklyHours,
-                    squad: {
-                        connect: {
-                            id: createPositionDto.squadId,
-                        },
-                    },
+                    squadId: createPositionDto.squadId
                 },
             });
         } catch (error) {
@@ -120,16 +116,8 @@ export class PositionService {
         try {
             return await this.prismaService.positionUser.create({
                 data: {
-                    position: {
-                        connect: {
-                            id: positionId,
-                        },
-                    },
-                    user: {
-                        connect: {
-                            id: addUserToPositionDto.userId,
-                        },
-                    },
+                    positionId: positionId,
+                    userId: addUserToPositionDto.userId,
                     startDate: addUserToPositionDto.startDate,
                     endDate: addUserToPositionDto.endDate,
                 },

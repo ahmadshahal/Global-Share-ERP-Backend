@@ -7,3 +7,8 @@ export function exclude<Object, Key extends keyof Object>(
     }
     return object;
 }
+
+export function addYears(date: Date, years: number): Date {
+    date.setFullYear(date.getFullYear() + years);
+    return date;
+}

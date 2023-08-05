@@ -18,23 +18,11 @@ export class EvaluationService {
     ): Promise<Evaluation> {
         return await this.prisma.evaluation.create({
             data: {
-                user: {
-                    connect: {
-                        id: createEvaluationDto.userId,
-                    },
-                },
-                competency: {
-                    connect: {
-                        id: createEvaluationDto.competencyId,
-                    },
-                },
+                userId: createEvaluationDto.userId,
+                competencyId: createEvaluationDto.competencyId,
                 text: createEvaluationDto.text,
                 mark: createEvaluationDto.mark,
-                evaluator: {
-                    connect: {
-                        id: createEvaluationDto.evaluatorId,
-                    },
-                },
+                evaluatorId: createEvaluationDto.evaluatorId,
                 date: createEvaluationDto.date,
             },
         });
@@ -79,23 +67,11 @@ export class EvaluationService {
             return await this.prisma.evaluation.update({
                 where: { id },
                 data: {
-                    user: {
-                        connect: {
-                            id: updateEvaluationDto.userId,
-                        },
-                    },
-                    competency: {
-                        connect: {
-                            id: updateEvaluationDto.competencyId,
-                        },
-                    },
+                    userId: updateEvaluationDto.userId,
+                    competencyId: updateEvaluationDto.competencyId,
                     text: updateEvaluationDto.text,
                     mark: updateEvaluationDto.mark,
-                    evaluator: {
-                        connect: {
-                            id: updateEvaluationDto.evaluatorId,
-                        },
-                    },
+                    evaluatorId: updateEvaluationDto.evaluatorId,
                     date: updateEvaluationDto.date,
                 },
                 include: {

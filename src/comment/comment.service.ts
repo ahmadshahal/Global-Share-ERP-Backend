@@ -58,16 +58,8 @@ export class CommentService {
             return await this.prismaService.comment.create({
                 data: {
                     content: createCommentDto.content,
-                    author: {
-                        connect: {
-                            id: authorId,
-                        },
-                    },
-                    task: {
-                        connect: {
-                            id: createCommentDto.taskId,
-                        },
-                    },
+                    authorId: authorId,
+                    taskId: createCommentDto.taskId
                 },
             });
         } catch (error) {

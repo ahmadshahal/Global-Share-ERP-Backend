@@ -56,11 +56,7 @@ export class VacancyService {
                     required: createVacancyDto.required,
                     effect: createVacancyDto.effect,
                     isOpen: true,
-                    position: {
-                        connect: {
-                            id: createVacancyDto.positionId,
-                        },
-                    },
+                    positionId: createVacancyDto.positionId,
                     questions: {
                         createMany: {
                             data: createVacancyDto.questionsIds.map((id) => ({
@@ -111,11 +107,7 @@ export class VacancyService {
                     required: updateVacancyDto.required,
                     effect: updateVacancyDto.effect,
                     isOpen: true,
-                    position: {
-                        connect: {
-                            id: updateVacancyDto.positionId,
-                        },
-                    },
+                    positionId: updateVacancyDto.positionId,
                     questions: {
                         deleteMany: {
                             vacancyId: updateVacancyDto.questionsIds ? id : undefined

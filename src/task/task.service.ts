@@ -126,28 +126,10 @@ export class TaskService {
                     deadline: createTaskDto.deadline,
                     priority: createTaskDto.priority,
                     difficulty: createTaskDto.difficulty,
-                    status: {
-                        connect: {
-                            id: createTaskDto.statusId,
-                        },
-                    },
-                    assignedBy: {
-                        connect: {
-                            id: createTaskDto.assignedById,
-                        },
-                    },
-                    assignedTo: {
-                        connect: {
-                            id: createTaskDto.assignedToId,
-                        },
-                    },
-                    step: createTaskDto.stepId
-                        ? {
-                              connect: {
-                                  id: createTaskDto.stepId,
-                              },
-                          }
-                        : undefined,
+                    statusId: createTaskDto.statusId,
+                    assignedById: createTaskDto.assignedById,
+                    assignedToId: createTaskDto.assignedToId,
+                    stepId: createTaskDto.stepId,
                     kpis: {
                         createMany: {
                             data: createTaskDto.kpis?.map((kpi) => ({

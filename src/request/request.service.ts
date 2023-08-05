@@ -18,11 +18,7 @@ export class RequestService {
     async create(createRequestDto: CreateRequestDto): Promise<Request> {
         return await this.prismaService.request.create({
             data: {
-                user: {
-                    connect: {
-                        id: createRequestDto.userId,
-                    },
-                },
+                userId: createRequestDto.userId,
                 requestType: createRequestDto.requestType,
                 reason: createRequestDto.reason,
                 status: RequestStatus.Pending,

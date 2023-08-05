@@ -48,11 +48,7 @@ export class RecruitmentFeedbackService {
         try {
             return await this.prismaService.recruitmentFeedback.create({
                 data: {
-                    application: {
-                        connect: {
-                            id: createRecruitmentFeedbackDto.applicationId,
-                        },
-                    },
+                    applicationId: createRecruitmentFeedbackDto.applicationId,
                     type: createRecruitmentFeedbackDto.type,
                     text: createRecruitmentFeedbackDto.text,
                 },
@@ -77,11 +73,7 @@ export class RecruitmentFeedbackService {
                     id,
                 },
                 data: {
-                    application: {
-                        connect: {
-                            id: updateRecruitmentFeedbackDto.applicationId,
-                        },
-                    },
+                    applicationId: updateRecruitmentFeedbackDto.applicationId,
                     type: updateRecruitmentFeedbackDto.type,
                     text: updateRecruitmentFeedbackDto.text,
                 },
