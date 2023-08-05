@@ -123,7 +123,7 @@ export class TaskService {
                     title: createTaskDto.title,
                     description: createTaskDto.description,
                     url: createTaskDto.url,
-                    deadline: new Date(createTaskDto.deadline),
+                    deadline: createTaskDto.deadline,
                     priority: createTaskDto.priority,
                     difficulty: createTaskDto.difficulty,
                     status: {
@@ -150,11 +150,11 @@ export class TaskService {
                         : undefined,
                     kpis: {
                         createMany: {
-                            data: createTaskDto.kpis.map((kpi) => ({
+                            data: createTaskDto.kpis?.map((kpi) => ({
                                 kpiId: kpi.kpiId,
                                 description: kpi.description,
                                 grade: kpi.grade,
-                            })),
+                            })) ?? [],
                         },
                     },
                 },
@@ -179,29 +179,13 @@ export class TaskService {
                     title: updateTaskDto.title,
                     description: updateTaskDto.description,
                     url: updateTaskDto.url,
-                    deadline: new Date(updateTaskDto.deadline),
+                    deadline: updateTaskDto.deadline,
                     priority: updateTaskDto.priority,
                     difficulty: updateTaskDto.difficulty,
-                    status: {
-                        connect: {
-                            id: updateTaskDto.statusId,
-                        },
-                    },
-                    assignedBy: {
-                        connect: {
-                            id: updateTaskDto.assignedById,
-                        },
-                    },
-                    assignedTo: {
-                        connect: {
-                            id: updateTaskDto.assignedToId,
-                        },
-                    },
-                    step: {
-                        connect: {
-                            id: updateTaskDto.stepId,
-                        },
-                    },
+                    statusId: updateTaskDto.statusId,
+                    assignedById: updateTaskDto.assignedById,
+                    assignedToId: updateTaskDto.assignedToId,
+                    stepId: updateTaskDto.stepId,
                     kpis: {
                         deleteMany: {
                             taskId: updateTaskDto.kpis ? id : undefined,
@@ -215,14 +199,6 @@ export class TaskService {
                                 })) ?? [],
                         },
                     },
-                },
-                include: {
-                    comments: true,
-                    assignedBy: true,
-                    assignedTo: true,
-                    kpis: true,
-                    step: true,
-                    status: true,
                 },
             });
         } catch (error) {
