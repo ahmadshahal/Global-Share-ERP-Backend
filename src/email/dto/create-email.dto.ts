@@ -16,5 +16,5 @@ export class CreateEmailDto {
 
     @IsOptional()
     @IsString()
-    cc?: string;
+    cc: string;
 }

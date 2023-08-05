@@ -250,7 +250,7 @@ model Email {
     title             String
     body              String
     recruitmentStatus RecruitmentStatus
-    cc                String
+    cc                String?
 }
 
 model Feedback {

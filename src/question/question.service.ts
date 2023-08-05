@@ -14,7 +14,7 @@ export class QuestionService {
     constructor(private readonly prisma: PrismaService) {}
 
     async create(createQuestionDto: CreateQuestionDto): Promise<Question> {
-        return await this.prisma.question.create({
+        const question = await this.prisma.question.create({
             data: {
                 text: createQuestionDto.text,
                 type: createQuestionDto.type,
@@ -23,15 +23,23 @@ export class QuestionService {
                     : undefined,
             },
         });
+
+        if (question.options) {
+            question.options = JSON.parse(question.options.toString());
+        }
+        return question;
     }
 
     async readAll(skip: number = 0, take: number = 10): Promise<Question[]> {
-        return await this.prisma.question.findMany({
-            include: {
-                positions: true,
-            },
+        const questions = await this.prisma.question.findMany({
             skip: skip,
             take: take == 0 ? undefined : take,
+        });
+        return questions.map((question) => {
+            if (question.options) {
+                question.options = JSON.parse(question.options.toString());
+            }
+            return question;
         });
     }
 
@@ -40,13 +48,14 @@ export class QuestionService {
             where: {
                 id,
             },
-            include: {
-                positions: true,
-            },
         });
-
+        
         if (!question) {
             throw new NotFoundException(`Question with ID ${id} not found`);
+        }
+
+        if (question.options) {
+            question.options = JSON.parse(question.options.toString());
         }
 
         return question;
@@ -57,7 +66,7 @@ export class QuestionService {
         updateQuestionDto: UpdateQuestionDto,
     ): Promise<Question> {
         try {
-            return await this.prisma.question.update({
+            const question = await this.prisma.question.update({
                 where: {
                     id,
                 },
@@ -66,12 +75,13 @@ export class QuestionService {
                     type: updateQuestionDto.type,
                     options: updateQuestionDto.options
                         ? JSON.stringify(updateQuestionDto.options)
-                        : null,
-                },
-                include: {
-                    positions: true,
+                        : undefined,
                 },
             });
+            if (question.options) {
+                question.options = JSON.parse(question.options.toString());
+            }
+            return question;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
@@ -84,14 +94,15 @@ export class QuestionService {
 
     async remove(id: number): Promise<Question> {
         try {
-            return await this.prisma.question.delete({
+            const question = await this.prisma.question.delete({
                 where: {
                     id,
                 },
-                include: {
-                    positions: true,
-                },
             });
+            if (question.options) {
+                question.options = JSON.parse(question.options.toString());
+            }
+            return question;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
