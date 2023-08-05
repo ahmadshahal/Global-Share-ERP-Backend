@@ -60,7 +60,7 @@ export class VacancyService {
                     questions: {
                         createMany: {
                             data: createVacancyDto.questionsIds.map((id) => ({
-                                questionId: id
+                                questionId: id,
                             })),
                         },
                     },
@@ -69,7 +69,9 @@ export class VacancyService {
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
-                    throw new NotFoundException('Position or Question Not Found');
+                    throw new NotFoundException(
+                        'Position or Question Not Found',
+                    );
                 }
             }
             throw error;
@@ -80,7 +82,7 @@ export class VacancyService {
         try {
             await this.prismaService.vacancyQuestion.deleteMany({
                 where: {
-                    vacancyId: id
+                    vacancyId: id,
                 },
             });
             return await this.prismaService.vacancy.delete({
@@ -120,13 +122,14 @@ export class VacancyService {
                     positionId: updateVacancyDto.positionId,
                     questions: {
                         deleteMany: {
-                            vacancyId: updateVacancyDto.questionsIds ? id : -1
+                            vacancyId: updateVacancyDto.questionsIds ? id : -1,
                         },
                         createMany: {
-                            data: updateVacancyDto.questionsIds?.map((id) => ({
-                                questionId: id
-                            })) ?? [],
-                        }
+                            data:
+                                updateVacancyDto.questionsIds?.map((id) => ({
+                                    questionId: id,
+                                })) ?? [],
+                        },
                     },
                 },
             });
@@ -152,16 +155,26 @@ export class VacancyService {
         skip: number = 0,
         take: number = 10,
     ) {
-        return await this.prismaService.vacancyQuestion.findMany({
-            where: {
-                vacancyId: id,
-            },
-            include: {
-                question: true,
-                answer: true,
-            },
-            skip: skip,
-            take: take,
+        const vacancyQuestions =
+            await this.prismaService.vacancyQuestion.findMany({
+                where: {
+                    vacancyId: id,
+                },
+                include: {
+                    question: true,
+                    answer: true,
+                },
+                skip: skip,
+                take: take,
+            });
+        const questions = vacancyQuestions.map((question) => {
+            if (question.question.options) {
+                question.question.options = JSON.parse(
+                    question.question.options.toString(),
+                );
+            }
+            return question;
         });
+        return questions;
     }
 }
