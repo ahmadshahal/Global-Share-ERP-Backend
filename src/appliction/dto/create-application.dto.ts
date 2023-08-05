@@ -1,5 +1,6 @@
 import {
     IsArray,
+    IsEmail,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -12,8 +13,9 @@ class AnswerDto {
     questionId: number;
 
     @IsOptional()
-    @IsString()
-    text: string;
+    @IsArray()
+    @IsString({ each: true })
+    content: string[];
 }
 
 export class CreateApplicationDto {
@@ -21,6 +23,7 @@ export class CreateApplicationDto {
     vacancyId: number;
 
     @IsNotEmpty()
+    @IsEmail()
     email: string;
 
     @IsNotEmpty()

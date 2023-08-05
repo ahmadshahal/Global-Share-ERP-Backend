@@ -17,15 +17,11 @@ import {
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-// import { UpdateApplicationDto } from './dto/update-application.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { Action } from '@prisma/client';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
-import {
-    AnyFilesInterceptor,
-    FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationFilesValidator } from './validator/application.validator';
 
@@ -78,13 +74,13 @@ export class ApplicationController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateApplicationDto: UpdateApplicationDto,
     ) {
-        await this.applicationService.update(id, updateApplicationDto);
+        return await this.applicationService.update(id, updateApplicationDto);
     }
 
     @Permissions({ action: Action.Delete, subject: 'Application' })
     @HttpCode(HttpStatus.OK)
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-        await this.applicationService.delete(id);
+        return await this.applicationService.delete(id);
     }
 }

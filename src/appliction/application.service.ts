@@ -31,15 +31,6 @@ export class ApplicationService {
                 id: id,
             },
             include: {
-                vacancy: {
-                    include: {
-                        position: {
-                            include: {
-                                squad: true,
-                            },
-                        },
-                    },
-                },
                 answers: {
                     include: {
                         question: true,
@@ -51,25 +42,34 @@ export class ApplicationService {
         if (!application) {
             throw new NotFoundException('Application Not Found');
         }
+        application.answers = application.answers.map((answer) => {
+            answer.content = JSON.parse(answer.content.toString());
+            return answer;
+        });
         return application;
     }
 
     async readAll(skip: number = 0, take: number = 10): Promise<Application[]> {
-        return await this.prismaService.application.findMany({
+        const applications = await this.prismaService.application.findMany({
             include: {
-                vacancy: {
+                answers: {
                     include: {
-                        position: {
-                            include: {
-                                squad: true,
-                            },
-                        },
+                        question: true,
                     },
                 },
+                feedbacks: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const parsedApplications = applications.map((application) => {
+            application.answers = application.answers.map((answer) => {
+                answer.content = JSON.parse(answer.content.toString());
+                return answer;
+            });
+            return application;
+        });
+        return parsedApplications;
     }
 
     async create(
@@ -77,42 +77,54 @@ export class ApplicationService {
         files: Express.Multer.File[],
     ): Promise<Application> {
         try {
-            const applicationFiles = files.map(async (file) => {
-                const res = await this.driveService.saveFile(
-                    Date.now().toString(),
-                    new PassThrough().end(file.buffer),
-                    file.mimetype,
-                );
-                return res.data.webViewLink || res.data.webContentLink;
-            });
+            const applicationFiles =
+                files?.map(async (file) => {
+                    const res = await this.driveService.saveFile(
+                        Date.now().toString(),
+                        new PassThrough().end(file.buffer),
+                        file.mimetype,
+                    );
+                    return res.data.webViewLink || res.data.webContentLink;
+                }) ?? [];
 
-            const answers: { questionId: number; text: string }[] = [];
+            const answers: { questionId: number; content: string }[] = [];
             var fileAnswersCounter = 0;
-            createApplicationDto.answers.forEach(async (answer) => {
-                const question = await this.prismaService.question.findUnique({
-                    where: {
-                        id: answer.questionId,
-                    },
-                });
-                if (!question) {
-                    throw new NotFoundException('Question Not Found');
-                }
-                if (question.type == QuestionType.FILE) {
-                    answer.text = await applicationFiles[fileAnswersCounter];
-                    fileAnswersCounter++;
-                }
-                answers.push(answer);
-            });
+            await Promise.all(
+                createApplicationDto.answers.map(async (answer) => {
+                    const vacancyQuestion =
+                        await this.prismaService.vacancyQuestion.findFirst({
+                            where: {
+                                questionId: answer.questionId,
+                                vacancyId: createApplicationDto.vacancyId,
+                            },
+                            include: {
+                                question: true,
+                            },
+                        });
+                    if (!vacancyQuestion) {
+                        throw new NotFoundException(
+                            'Question or Vacancy Not Found',
+                        );
+                    }
+                    if (vacancyQuestion.question.type == QuestionType.FILE) {
+                        answer.content = [
+                            await applicationFiles[fileAnswersCounter],
+                        ];
+                        fileAnswersCounter++;
+                    }
+                    const stringifiedAnswer = {
+                        questionId: vacancyQuestion.id,
+                        content: JSON.stringify(answer.content),
+                    };
+                    answers.push(stringifiedAnswer);
+                }),
+            );
 
             return await this.prismaService.application.create({
                 data: {
                     status: RecruitmentStatus.APPLIED,
                     email: createApplicationDto.email,
-                    vacancy: {
-                        connect: {
-                            id: createApplicationDto.vacancyId,
-                        },
-                    },
+                    vacancyId: createApplicationDto.vacancyId,
                     answers: {
                         createMany: {
                             data: answers,
@@ -132,9 +144,17 @@ export class ApplicationService {
 
     async delete(id: number): Promise<Application> {
         try {
+            await this.prismaService.answer.deleteMany({
+                where: {
+                    applicationId: id,
+                },
+            });
             return await this.prismaService.application.delete({
                 where: {
                     id: id,
+                },
+                include: {
+                    answers: true,
                 },
             });
         } catch (error) {
@@ -175,7 +195,9 @@ export class ApplicationService {
                 throw new BadRequestException('Invalid status update');
             }
             const email = await this.prismaService.email.findFirst({
-                where: { recruitmentStatus: updateApplicationDto.status },
+                where: {
+                    recruitmentStatus: updateApplicationDto.status,
+                },
             });
             if (!email) {
                 throw new BadRequestException(
@@ -196,13 +218,16 @@ export class ApplicationService {
                             },
                         },
                     },
+                    include: {
+                        answers: true,
+                    },
                 });
             this.mailService
                 .sendMail({
                     to: [application.email],
                     subject: email.title,
                     text: email.body,
-                    cc: email.cc.split(','),
+                    cc: email.cc?.split(','),
                 })
                 .then((success) => {
                     return success;
