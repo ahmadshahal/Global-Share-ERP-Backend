@@ -14,6 +14,7 @@ export class CreateRequestDto {
     @IsString()
     reason?: string;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsEnum(RequestStatus)
     status: RequestStatus;

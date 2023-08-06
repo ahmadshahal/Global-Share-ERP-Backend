@@ -107,7 +107,7 @@ model Request {
     user        User          @relation(fields: [userId], references: [id])
     requestType RequestType
     reason      String?
-    status      RequestStatus @default(Pending)
+    status      RequestStatus @default(PENDING)
     date        DateTime
 
     @@index([userId])
@@ -314,16 +314,17 @@ enum QuestionType {
 }
 
 enum RequestType {
-    HeartAddition
-    HeartDeletion
-    Freeze
-    Protection
+    HEART_ADDITION
+    HEART_DELETION
+    FREEZE
+    PROTECTION
 }
 
 enum RequestStatus {
-    Pending
-    OrchApproved
-    Approved
+    PENDING
+    ORCH_APPROVED
+    APPROVED
+    REFUSED
 }
 
 // ? -----------------------------------------------------------------------//

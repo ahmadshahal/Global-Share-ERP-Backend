@@ -21,7 +21,7 @@ export class RequestService {
                 userId: createRequestDto.userId,
                 requestType: createRequestDto.requestType,
                 reason: createRequestDto.reason,
-                status: RequestStatus.Pending,
+                status: createRequestDto.status,
                 date: new Date(),
             },
             include: {
@@ -41,7 +41,7 @@ export class RequestService {
     }
 
     async readOne(id: number): Promise<Request> {
-        return this.prismaService.request.findUnique({
+        const request = this.prismaService.request.findUnique({
             where: {
                 id,
             },
@@ -49,6 +49,10 @@ export class RequestService {
                 user: true,
             },
         });
+        if (!request) {
+            throw new NotFoundException('Request Not Found');
+        }
+        return request;
     }
 
     async update(
@@ -56,24 +60,22 @@ export class RequestService {
         updateRequestDto: UpdateRequestDto,
     ): Promise<Request> {
         try {
-            const request = await this.prismaService.request.findUnique({
-                where: {
-                    id: updateRequestDto.userId,
-                },
-                include: {
-                    user: true,
-                },
-            });
-            if (!request) {
-                throw new NotFoundException('Request Not Found');
-            }
             return await this.prismaService.$transaction(
                 async (prismaService) => {
-                    if (updateRequestDto.status != RequestStatus.Approved) {
-                        return;
+                    const request = await prismaService.request.update({
+                        where: {
+                            id: id,
+                        },
+                        data: {
+                            reason: updateRequestDto.reason,
+                            status: updateRequestDto.status,
+                        },
+                    });
+                    if (updateRequestDto.status != RequestStatus.APPROVED) {
+                        return request;
                     }
                     switch (request.requestType) {
-                        case RequestType.Freeze:
+                        case RequestType.FREEZE: {
                             await prismaService.user.update({
                                 where: {
                                     id: request.userId,
@@ -85,7 +87,9 @@ export class RequestService {
                                     },
                                 },
                             });
-                        case RequestType.Protection:
+                            break;
+                        }
+                        case RequestType.PROTECTION: {
                             await prismaService.user.update({
                                 where: {
                                     id: request.userId,
@@ -96,7 +100,9 @@ export class RequestService {
                                     },
                                 },
                             });
-                        case RequestType.HeartAddition:
+                            break;
+                        }
+                        case RequestType.HEART_ADDITION: {
                             await prismaService.user.update({
                                 where: {
                                     id: request.userId,
@@ -107,7 +113,9 @@ export class RequestService {
                                     },
                                 },
                             });
-                        case RequestType.HeartDeletion:
+                            break;
+                        }
+                        case RequestType.HEART_DELETION: {
                             await prismaService.user.update({
                                 where: {
                                     id: request.userId,
@@ -118,16 +126,10 @@ export class RequestService {
                                     },
                                 },
                             });
+                            break;
+                        }
                     }
-                    return await prismaService.request.update({
-                        where: {
-                            id,
-                        },
-                        data: {
-                            reason: updateRequestDto.reason,
-                            status: updateRequestDto.status,
-                        },
-                    });
+                    return request;
                 },
             );
         } catch (error) {
