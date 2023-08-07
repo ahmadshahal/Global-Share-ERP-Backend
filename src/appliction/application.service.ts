@@ -88,7 +88,7 @@ export class ApplicationService {
                 }) ?? [];
 
             const answers: { questionId: number; content: string }[] = [];
-            var fileAnswersCounter = 0;
+            let fileAnswersCounter = 0;
             await Promise.all(
                 createApplicationDto.answers.map(async (answer) => {
                     const vacancyQuestion =
@@ -120,7 +120,7 @@ export class ApplicationService {
                 }),
             );
 
-            return await this.prismaService.application.create({
+            const application = await this.prismaService.application.create({
                 data: {
                     status: RecruitmentStatus.APPLIED,
                     email: createApplicationDto.email,
@@ -132,6 +132,30 @@ export class ApplicationService {
                     },
                 },
             });
+            const email = await this.prismaService.email.findFirst({
+                where: {
+                    recruitmentStatus: application.status,
+                },
+            });
+            if (!email) {
+                throw new BadRequestException(
+                    'Application Status Has No Emails',
+                );
+            }
+            this.mailService
+                .sendMail({
+                    to: [application.email],
+                    subject: email.title,
+                    text: email.body,
+                    cc: email.cc?.split(','),
+                })
+                .then((success) => {
+                    return success;
+                })
+                .catch((error) => {
+                    return error;
+                });
+            return application;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
