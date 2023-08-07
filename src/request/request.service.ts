@@ -16,6 +16,22 @@ export class RequestService {
     constructor(private prismaService: PrismaService) {}
 
     async create(createRequestDto: CreateRequestDto): Promise<Request> {
+        const user = await this.prismaService.user.findUnique({
+            where: { id: createRequestDto.userId },
+        });
+        if (
+            createRequestDto.requestType == RequestType.FREEZE &&
+            !user.freezeCardsCount
+        ) {
+            throw new BadRequestException("You don't have enough freeze cards");
+        } else if (
+            createRequestDto.requestType == RequestType.PROTECTION &&
+            !user.protectionCardsCount
+        ) {
+            throw new BadRequestException(
+                "You don't have enough protection cards",
+            );
+        }
         return await this.prismaService.request.create({
             data: {
                 userId: createRequestDto.userId,

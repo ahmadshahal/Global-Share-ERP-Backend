@@ -132,11 +132,12 @@ export class TaskService {
                     stepId: createTaskDto.stepId,
                     kpis: {
                         createMany: {
-                            data: createTaskDto.kpis?.map((kpi) => ({
-                                kpiId: kpi.kpiId,
-                                description: kpi.description,
-                                grade: kpi.grade,
-                            })) ?? [],
+                            data:
+                                createTaskDto.kpis?.map((kpi) => ({
+                                    kpiId: kpi.kpiId,
+                                    description: kpi.description,
+                                    grade: kpi.grade,
+                                })) ?? [],
                         },
                     },
                 },
