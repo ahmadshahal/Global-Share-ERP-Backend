@@ -13,7 +13,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-// import { DriveService } from 'src/drive/drive.service';
+import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -21,7 +21,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class ApplicationService {
     constructor(
         private prismaService: PrismaService,
-        // private readonly driveService: DriveService,
+        private readonly driveService: DriveService,
         private mailService: MailerService,
     ) {}
 
@@ -79,13 +79,12 @@ export class ApplicationService {
         try {
             const applicationFiles =
                 files?.map(async (file) => {
-                    // const res = await this.driveService.saveFile(
-                    //     Date.now().toString(),
-                    //     new PassThrough().end(file.buffer),
-                    //     file.mimetype,
-                    // );
-                    // return res.data.webViewLink || res.data.webContentLink;
-                    return '';
+                    const res = await this.driveService.saveFile(
+                        Date.now().toString(),
+                        new PassThrough().end(file.buffer),
+                        file.mimetype,
+                    );
+                    return res.data.webViewLink || res.data.webContentLink;
                 }) ?? [];
 
             const answers: { questionId: number; content: string }[] = [];
