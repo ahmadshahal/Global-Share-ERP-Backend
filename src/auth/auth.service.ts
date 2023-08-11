@@ -17,10 +17,17 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async login(loginDto: LoginDto): Promise<string> {
+    async login(loginDto: LoginDto) {
         const user = await this.prismaService.user.findUnique({
             where: {
                 email: loginDto.email,
+            },
+            include: {
+                role: {
+                    include: {
+                        permissions: true,
+                    },
+                },
             },
         });
         if (!user) {
@@ -33,7 +40,11 @@ export class AuthService {
         if (!passwordsMatch) {
             throw new BadRequestException('Wrong Password');
         }
-        return await this.signToken(user.id, user.email);
+        const token = await this.signToken(user.id, user.email);
+        return {
+            user,
+            token,
+        };
     }
 
     async signup(signupDto: SignupDto): Promise<string> {
@@ -54,10 +65,10 @@ export class AuthService {
                                     positionId: signupDto.positionId,
                                     startDate: new Date(),
                                     endDate: addYears(new Date(), 4),
-                                }
-                            ]
-                        }
-                    }
+                                },
+                            ],
+                        },
+                    },
                 },
             });
             return await this.signToken(user.id, user.email);

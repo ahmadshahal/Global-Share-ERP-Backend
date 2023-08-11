@@ -86,8 +86,8 @@ export class TaskService {
         return task;
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Task[]> {
-        const tasks = await this.prismaService.task.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = await this.prismaService.task.findMany({
             include: {
                 assignedBy: {
                     select: {
@@ -113,7 +113,11 @@ export class TaskService {
             skip: skip,
             take: take == 0 ? undefined : take,
         });
-        return tasks;
+        const count = await this.prismaService.task.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async create(createTaskDto: CreateTaskDto): Promise<Task> {

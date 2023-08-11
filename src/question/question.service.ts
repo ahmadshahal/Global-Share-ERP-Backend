@@ -30,17 +30,22 @@ export class QuestionService {
         return question;
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Question[]> {
+    async readAll(skip: number = 0, take: number = 10) {
         const questions = await this.prisma.question.findMany({
             skip: skip,
             take: take == 0 ? undefined : take,
         });
-        return questions.map((question) => {
+        const parsedQuestions = questions.map((question) => {
             if (question.options) {
                 question.options = JSON.parse(question.options.toString());
             }
             return question;
         });
+        const count = await this.prisma.question.count();
+        return {
+            data: parsedQuestions,
+            count,
+        };
     }
 
     async readOne(id: number): Promise<Question> {
@@ -49,7 +54,7 @@ export class QuestionService {
                 id,
             },
         });
-        
+
         if (!question) {
             throw new NotFoundException(`Question with ID ${id} not found`);
         }

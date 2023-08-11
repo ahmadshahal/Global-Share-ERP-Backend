@@ -36,10 +36,15 @@ export class EmailService {
     }
 
     async readAll(skip: number = 0, take: number = 10) {
-        return await this.prismaService.email.findMany({
+        const data = await this.prismaService.email.findMany({
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.email.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async readOne(id: number) {

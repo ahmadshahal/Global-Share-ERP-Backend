@@ -21,9 +21,9 @@ export class UserService {
             include: {
                 positions: {
                     include: {
-                        position: true
-                    }
-                }
+                        position: true,
+                    },
+                },
             },
         });
         if (!user) {
@@ -37,14 +37,19 @@ export class UserService {
             include: {
                 positions: {
                     include: {
-                        position: true
-                    }
-                }
+                        position: true,
+                    },
+                },
             },
             skip: skip,
-            take: take == 0 ? undefined : take
+            take: take == 0 ? undefined : take,
         });
-        return users.map((user) => exclude(user, ['password']));
+        const editedUser = users.map((user) => exclude(user, ['password']));
+        const count = await this.prismaService.user.count();
+        return {
+            data: editedUser,
+            count,
+        };
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {

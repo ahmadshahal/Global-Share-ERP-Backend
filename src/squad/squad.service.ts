@@ -17,7 +17,6 @@ export class SquadService {
         private prismaService: PrismaService,
         private readonly driveService: DriveService,
     ) {}
-
     async readOne(id: number) {
         const squad = await this.prismaService.squad.findUnique({
             where: {
@@ -34,13 +33,18 @@ export class SquadService {
     }
 
     async readAll(skip: number = 0, take: number = 10) {
-        return await this.prismaService.squad.findMany({
+        const data = await this.prismaService.squad.findMany({
             include: {
                 positions: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.squad.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async create(createSquadDto: CreateSquadDto, image: Express.Multer.File) {

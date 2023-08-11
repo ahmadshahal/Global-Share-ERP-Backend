@@ -23,10 +23,15 @@ export class CompetencyService {
     }
 
     async readAll(skip: number = 0, take: number = 10) {
-        return await this.prismaService.competency.findMany({
+        const data = await this.prismaService.competency.findMany({
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.competency.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async readOne(id: number) {

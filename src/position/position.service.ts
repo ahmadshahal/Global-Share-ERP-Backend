@@ -29,14 +29,19 @@ export class PositionService {
         return position;
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Position[]> {
-        return await this.prismaService.position.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = await this.prismaService.position.findMany({
             include: {
                 squad: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.position.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async create(createPositionDto: CreatePositionDto): Promise<Position> {
@@ -47,7 +52,7 @@ export class PositionService {
                     gsName: createPositionDto.gsName,
                     gsLevel: createPositionDto.gsLevel,
                     weeklyHours: createPositionDto.weeklyHours,
-                    squadId: createPositionDto.squadId
+                    squadId: createPositionDto.squadId,
                 },
             });
         } catch (error) {
@@ -96,7 +101,7 @@ export class PositionService {
                     gsName: updatePositionDto.gsName,
                     gsLevel: updatePositionDto.gsLevel,
                     weeklyHours: updatePositionDto.weeklyHours,
-                    squadId: updatePositionDto.squadId
+                    squadId: updatePositionDto.squadId,
                 },
             });
         } catch (error) {

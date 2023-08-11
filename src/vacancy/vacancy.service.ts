@@ -32,8 +32,8 @@ export class VacancyService {
         return vacancy;
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Vacancy[]> {
-        return await this.prismaService.vacancy.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = await this.prismaService.vacancy.findMany({
             include: {
                 position: {
                     include: {
@@ -44,6 +44,11 @@ export class VacancyService {
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.vacancy.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {

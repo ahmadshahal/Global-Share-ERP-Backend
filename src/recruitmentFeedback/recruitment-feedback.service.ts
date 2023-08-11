@@ -13,17 +13,19 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 export class RecruitmentFeedbackService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async readAll(
-        skip: number = 0,
-        take: number = 10,
-    ): Promise<RecruitmentFeedback[]> {
-        return await this.prismaService.recruitmentFeedback.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = await this.prismaService.recruitmentFeedback.findMany({
             include: {
                 application: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.recruitmentFeedback.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async readOne(id: number): Promise<RecruitmentFeedback> {

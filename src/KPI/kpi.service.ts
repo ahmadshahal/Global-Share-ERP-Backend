@@ -22,14 +22,19 @@ export class KpiService {
         });
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<KPI[]> {
-        return await this.prismaService.kPI.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = await this.prismaService.kPI.findMany({
             include: {
                 tasks: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.kPI.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async readOne(id: number): Promise<KPI> {
@@ -81,9 +86,7 @@ export class KpiService {
                 }
             }
             if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
-                throw new BadRequestException(
-                    'Unable to delete a related KPI',
-                );
+                throw new BadRequestException('Unable to delete a related KPI');
             }
             throw error;
         }

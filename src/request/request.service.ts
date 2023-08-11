@@ -46,14 +46,19 @@ export class RequestService {
         });
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Request[]> {
-        return this.prismaService.request.findMany({
+    async readAll(skip: number = 0, take: number = 10) {
+        const data = this.prismaService.request.findMany({
             include: {
                 user: true,
             },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
+        const count = await this.prismaService.request.count();
+        return {
+            data,
+            count,
+        };
     }
 
     async readOne(id: number): Promise<Request> {

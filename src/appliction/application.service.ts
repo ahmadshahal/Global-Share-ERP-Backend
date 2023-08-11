@@ -49,7 +49,7 @@ export class ApplicationService {
         return application;
     }
 
-    async readAll(skip: number = 0, take: number = 10): Promise<Application[]> {
+    async readAll(skip: number = 0, take: number = 10) {
         const applications = await this.prismaService.application.findMany({
             include: {
                 answers: {
@@ -69,7 +69,11 @@ export class ApplicationService {
             });
             return application;
         });
-        return parsedApplications;
+        const count = await this.prismaService.application.count();
+        return {
+            data: parsedApplications,
+            count,
+        };
     }
 
     async create(
