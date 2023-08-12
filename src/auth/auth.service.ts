@@ -22,13 +22,6 @@ export class AuthService {
             where: {
                 email: loginDto.email,
             },
-            include: {
-                role: {
-                    include: {
-                        permissions: true,
-                    },
-                },
-            },
         });
         if (!user) {
             throw new BadRequestException('Credentials Incorrect');
@@ -47,7 +40,7 @@ export class AuthService {
         };
     }
 
-    async signup(signupDto: SignupDto): Promise<string> {
+    async signup(signupDto: SignupDto) {
         const hashedPassword = await argon.hash(signupDto.password);
         try {
             const user = await this.prismaService.user.create({
@@ -71,7 +64,11 @@ export class AuthService {
                     },
                 },
             });
-            return await this.signToken(user.id, user.email);
+            const token = await this.signToken(user.id, user.email);
+            return {
+                user: exclude(user, ['password']),
+                token,
+            };
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {

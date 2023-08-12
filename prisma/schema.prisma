@@ -57,7 +57,7 @@ model User {
     role                 Role                  @relation(fields: [roleId], references: [id])
     email                String                @unique
     password             String
-    phoneNumber          String                @unique
+    phoneNumber          String?                @unique
     firstName            String
     lastName             String
     additionalEmail      String?               @unique
@@ -120,7 +120,7 @@ model PositionUser {
     userId      Int
     user        User         @relation(fields: [userId], references: [id])
     startDate   DateTime
-    endDate     DateTime
+    endDate     DateTime?
     evaluations Evaluation[]
 
     @@index([userId])

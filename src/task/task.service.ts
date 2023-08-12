@@ -158,6 +158,29 @@ export class TaskService {
 
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
+            const status = await this.prismaService.status.findUnique({
+                where: { id: updateTaskDto.statusId },
+            });
+            const task = await this.prismaService.task.findUnique({
+                where: { id },
+            });
+            // return await this.prismaService.$transaction(
+            // async (prismaService) => {
+            if (status.crucial && status.name == 'Approved') {
+                if (!updateTaskDto.hoursTaken) {
+                    throw new BadRequestException(
+                        'hours taken are required when approving a task',
+                    );
+                }
+                await this.prismaService.user.update({
+                    where: { id: task.assignedToId },
+                    data: {
+                        volunteeredHours: {
+                            increment: updateTaskDto.hoursTaken,
+                        },
+                    },
+                });
+            }
             return await this.prismaService.task.update({
                 where: {
                     id: id,
@@ -187,7 +210,12 @@ export class TaskService {
                         },
                     },
                 },
+                include: {
+                    status: true,
+                },
             });
+            // },
+            // );
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {

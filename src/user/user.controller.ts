@@ -19,6 +19,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('user')
@@ -54,6 +55,13 @@ export class UserController {
     @Put()
     async update(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.update(id, updateUserDto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Update, subject: 'User' })
+    @Post()
+    async create(@Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(createUserDto);
     }
 
     @HttpCode(HttpStatus.OK)
