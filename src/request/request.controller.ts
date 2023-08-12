@@ -3,7 +3,6 @@ import {
     Get,
     Post,
     Body,
-    Patch,
     Param,
     Delete,
     UseGuards,
@@ -17,10 +16,13 @@ import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
-import { Request } from '@prisma/client';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterRequestDto } from './dto/filter-request-dto';
+import { RequestGeneralType } from 'src/request/enums/request-general-type.enum';
+import { RequestGeneralTypeValidationPipe } from './pipes/general-type.pipe';
+
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('request')
 export class RequestController {
@@ -35,12 +37,15 @@ export class RequestController {
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Request' })
-    @Get()
+    @Get(':generalType')
     async findAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Param('generalType', RequestGeneralTypeValidationPipe)
+        generalType: RequestGeneralType,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterRequestDto,
     ) {
-        return this.requestService.readAll(skip, take);
+        return this.requestService.readAll(generalType, filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

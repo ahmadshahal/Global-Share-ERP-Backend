@@ -10,6 +10,8 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { Request } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { FilterRequestDto } from './dto/filter-request-dto';
+import { RequestGeneralType } from 'src/request/enums/request-general-type.enum';
 
 @Injectable()
 export class RequestService {
@@ -46,8 +48,52 @@ export class RequestService {
         });
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
-        const data = this.prismaService.request.findMany({
+    async readAll(
+        generalType: RequestGeneralType,
+        filters: FilterRequestDto,
+        skip: number,
+        take: number,
+    ) {
+        const { squads, volunteers, status } = filters;
+        const data = await this.prismaService.request.findMany({
+            where: {
+                requestType:
+                    generalType == RequestGeneralType.PERSONAL
+                        ? {
+                              in: [RequestType.FREEZE, RequestType.PROTECTION],
+                          }
+                        : {
+                              in: [
+                                  RequestType.HEART_ADDITION,
+                                  RequestType.HEART_DELETION,
+                              ],
+                          },
+                status: status
+                    ? {
+                          in: status
+                              ?.split(',')
+                              .map((value) => RequestStatus[value]),
+                      }
+                    : undefined,
+                user: {
+                    id: volunteers
+                        ? { in: volunteers.split(',').map((value) => +value) }
+                        : undefined,
+                    positions: {
+                        some: {
+                            position: squads
+                                ? {
+                                      squadId: {
+                                          in: squads
+                                              .split(',')
+                                              .map((value) => +value),
+                                      },
+                                  }
+                                : undefined,
+                        },
+                    },
+                },
+            },
             include: {
                 user: true,
             },
