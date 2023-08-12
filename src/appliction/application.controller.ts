@@ -24,6 +24,7 @@ import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationFilesValidator } from './validator/application.validator';
+import { FilterApplicationDto } from './dto/filter-application.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('application')
@@ -36,8 +37,9 @@ export class ApplicationController {
     async readAll(
         @Query('skip') skip: number = 0,
         @Query('take') take: number = 0,
+        @Query() filters: FilterApplicationDto,
     ) {
-        return await this.applicationService.readAll(+skip, +take);
+        return await this.applicationService.readAll(filters, +skip, +take);
     }
 
     @Permissions({ action: Action.Read, subject: 'Application' })

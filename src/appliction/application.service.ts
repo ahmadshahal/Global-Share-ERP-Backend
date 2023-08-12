@@ -16,6 +16,7 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
+import { FilterApplicationDto } from './dto/filter-application.dto';
 
 @Injectable()
 export class ApplicationService {
@@ -49,8 +50,35 @@ export class ApplicationService {
         return application;
     }
 
-    async readAll(skip: number = 0, take: number = 0) {
+    async readAll(filters: FilterApplicationDto, skip: number, take: number) {
+        const { positions, squads, status, vacancies } = filters;
         const applications = await this.prismaService.application.findMany({
+            where: {
+                status: status
+                    ? {
+                          in: status
+                              ?.split(',')
+                              .map((value) => RecruitmentStatus[value]),
+                      }
+                    : undefined,
+                vacancy: {
+                    id: vacancies
+                        ? { in: vacancies?.split(',').map((value) => +value) }
+                        : undefined,
+                    position: {
+                        id: positions
+                            ? {
+                                  in: positions
+                                      ?.split(',')
+                                      .map((value) => +value),
+                              }
+                            : undefined,
+                        squadId: squads
+                            ? { in: squads?.split(',').map((value) => +value) }
+                            : undefined,
+                    },
+                },
+            },
             include: {
                 answers: {
                     include: {

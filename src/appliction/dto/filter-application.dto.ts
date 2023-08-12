@@ -1,19 +1,17 @@
 import { IsOptional, IsString } from 'class-validator';
-import { IsValidLevel } from 'src/validators/validate-level.validator';
-import { IsValidStatus } from 'src/validators/validate-gs-status.validator';
+import { IsValidRecruitmentStatus } from 'src/validators/validate-recruitment-status.validator';
 
-export class FilterUserDto {
+export class FilterApplicationDto {
     @IsOptional()
     @IsString()
     search: string;
 
     @IsOptional()
-    @IsValidStatus()
+    @IsValidRecruitmentStatus()
     status: string;
 
     @IsOptional()
-    @IsValidLevel()
-    level: string;
+    vacancies: string;
 
     @IsOptional()
     positions: string;
