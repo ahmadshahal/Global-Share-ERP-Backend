@@ -10,6 +10,7 @@ import { UpdateSquadDto } from './dto/update-squad.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
+import { FilterSquadDto } from './dto/filter-squad.dto';
 
 @Injectable()
 export class SquadService {
@@ -32,8 +33,25 @@ export class SquadService {
         return squad;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterSquadDto, skip: number, take: number) {
+        const { search } = filters;
         const data = await this.prismaService.squad.findMany({
+            where: {
+                OR: search
+                    ? [
+                          {
+                              name: {
+                                  contains: search,
+                              },
+                          },
+                          {
+                              gsName: {
+                                  contains: search,
+                              },
+                          },
+                      ]
+                    : undefined,
+            },
             include: {
                 positions: true,
             },
@@ -109,7 +127,7 @@ export class SquadService {
         image: Express.Multer.File,
     ) {
         try {
-            var imageUrl = undefined;
+            let imageUrl = undefined;
             if (image) {
                 const resource = await this.driveService.saveFile(
                     updateSquadDto.gsName,

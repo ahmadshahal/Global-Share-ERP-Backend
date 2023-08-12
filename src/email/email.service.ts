@@ -8,6 +8,7 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, Email } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
+import { FilterEmailDto } from './dto/filter-email.dto';
 
 @Injectable()
 export class EmailService {
@@ -35,8 +36,25 @@ export class EmailService {
         });
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterEmailDto, skip: number, take: number) {
+        const { search } = filters;
         const data = await this.prismaService.email.findMany({
+            where: {
+                OR: search
+                    ? [
+                          {
+                              title: {
+                                  contains: search,
+                              },
+                          },
+                          {
+                              body: {
+                                  contains: search,
+                              },
+                          },
+                      ]
+                    : undefined,
+            },
             skip: skip,
             take: take == 0 ? undefined : take,
         });
@@ -61,6 +79,18 @@ export class EmailService {
 
     async update(id: number, updateEmailDto: UpdateEmailDto) {
         try {
+            const oldEmail = await this.prismaService.email.findFirst({
+                where: {
+                    recruitmentStatus: updateEmailDto.recruitmentStatus,
+                    id: { not: id },
+                },
+            });
+
+            if (oldEmail) {
+                throw new BadRequestException(
+                    'An email with the same status already exists',
+                );
+            }
             return await this.prismaService.email.update({
                 where: {
                     id,

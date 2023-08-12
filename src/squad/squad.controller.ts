@@ -24,6 +24,7 @@ import { SquadImageValidator } from './validator/squad.validator';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterSquadDto } from './dto/filter-squad.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('squad')
@@ -34,10 +35,11 @@ export class SquadController {
     @Permissions({ action: Action.Read, subject: 'Squad' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterSquadDto,
     ) {
-        return await this.squadService.readAll(skip, take);
+        return await this.squadService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

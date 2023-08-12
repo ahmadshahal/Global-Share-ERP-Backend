@@ -20,6 +20,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { Action } from '@prisma/client';
+import { FilterEmailDto } from './dto/filter-email.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('email')
@@ -40,10 +41,11 @@ export class EmailController {
     @Permissions({ action: Action.Read, subject: 'Email' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterEmailDto,
     ) {
-        return await this.emailService.readAll(skip, take);
+        return await this.emailService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

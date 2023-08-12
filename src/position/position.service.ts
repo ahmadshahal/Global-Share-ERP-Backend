@@ -3,7 +3,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Position, PositionUser, Prisma } from '@prisma/client';
+import { Position, PositionUser, Prisma, GsLevel } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -31,14 +31,37 @@ export class PositionService {
     }
 
     async readAll(filters: FilterPositionDto, skip: number, take: number) {
-        const { squads } = filters;
+        const { squads, level, search } = filters;
         const data = await this.prismaService.position.findMany({
             where: {
-                squadId: squads
-                    ? {
-                          in: squads?.split(',').map((value) => +value),
-                      }
-                    : undefined,
+                AND: [
+                    {
+                        squadId: squads
+                            ? {
+                                  in: squads?.split(',').map((value) => +value),
+                              }
+                            : undefined,
+                    },
+                    {
+                        gsLevel: level
+                            ? {
+                                  in: level
+                                      ?.split(',')
+                                      .map((value) => GsLevel[value]),
+                              }
+                            : undefined,
+                    },
+                    {
+                        OR: search
+                            ? [
+                                  {
+                                      name: { contains: search },
+                                      gsName: { contains: search },
+                                  },
+                              ]
+                            : undefined,
+                    },
+                ],
             },
             include: {
                 squad: true,
