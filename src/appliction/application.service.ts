@@ -49,7 +49,7 @@ export class ApplicationService {
         return application;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(skip: number = 0, take: number = 0) {
         const applications = await this.prismaService.application.findMany({
             include: {
                 answers: {

@@ -3,13 +3,14 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { GsStatus, Prisma } from '@prisma/client';
+import { GsStatus, GsLevel, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { exclude } from 'src/utils/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon from 'argon2';
+import { FilterUserDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UserService {
@@ -39,8 +40,86 @@ export class UserService {
         return exclude(user, ['password']);
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterUserDto, skip: number = 0, take: number = 0) {
+        const { status, positions, level, squads, search } = filters;
         const users = await this.prismaService.user.findMany({
+            where: {
+                AND: [
+                    {
+                        gsStatus: status
+                            ? {
+                                  in: status
+                                      ?.split(',')
+                                      .map((value) => GsStatus[value]),
+                              }
+                            : undefined,
+                    },
+                    {
+                        positions: {
+                            some: positions
+                                ? {
+                                      positionId: {
+                                          in: positions
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      },
+                                  }
+                                : level
+                                ? {
+                                      position: {
+                                          gsLevel: {
+                                              in: level
+                                                  ?.split(',')
+                                                  .map(
+                                                      (value) => GsLevel[value],
+                                                  ),
+                                          },
+                                      },
+                                  }
+                                : squads
+                                ? {
+                                      position: {
+                                          squadId: {
+                                              in: squads
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          },
+                                      },
+                                  }
+                                : undefined,
+                        },
+                    },
+                    {
+                        OR: [
+                            {
+                                fullName: {
+                                    contains: search,
+                                },
+                            },
+                            {
+                                firstName: {
+                                    contains: search,
+                                },
+                            },
+                            {
+                                lastName: {
+                                    contains: search,
+                                },
+                            },
+                            {
+                                middleName: {
+                                    contains: search,
+                                },
+                            },
+                            {
+                                arabicFullName: {
+                                    contains: search,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
             include: {
                 positions: {
                     include: {
@@ -76,6 +155,9 @@ export class UserService {
                     password,
                     firstName: createUserDto.firstName,
                     lastName: createUserDto.lastName,
+                    fullName:
+                        createUserDto.firstName.trim() +
+                        createUserDto.lastName.trim(),
                     gsStatus: GsStatus.ACTIVE,
                     positions: {
                         createMany: {
@@ -109,6 +191,10 @@ export class UserService {
                     firstName: updateUserDto.firstName,
                     lastName: updateUserDto.lastName,
                     middleName: updateUserDto.middleName,
+                    fullName:
+                        updateUserDto.firstName.trim() +
+                        updateUserDto.middleName.trim() +
+                        updateUserDto.lastName.trim(),
                     phoneNumber: updateUserDto.phoneNumber,
                     gsStatus: updateUserDto.gsStatus,
                     roleId: updateUserDto.roleId,

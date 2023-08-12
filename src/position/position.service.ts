@@ -9,6 +9,7 @@ import { CreatePositionDto } from './dto/create-position.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
+import { FilterPositionDto } from './dto/filter-position.dto';
 
 @Injectable()
 export class PositionService {
@@ -29,8 +30,16 @@ export class PositionService {
         return position;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterPositionDto, skip: number, take: number) {
+        const { squads } = filters;
         const data = await this.prismaService.position.findMany({
+            where: {
+                squadId: squads
+                    ? {
+                          in: squads?.split(',').map((value) => +value),
+                      }
+                    : undefined,
+            },
             include: {
                 squad: true,
             },

@@ -62,6 +62,7 @@ model User {
     lastName             String
     additionalEmail      String?               @unique
     middleName           String?
+    fullName             String?
     arabicFullName       String?
     appointlet           String?
     bio                  String?

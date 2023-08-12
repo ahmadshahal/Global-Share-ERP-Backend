@@ -20,6 +20,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterPositionDto } from './dto/filter-position.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('position')
@@ -30,10 +31,11 @@ export class PositionController {
     @Permissions({ action: Action.Read, subject: 'Position' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterPositionDto,
     ) {
-        return await this.positionService.readAll(skip, take);
+        return await this.positionService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -34,10 +34,10 @@ export class ApplicationController {
     @Permissions({ action: Action.Read, subject: 'Application' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
     ) {
-        return await this.applicationService.readAll(skip, take);
+        return await this.applicationService.readAll(+skip, +take);
     }
 
     @Permissions({ action: Action.Read, subject: 'Application' })
