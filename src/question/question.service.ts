@@ -6,8 +6,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-import { Prisma, Question } from '@prisma/client';
+import { Prisma, Question, QuestionType } from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
+import { FilterQuestionDto } from './dto/filter-question.dto';
 
 @Injectable()
 export class QuestionService {
@@ -30,8 +31,25 @@ export class QuestionService {
         return question;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterQuestionDto, skip: number, take: number) {
+        const { search, type } = filters;
         const questions = await this.prisma.question.findMany({
+            where: {
+                AND: [
+                    {
+                        type: type
+                            ? {
+                                  in: type
+                                      .split(',')
+                                      .map((value) => QuestionType[value]),
+                              }
+                            : undefined,
+                    },
+                    {
+                        text: search ? { contains: search } : undefined,
+                    },
+                ],
+            },
             skip: skip,
             take: take == 0 ? undefined : take,
         });

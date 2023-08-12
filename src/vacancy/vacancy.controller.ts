@@ -19,6 +19,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterVacancyDto } from './dto/filter-vacancy.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('vacancy')
@@ -29,10 +30,11 @@ export class VacancyController {
     @Permissions({ action: Action.Read, subject: 'Vacancy' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterVacancyDto,
     ) {
-        return await this.vacancyService.readAll(skip, take);
+        return await this.vacancyService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

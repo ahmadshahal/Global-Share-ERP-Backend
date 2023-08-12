@@ -19,6 +19,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterQuestionDto } from './dto/filter-question.dto';
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('question')
 export class QuestionController {
@@ -35,10 +36,11 @@ export class QuestionController {
     @Permissions({ action: Action.Read, subject: 'Question' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterQuestionDto,
     ) {
-        return await this.questionService.readAll(skip, take);
+        return await this.questionService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)

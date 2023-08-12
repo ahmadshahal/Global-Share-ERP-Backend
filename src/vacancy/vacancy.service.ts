@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
+import { FilterVacancyDto } from './dto/filter-vacancy.dto';
 
 @Injectable()
 export class VacancyService {
@@ -32,8 +33,25 @@ export class VacancyService {
         return vacancy;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterVacancyDto, skip: number, take: number) {
+        const { isOpen, positions, squads } = filters;
         const data = await this.prismaService.vacancy.findMany({
+            where: {
+                isOpen: isOpen ? (isOpen == 1 ? true : false) : undefined,
+                position: positions
+                    ? {
+                          id: {
+                              in: positions?.split(',').map((value) => +value),
+                          },
+                      }
+                    : squads
+                    ? {
+                          squadId: {
+                              in: squads?.split(',').map((value) => +value),
+                          },
+                      }
+                    : undefined,
+            },
             include: {
                 position: {
                     include: {
