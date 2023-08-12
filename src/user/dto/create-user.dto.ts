@@ -5,6 +5,7 @@ import {
     IsDate,
     IsEmail,
     IsEnum,
+    IsInt,
     IsMobilePhone,
     IsNotEmpty,
     IsOptional,
@@ -27,7 +28,6 @@ class PositionDto {
 }
 
 export class CreateUserDto {
-    @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(50)
@@ -39,7 +39,6 @@ export class CreateUserDto {
     @MaxLength(50)
     middleName: string;
 
-    @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(50)
@@ -51,17 +50,16 @@ export class CreateUserDto {
     @MaxLength(50)
     arabicFullName: string;
 
-    @IsOptional()
     @IsNotEmpty()
     @MinLength(8)
     password: string;
 
     @IsNotEmpty()
+    @IsInt()
     roleId: number;
 
-    @IsOptional()
-    @IsEmail()
     @IsNotEmpty()
+    @IsEmail()
     email: string;
 
     @IsOptional()
