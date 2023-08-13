@@ -49,8 +49,10 @@ export class ApplicationService {
         }
         application.answers = application.answers.map((answer) => {
             answer.content = JSON.parse(answer.content.toString());
+            answer.question.question.options = JSON.parse(answer.question.question.options?.toString() ?? null);
             return answer;
         });
+        
         return application;
     }
 
@@ -101,6 +103,7 @@ export class ApplicationService {
         const parsedApplications = applications.map((application) => {
             application.answers = application.answers.map((answer) => {
                 answer.content = JSON.parse(answer.content.toString());
+                answer.question.question.options = JSON.parse(answer.question.question.options?.toString() ?? null);
                 return answer;
             });
             return application;
