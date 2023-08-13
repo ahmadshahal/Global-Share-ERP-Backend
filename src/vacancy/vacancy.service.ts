@@ -25,7 +25,11 @@ export class VacancyService {
                         squad: true,
                     },
                 },
-                questions: true,
+                questions: {
+                    include: {
+                        question: true,
+                    },
+                },
             },
         });
         if (!vacancy) {
