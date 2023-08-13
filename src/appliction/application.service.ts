@@ -34,7 +34,11 @@ export class ApplicationService {
             include: {
                 answers: {
                     include: {
-                        question: true,
+                        question: {
+                            include: {
+                                question: true
+                            }
+                        },
                     },
                 },
                 feedbacks: true,
@@ -82,7 +86,11 @@ export class ApplicationService {
             include: {
                 answers: {
                     include: {
-                        question: true,
+                        question: {
+                            include: {
+                                question: true
+                            }
+                        },
                     },
                 },
                 feedbacks: true,
@@ -163,6 +171,17 @@ export class ApplicationService {
                         },
                     },
                 },
+                include: {
+                    answers: {
+                        include: {
+                            question: {
+                                include: {
+                                    question: true
+                                }
+                            },
+                        },
+                    },
+                }
             });
             const email = await this.prismaService.email.findFirst({
                 where: {
@@ -210,7 +229,15 @@ export class ApplicationService {
                     id: id,
                 },
                 include: {
-                    answers: true,
+                    answers: {
+                        include: {
+                            question: {
+                                include: {
+                                    question: true
+                                }
+                            },
+                        },
+                    },
                 },
             });
         } catch (error) {
@@ -275,7 +302,15 @@ export class ApplicationService {
                         },
                     },
                     include: {
-                        answers: true,
+                        answers: {
+                            include: {
+                                question: {
+                                    include: {
+                                        question: true
+                                    }
+                                },
+                            },
+                        },
                     },
                 });
             this.mailService
