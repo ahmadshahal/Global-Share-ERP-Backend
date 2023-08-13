@@ -25,6 +25,7 @@ export class VacancyService {
                         squad: true,
                     },
                 },
+                questions: true,
             },
         });
         if (!vacancy) {
