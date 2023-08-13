@@ -44,7 +44,11 @@ export class ApplicationService {
                 feedbacks: true,
                 vacancy: {
                     include: {
-                        position: true,
+                        position: {
+                            include: {
+                                squad: true
+                            }
+                        },
                     }
                 }
             },
@@ -103,7 +107,11 @@ export class ApplicationService {
                 feedbacks: true,
                 vacancy: {
                     include: {
-                        position: true,
+                        position: {
+                            include: {
+                                squad: true
+                            }
+                        },
                     }
                 }
             },
