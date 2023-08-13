@@ -42,6 +42,11 @@ export class ApplicationService {
                     },
                 },
                 feedbacks: true,
+                vacancy: {
+                    include: {
+                        position: true,
+                    }
+                }
             },
         });
         if (!application) {
@@ -96,6 +101,11 @@ export class ApplicationService {
                     },
                 },
                 feedbacks: true,
+                vacancy: {
+                    include: {
+                        position: true,
+                    }
+                }
             },
             skip: skip,
             take: take == 0 ? undefined : take,
