@@ -17,37 +17,17 @@ export class TaskService {
         squadId: number,
         skip: number = 0,
         take: number = 10,
-    ): Promise<Task[]> {
-        const tasks = await this.prismaService.task.findMany({
+    ) {
+        const tasks = await this.prismaService.status.findMany({
             where: {
-                status: {
-                    squadId: squadId,
-                },
+                squadId: squadId
             },
             include: {
-                assignedBy: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        middleName: true,
-                    },
+                tasks: {
+                    skip: skip,
+                    take: take == 0 ? undefined : take,
                 },
-                assignedTo: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        middleName: true,
-                    },
-                },
-                status: true,
-                comments: true,
-                kpis: true,
-                step: true,
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
+            }
         });
         return tasks;
     }
@@ -87,37 +67,14 @@ export class TaskService {
     }
 
     async readAll(skip: number = 0, take: number = 10) {
-        const data = await this.prismaService.task.findMany({
+        return await this.prismaService.status.findMany({
             include: {
-                assignedBy: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        middleName: true,
-                    },
+                tasks: {
+                    skip: skip,
+                    take: take == 0 ? undefined : take,
                 },
-                assignedTo: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        middleName: true,
-                    },
-                },
-                status: true,
-                comments: true,
-                kpis: true,
-                step: true,
             },
-            skip: skip,
-            take: take == 0 ? undefined : take,
         });
-        const count = await this.prismaService.task.count();
-        return {
-            data,
-            count,
-        };
     }
 
     async create(createTaskDto: CreateTaskDto): Promise<Task> {
@@ -158,29 +115,6 @@ export class TaskService {
 
     async update(id: number, updateTaskDto: UpdateTaskDto) {
         try {
-            const status = await this.prismaService.status.findUnique({
-                where: { id: updateTaskDto.statusId },
-            });
-            const task = await this.prismaService.task.findUnique({
-                where: { id },
-            });
-            // return await this.prismaService.$transaction(
-            // async (prismaService) => {
-            if (status.crucial && status.name == 'Approved') {
-                if (!updateTaskDto.hoursTaken) {
-                    throw new BadRequestException(
-                        'hours taken are required when approving a task',
-                    );
-                }
-                await this.prismaService.user.update({
-                    where: { id: task.assignedToId },
-                    data: {
-                        volunteeredHours: {
-                            increment: updateTaskDto.hoursTaken,
-                        },
-                    },
-                });
-            }
             return await this.prismaService.task.update({
                 where: {
                     id: id,
@@ -210,12 +144,7 @@ export class TaskService {
                         },
                     },
                 },
-                include: {
-                    status: true,
-                },
             });
-            // },
-            // );
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
