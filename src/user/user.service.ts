@@ -27,7 +27,7 @@ export class UserService {
                         position: {
                             include: {
                                 squad: true,
-                            }
+                            },
                         },
                     },
                 },
@@ -129,8 +129,8 @@ export class UserService {
                     include: {
                         position: {
                             include: {
-                                squad: true
-                            }
+                                squad: true,
+                            },
                         },
                     },
                 },
@@ -187,6 +187,10 @@ export class UserService {
 
     async update(id: number, updateUserDto: UpdateUserDto) {
         try {
+            const fullName =
+                updateUserDto.firstName?.trim() +
+                updateUserDto.middleName?.trim() +
+                updateUserDto.lastName?.trim();
             const user = await this.prismaService.user.update({
                 where: {
                     id: id,
@@ -199,10 +203,7 @@ export class UserService {
                     firstName: updateUserDto.firstName,
                     lastName: updateUserDto.lastName,
                     middleName: updateUserDto.middleName,
-                    fullName:
-                        updateUserDto.firstName.trim() +
-                        updateUserDto.middleName.trim() +
-                        updateUserDto.lastName.trim(),
+                    fullName: fullName || undefined,
                     phoneNumber: updateUserDto.phoneNumber,
                     gsStatus: updateUserDto.gsStatus,
                     roleId: updateUserDto.roleId,

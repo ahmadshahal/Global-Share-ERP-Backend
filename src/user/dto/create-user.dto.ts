@@ -15,6 +15,7 @@ import {
 } from 'class-validator';
 
 class PositionDto {
+    @IsInt()
     @IsNotEmpty()
     positionId: number;
 

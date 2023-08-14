@@ -53,9 +53,16 @@ export class UserController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Permissions({ action: Action.Update, subject: 'User' })
+    // @Permissions({ action: Action.Update, subject: 'User' })
     @Put()
-    async update(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
+    async updateProfile(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
+        return await this.userService.update(id, updateUserDto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Update, subject: 'User' })
+    @Put(':id')
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.update(id, updateUserDto);
     }
 
