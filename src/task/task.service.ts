@@ -13,21 +13,47 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(
-        squadId: number,
-        skip: number = 0,
-        take: number = 10,
-    ) {
+    async readBySquad(squadId: number, skip: number = 0, take: number = 10) {
         const tasks = await this.prismaService.status.findMany({
             where: {
-                squadId: squadId
+                squadId: squadId,
             },
             include: {
                 tasks: {
                     skip: skip,
                     take: take == 0 ? undefined : take,
+                    include: {
+                        assignedBy: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                middleName: true,
+                            },
+                        },
+                        assignedTo: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                middleName: true,
+                            },
+                        },
+                        comments: {
+                            include: {
+                                author: {
+                                    select: {
+                                        firstName: true,
+                                        lastName: true,
+                                        email: true,
+                                        middleName: true,
+                                    },  
+                                }
+                            }
+                        },
+                    }
                 },
-            }
+            },
         });
         return tasks;
     }
@@ -54,8 +80,19 @@ export class TaskService {
                         middleName: true,
                     },
                 },
+                comments: {
+                    include: {
+                        author: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                middleName: true,
+                            },  
+                        }
+                    }
+                },
                 status: true,
-                comments: true,
                 kpis: true,
                 step: true,
             },
@@ -72,6 +109,36 @@ export class TaskService {
                 tasks: {
                     skip: skip,
                     take: take == 0 ? undefined : take,
+                    include: {
+                        assignedBy: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                middleName: true,
+                            },
+                        },
+                        assignedTo: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                middleName: true,
+                            },
+                        },
+                        comments: {
+                            include: {
+                                author: {
+                                    select: {
+                                        firstName: true,
+                                        lastName: true,
+                                        email: true,
+                                        middleName: true,
+                                    },  
+                                }
+                            }
+                        },
+                    }
                 },
             },
         });
