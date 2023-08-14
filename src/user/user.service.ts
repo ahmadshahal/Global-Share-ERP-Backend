@@ -24,7 +24,11 @@ export class UserService {
             include: {
                 positions: {
                     include: {
-                        position: true,
+                        position: {
+                            include: {
+                                squad: true,
+                            }
+                        },
                     },
                 },
                 role: {
@@ -123,7 +127,11 @@ export class UserService {
             include: {
                 positions: {
                     include: {
-                        position: true,
+                        position: {
+                            include: {
+                                squad: true
+                            }
+                        },
                     },
                 },
             },
