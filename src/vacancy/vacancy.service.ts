@@ -32,15 +32,15 @@ export class VacancyService {
                 },
             },
         });
+        if (!vacancy) {
+            throw new NotFoundException('Vacancy Not Found');
+        }
         vacancy.questions = vacancy.questions.map((question) => {
             question.question.options = JSON.parse(
                 question.question.options?.toString() ?? null,
             );
             return question;
         });
-        if (!vacancy) {
-            throw new NotFoundException('Vacancy Not Found');
-        }
         return vacancy;
     }
 
