@@ -3,11 +3,12 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Task } from '@prisma/client';
+import { Prisma, Task, Difficulty, Priority } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { FilterTaskDto } from './dto/filter-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -47,11 +48,11 @@ export class TaskService {
                                         lastName: true,
                                         email: true,
                                         middleName: true,
-                                    },  
-                                }
-                            }
+                                    },
+                                },
+                            },
                         },
-                    }
+                    },
                 },
             },
         });
@@ -88,9 +89,9 @@ export class TaskService {
                                 lastName: true,
                                 email: true,
                                 middleName: true,
-                            },  
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
                 status: true,
                 kpis: true,
@@ -103,10 +104,63 @@ export class TaskService {
         return task;
     }
 
-    async readAll(skip: number = 0, take: number = 10) {
+    async readAll(filters: FilterTaskDto, skip: number, take: number) {
+        const { assignedTo, difficulty, priority, search, squad } = filters;
         return await this.prismaService.status.findMany({
             include: {
                 tasks: {
+                    where: {
+                        AND: [
+                            {
+                                difficulty: difficulty
+                                    ? {
+                                          in: difficulty
+                                              .split(',')
+                                              .map(
+                                                  (value) => Difficulty[value],
+                                              ),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                priority: priority
+                                    ? {
+                                          in: priority
+                                              .split(',')
+                                              .map((value) => Priority[value]),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                assignedToId: assignedTo
+                                    ? {
+                                          in: assignedTo
+                                              .split(',')
+                                              .map((value) => +value),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                status: squad
+                                    ? {
+                                          squadId: squad,
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                OR: search
+                                    ? [
+                                          {
+                                              title: { contains: search },
+                                          },
+                                          {
+                                              description: { contains: search },
+                                          },
+                                      ]
+                                    : undefined,
+                            },
+                        ],
+                    },
                     skip: skip,
                     take: take == 0 ? undefined : take,
                     include: {
@@ -134,11 +188,11 @@ export class TaskService {
                                         lastName: true,
                                         email: true,
                                         middleName: true,
-                                    },  
-                                }
-                            }
+                                    },
+                                },
+                            },
                         },
-                    }
+                    },
                 },
             },
         });

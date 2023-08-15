@@ -19,6 +19,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { FilterTaskDto } from './dto/filter-task.dto';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('task')
@@ -29,10 +30,11 @@ export class TaskController {
     @Permissions({ action: Action.Read, subject: 'Task' })
     @Get()
     async readAll(
-        @Query('skip', ParseIntPipe) skip: number,
-        @Query('take', ParseIntPipe) take: number,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
+        @Query() filters: FilterTaskDto,
     ) {
-        return await this.taskService.readAll(skip, take);
+        return await this.taskService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)
