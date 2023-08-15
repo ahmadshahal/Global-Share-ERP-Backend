@@ -8,7 +8,6 @@ export class FilterTaskDto {
     search: string;
 
     @IsOptional()
-    @IsInt()
     squad: number;
 
     @IsOptional()

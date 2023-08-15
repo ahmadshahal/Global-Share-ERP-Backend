@@ -107,6 +107,9 @@ export class TaskService {
     async readAll(filters: FilterTaskDto, skip: number, take: number) {
         const { assignedTo, difficulty, priority, search, squad } = filters;
         return await this.prismaService.status.findMany({
+            where: {
+                squadId: squad ? +squad : undefined,
+            },
             include: {
                 tasks: {
                     where: {
@@ -137,13 +140,6 @@ export class TaskService {
                                           in: assignedTo
                                               .split(',')
                                               .map((value) => +value),
-                                      }
-                                    : undefined,
-                            },
-                            {
-                                status: squad
-                                    ? {
-                                          squadId: squad,
                                       }
                                     : undefined,
                             },
