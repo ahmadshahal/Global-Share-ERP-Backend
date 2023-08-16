@@ -45,11 +45,11 @@ export class UserController {
     @Permissions({ action: Action.Read, subject: 'User' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterUserDto,
     ) {
-        return await this.userService.readAll(filters, +skip, +take);
+        return await this.userService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

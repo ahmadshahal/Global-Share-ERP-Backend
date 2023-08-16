@@ -35,11 +35,11 @@ export class SquadController {
     @Permissions({ action: Action.Read, subject: 'Squad' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterSquadDto,
     ) {
-        return await this.squadService.readAll(filters, +skip, +take);
+        return await this.squadService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

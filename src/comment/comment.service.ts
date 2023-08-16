@@ -50,6 +50,29 @@ export class CommentService {
         });
     }
 
+    async readAllByTask(
+        skip: number = 0,
+        take: number = 10,
+        taskId: number,
+    ): Promise<Comment[]> {
+        return await this.prismaService.comment.findMany({
+            where: {
+                taskId: taskId
+            },
+            include: {
+                task: true,
+                author: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+            },
+            skip: skip,
+            take: take == 0 ? undefined : take,
+        });
+    }
+
     async create(
         createCommentDto: CreateCommentDto,
         authorId: number,
@@ -59,7 +82,7 @@ export class CommentService {
                 data: {
                     content: createCommentDto.content,
                     authorId: authorId,
-                    taskId: createCommentDto.taskId
+                    taskId: createCommentDto.taskId,
                 },
             });
         } catch (error) {

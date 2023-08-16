@@ -36,11 +36,11 @@ export class QuestionController {
     @Permissions({ action: Action.Read, subject: 'Question' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterQuestionDto,
     ) {
-        return await this.questionService.readAll(filters, +skip, +take);
+        return await this.questionService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

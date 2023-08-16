@@ -30,11 +30,11 @@ export class VacancyController {
     @Permissions({ action: Action.Read, subject: 'Vacancy' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterVacancyDto,
     ) {
-        return await this.vacancyService.readAll(filters, +skip, +take);
+        return await this.vacancyService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

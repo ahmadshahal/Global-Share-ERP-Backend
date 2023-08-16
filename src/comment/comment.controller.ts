@@ -38,6 +38,17 @@ export class CommentController {
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Comment' })
+    @Get(':taskId')
+    async readAllByTask(
+        @Query('skip', ParseIntPipe) skip: number,
+        @Query('take', ParseIntPipe) take: number,
+        @Param('taskId', ParseIntPipe) taskId: number,
+    ) {
+        return await this.commentService.readAllByTask(skip, take, taskId);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Permissions({ action: Action.Read, subject: 'Comment' })
     @Get(':id')
     async readOne(@Param('id', ParseIntPipe) id: number) {
         return await this.commentService.readOne(id);

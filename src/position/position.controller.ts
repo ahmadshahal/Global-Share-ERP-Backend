@@ -31,11 +31,11 @@ export class PositionController {
     @Permissions({ action: Action.Read, subject: 'Position' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterPositionDto,
     ) {
-        return await this.positionService.readAll(filters, +skip, +take);
+        return await this.positionService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

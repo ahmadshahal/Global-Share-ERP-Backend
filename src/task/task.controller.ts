@@ -30,11 +30,11 @@ export class TaskController {
     @Permissions({ action: Action.Read, subject: 'Task' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterTaskDto,
     ) {
-        return await this.taskService.readAll(filters, +skip, +take);
+        return await this.taskService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

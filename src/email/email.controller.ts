@@ -41,11 +41,11 @@ export class EmailController {
     @Permissions({ action: Action.Read, subject: 'Email' })
     @Get()
     async readAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterEmailDto,
     ) {
-        return await this.emailService.readAll(filters, +skip, +take);
+        return await this.emailService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)
