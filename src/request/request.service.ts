@@ -54,45 +54,63 @@ export class RequestService {
         skip: number,
         take: number,
     ) {
-        const { squads, volunteers, status } = filters;
+        const { squads, volunteers, status, search } = filters;
         const data = await this.prismaService.request.findMany({
             where: {
-                requestType:
-                    generalType == RequestGeneralType.PERSONAL
-                        ? {
-                              in: [RequestType.FREEZE, RequestType.PROTECTION],
-                          }
-                        : {
-                              in: [
-                                  RequestType.HEART_ADDITION,
-                                  RequestType.HEART_DELETION,
-                              ],
-                          },
-                status: status
-                    ? {
-                          in: status
-                              ?.split(',')
-                              .map((value) => RequestStatus[value]),
-                      }
-                    : undefined,
-                user: {
-                    id: volunteers
-                        ? { in: volunteers.split(',').map((value) => +value) }
-                        : undefined,
-                    positions: {
-                        some: {
-                            position: squads
+                AND: [
+                    {
+                        requestType:
+                            generalType == RequestGeneralType.PERSONAL
                                 ? {
-                                      squadId: {
-                                          in: squads
-                                              .split(',')
-                                              .map((value) => +value),
-                                      },
+                                      in: ['FREEZE', 'PROTECTION'],
                                   }
-                                : undefined,
+                                : {
+                                      in: ['HEART_ADDITION', 'HEART_DELETION'],
+                                  },
+                    },
+                    {
+                        status: status
+                            ? {
+                                  in: status
+                                      ?.split(',')
+                                      .map((value) => RequestStatus[value]),
+                              }
+                            : undefined,
+                    },
+                    {
+                        user: {
+                            positions: {
+                                some: {
+                                    position: squads
+                                        ? {
+                                              squadId: {
+                                                  in: squads
+                                                      .split(',')
+                                                      .map((value) => +value),
+                                              },
+                                          }
+                                        : undefined,
+                                },
+                            },
                         },
                     },
-                },
+                    {
+                        OR: search
+                            ? [
+                                  {
+                                      user: {
+                                          fullName: { contains: search },
+                                      },
+                                  },
+                                  {
+                                      user: {
+                                          arabicFullName: { contains: search },
+                                      },
+                                  },
+                              ]
+                            : undefined,
+                    },
+                ],
             },
             include: {
                 user: true,
@@ -101,6 +119,7 @@ export class RequestService {
             take: take == 0 ? undefined : take,
         });
         const count = await this.prismaService.request.count();
+        console.log(data);
         return {
             data,
             count,
