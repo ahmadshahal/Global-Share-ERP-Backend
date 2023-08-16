@@ -1,75 +1,19 @@
 import * as argon from 'argon2';
-import { PrismaClient, Action, Prisma, GsLevel } from '@prisma/client';
+import { PrismaClient, Action, Prisma } from '@prisma/client';
+
 const prismaService = new PrismaClient();
 async function main() {
-    await prismaService.positionUser.deleteMany();
-    await prismaService.user.deleteMany();
+    // await prismaService.positionUser.deleteMany();
+    // await prismaService.request.deleteMany();
+    // await prismaService.user.deleteMany();
     await prismaService.rolePermission.deleteMany();
-    await prismaService.role.deleteMany();
+    // await prismaService.role.deleteMany();
     await prismaService.permission.deleteMany();
-    await prismaService.vacancy.deleteMany();
-    await prismaService.position.deleteMany();
-    await prismaService.status.deleteMany();
-    await prismaService.squad.deleteMany();
+    // await prismaService.vacancy.deleteMany();
+    // await prismaService.position.deleteMany();
+    // await prismaService.status.deleteMany();
+    // await prismaService.squad.deleteMany();
 
-    const squad = await prismaService.squad.create({
-        data: {
-            name: 'Social Media',
-            gsName: 'Radioactive',
-            description: 'Short paragraphs are easier to read and understand.',
-            imageUrl: '',
-        },
-    });
-
-    const position = await prismaService.position.create({
-        data: {
-            name: 'Android Developer',
-            gsLevel: GsLevel.SPECIALIST,
-            gsName: 'Androidy',
-            weeklyHours: 16,
-            squad: {
-                connect: {
-                    id: squad.id,
-                },
-            },
-        },
-    });
-
-    const role = await prismaService.role.create({
-        data: {
-            name: 'Employee',
-            permissions: {
-                createMany: {
-                    data: [],
-                },
-            },
-        },
-    });
-
-    const hashedPassword = await argon.hash('12345678');
-    await prismaService.user.create({
-        data: {
-            email: 'bob@gs.com',
-            password: hashedPassword,
-            phoneNumber: '123456789',
-            firstName: 'bob',
-            lastName: 'doe',
-            roleId: role.id,
-            positions: {
-                createMany: {
-                    data: [
-                        {
-                            positionId: position.id,
-                            startDate: new Date(),
-                            endDate: new Date(),
-                        },
-                    ],
-                },
-            },
-        },
-    });
-
-    /*
     let id = 0;
     const models = Prisma.dmmf.datamodel.models;
     const actions = [Action.Create, Action.Delete, Action.Read, Action.Update];
@@ -82,63 +26,133 @@ async function main() {
     });
 
     await prismaService.permission.createMany({ data: permissions });
-    console.log(`Created ${permissions.length} permissions`);
-    const employee_permissions = [
-        25, 26, 27, 28, 41, 42, 43, 44, 69, 70, 71, 72, 73, 75, 75, 76, 81, 82,
-        83, 84, 85, 86, 87, 88,
+    const volunteer_permissions = [
+        3, 7, 11, 15, 19, 23, 25, 27, 31, 59, 61, 62, 63, 64, 65, 66, 56, 68,
     ];
-    // const hr_member_permissions = [
-
-    // ];
-    const employee = await prismaService.role.create({
+    const recruiter_permissions = [
+        ...volunteer_permissions.flatMap((value) => value),
+        17,
+        24,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        39,
+        40,
+        41,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        55,
+        69,
+        70,
+        71,
+        72,
+    ];
+    const orch_permissions = [
+        ...volunteer_permissions.flatMap((value) => value),
+        28,
+        39,
+        40,
+        41,
+        43,
+        44,
+        55,
+        57,
+        58,
+        60,
+    ];
+    console.log(orch_permissions);
+    const volunteer = await prismaService.role.create({
         data: {
-            name: 'Employee',
+            name: 'Volunteer',
             permissions: {
                 createMany: {
-                    data: employee_permissions.map((permission) => ({
+                    data: volunteer_permissions.map((permission) => ({
                         permissionId: permission,
                     })),
                 },
             },
         },
     });
-    */
-    // const hr_member = await prismaService.role.create({
-    //     data: {
-    //         name: 'HR_Member',
-    //         permissions: {
-    //             create: { permissionId: 1 },
-    //         },
-    //     },
-    // });
-    // const admin = await prismaService.role.create({
-    //     data: {
-    //         name: 'Admin',
-    //     },
-    // });
+    const hr_member = await prismaService.role.create({
+        data: {
+            name: 'HR',
+            permissions: {
+                createMany: {
+                    data: recruiter_permissions.map((permission: number) => ({
+                        permissionId: permission,
+                    })),
+                },
+            },
+        },
+    });
+    const orch_member = await prismaService.role.create({
+        data: {
+            name: 'Orch',
+            permissions: {
+                createMany: {
+                    data: orch_permissions.map((permission: number) => ({
+                        permissionId: permission,
+                    })),
+                },
+            },
+        },
+    });
+    const admin = await prismaService.role.create({
+        data: {
+            name: 'Admin',
+        },
+    });
     // const hashedPassword = await argon.hash('12345678');
-    // await prismaService.user.upsert({
-    //     where: { email: 'alice@gs.com' },
-    //     update: {},
-    //     create: {
-    //         email: 'alice@gs.com',
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'admin@gs.com',
     //         password: hashedPassword,
     //         phoneNumber: '12345678',
-    //         firstName: 'alice',
+    //         firstName: 'admin',
     //         lastName: 'doe',
-    //         roleId: 13,
+    //         roleId: admin.id,
     //     },
     // });
-    // await prismaService.user.upsert({
-    //     where: { email: 'bob@gs.com' },
-    //     update: {},
-    //     create: {
-    //         email: 'bob@gs.com',
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'hr@gs.com',
     //         password: hashedPassword,
-    //         phoneNumber: '123456789',
-    //         firstName: 'bob',
+    //         phoneNumber: '12345678',
+    //         firstName: 'HR_Member',
     //         lastName: 'doe',
     //         roleId: hr_member.id,
+    //     },
+    // });
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'orch@gs.com',
+    //         password: hashedPassword,
+    //         phoneNumber: '12345678',
+    //         firstName: 'Orch',
+    //         lastName: 'doe',
+    //         roleId: orch_member.id,
+    //     },
+    // });
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'volunteer@gs.com',
+    //         password: hashedPassword,
+    //         phoneNumber: '12345678',
+    //         firstName: 'Volunteer',
+    //         lastName: 'doe',
+    //         roleId: volunteer.id,
     //     },
     // });
 }
