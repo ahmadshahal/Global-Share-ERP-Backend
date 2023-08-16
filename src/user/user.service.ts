@@ -165,7 +165,9 @@ export class UserService {
                     lastName: createUserDto.lastName,
                     fullName:
                         createUserDto.firstName.trim() +
-                        createUserDto.lastName.trim(),
+                        ' ' +
+                        createUserDto.lastName.trim() +
+                        ' ',
                     gsStatus: GsStatus.ACTIVE,
                     positions: {
                         createMany: {
@@ -189,7 +191,9 @@ export class UserService {
         try {
             const fullName =
                 updateUserDto.firstName?.trim() +
+                ' ' +
                 updateUserDto.middleName?.trim() +
+                ' ' +
                 updateUserDto.lastName?.trim();
             const user = await this.prismaService.user.update({
                 where: {

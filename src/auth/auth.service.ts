@@ -50,6 +50,10 @@ export class AuthService {
                     phoneNumber: signupDto.phoneNumber,
                     firstName: signupDto.firstName,
                     lastName: signupDto.lastName,
+                    fullName:
+                        signupDto.firstName.trim() +
+                        ' ' +
+                        signupDto.lastName.trim(),
                     roleId: signupDto.roleId,
                     positions: {
                         createMany: {
