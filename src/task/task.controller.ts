@@ -20,6 +20,7 @@ import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { FilterTaskDto } from './dto/filter-task.dto';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('task')
@@ -58,18 +59,22 @@ export class TaskController {
     @HttpCode(HttpStatus.CREATED)
     @Permissions({ action: Action.Create, subject: 'Task' })
     @Post()
-    async create(@Body() createTaskDto: CreateTaskDto) {
-        return await this.taskService.create(createTaskDto);
+    async create(
+        @UserId() userId: number,
+        @Body() createTaskDto: CreateTaskDto,
+    ) {
+        return await this.taskService.create(userId, createTaskDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'Task' })
     @Put(':id')
     async update(
+        @UserId() userId: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateTaskDto: UpdateTaskDto,
     ) {
-        return await this.taskService.update(id, updateTaskDto);
+        return await this.taskService.update(userId, id, updateTaskDto);
     }
 
     @HttpCode(HttpStatus.OK)

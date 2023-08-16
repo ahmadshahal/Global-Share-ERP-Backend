@@ -3,7 +3,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Task, Difficulty, Priority } from '@prisma/client';
+import { Prisma, Task, Difficulty, Priority, GsLevel } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -194,8 +194,81 @@ export class TaskService {
         });
     }
 
-    async create(createTaskDto: CreateTaskDto): Promise<Task> {
+    async create(userId: number, createTaskDto: CreateTaskDto): Promise<Task> {
         try {
+            const assignedBy = await this.prismaService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            if (!assignedBy) {
+                throw new NotFoundException('User Not Found');
+            }
+            const assignedTo = await this.prismaService.user.findUnique({
+                where: {
+                    id: createTaskDto.assignedToId,
+                },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            if (!assignedTo) {
+                throw new NotFoundException('User Not Found');
+            }
+            const taskStatus = await this.prismaService.status.findUnique({
+                where: {
+                    id: createTaskDto.statusId,
+                },
+                include: {
+                    squad: true,
+                },
+            });
+            if (!taskStatus) {
+                throw new NotFoundException('Status Not Found');
+            }
+            const taskSquadId = taskStatus.squadId;
+            const isAssignedByAnOrchestrator = assignedBy.positions.some(
+                (position) =>
+                    position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                    position.position.squadId == taskSquadId,
+            );
+            const isAssignedByInTheSquad = assignedBy.positions.some(
+                (position) => position.position.squadId == taskSquadId,
+            );
+            const isAssignedToInTheSquad = assignedTo.positions.some(
+                (position) => position.position.squadId == taskSquadId,
+            );
+            if (
+                !(
+                    isAssignedToInTheSquad &&
+                    (isAssignedByAnOrchestrator ||
+                        (isAssignedByInTheSquad &&
+                            assignedBy.id == assignedTo.id))
+                )
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permissions..',
+                );
+            }
             return await this.prismaService.task.create({
                 data: {
                     title: createTaskDto.title,
@@ -205,7 +278,7 @@ export class TaskService {
                     priority: createTaskDto.priority,
                     difficulty: createTaskDto.difficulty,
                     statusId: createTaskDto.statusId,
-                    assignedById: createTaskDto.assignedById,
+                    assignedById: userId,
                     assignedToId: createTaskDto.assignedToId,
                     stepId: createTaskDto.stepId,
                     kpis: {
@@ -230,30 +303,64 @@ export class TaskService {
         }
     }
 
-    async update(id: number, updateTaskDto: UpdateTaskDto) {
+    async update(userId: number, id: number, updateTaskDto: UpdateTaskDto) {
         try {
-            const status = await this.prismaService.status.findUnique({
+            const newStatus = await this.prismaService.status.findUnique({
                 where: { id: updateTaskDto.statusId },
             });
             const task = await this.prismaService.task.findUnique({
                 where: { id },
+                include: {
+                    status: true,
+                },
             });
-            // return await this.prismaService.$transaction(
-            // async (prismaService) => {
-            if (status.crucial && status.name == 'DONE') {
-                if (!updateTaskDto.hoursTaken) {
+            if(task.status.name == 'APPROVED') {
+                throw new BadRequestException(
+                    'Approved tasks can not be edited..',
+                );
+            }
+            if (newStatus.crucial && newStatus.name == 'APPROVED') {
+                const user = await this.prismaService.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                    include: {
+                        positions: {
+                            include: {
+                                position: {
+                                    include: {
+                                        squad: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+                const isOrchestrator = user.positions.some(
+                    (position) =>
+                        position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                        position.position.squadId == newStatus.squadId,
+                );
+                if (!isOrchestrator) {
                     throw new BadRequestException(
-                        'hours taken are required when approving a task',
+                        'You do not have the required permissions..',
                     );
                 }
                 await this.prismaService.user.update({
                     where: { id: task.assignedToId },
                     data: {
                         volunteeredHours: {
-                            increment: updateTaskDto.hoursTaken,
+                            increment: task.takenHours,
                         },
                     },
                 });
+            }
+            if(newStatus.crucial && newStatus.name == 'DONE') {
+                if (!updateTaskDto.hoursTaken) {
+                    throw new BadRequestException(
+                        'Taken hours are required when finishing a task..',
+                    );
+                }
             }
             return await this.prismaService.task.update({
                 where: {
@@ -283,6 +390,7 @@ export class TaskService {
                                 })) ?? [],
                         },
                     },
+                    takenHours: updateTaskDto.hoursTaken
                 },
             });
         } catch (error) {

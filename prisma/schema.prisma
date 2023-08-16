@@ -57,7 +57,7 @@ model User {
     role                 Role                  @relation(fields: [roleId], references: [id])
     email                String                @unique
     password             String
-    phoneNumber          String?                @unique
+    phoneNumber          String?               @unique
     firstName            String
     lastName             String
     additionalEmail      String?               @unique
@@ -218,6 +218,7 @@ model Task {
     priority     Priority   @default(NORMAL)
     difficulty   Difficulty @default(MEDIUM)
     statusId     Int
+    takenHours   Int?
     status       Status     @relation(fields: [statusId], references: [id])
     comments     Comment[]
     assignedBy   User       @relation(fields: [assignedById], references: [id], name: "assignedBy")
