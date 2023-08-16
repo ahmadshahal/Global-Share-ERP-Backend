@@ -160,7 +160,7 @@ export class UserService {
                 data: {
                     email: createUserDto.email,
                     roleId: createUserDto.roleId,
-                    password,
+                    password: password,
                     firstName: createUserDto.firstName,
                     lastName: createUserDto.lastName,
                     fullName:
@@ -181,6 +181,9 @@ export class UserService {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('User Not Found');
+                }
+                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
+                    throw new BadRequestException('Email already exists');
                 }
             }
             throw error;

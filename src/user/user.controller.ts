@@ -53,7 +53,7 @@ export class UserController {
     }
 
     @HttpCode(HttpStatus.OK)
-    // @Permissions({ action: Action.Update, subject: 'User' })
+    @Permissions({ action: Action.Update, subject: 'User' })
     @Put()
     async updateProfile(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.update(id, updateUserDto);

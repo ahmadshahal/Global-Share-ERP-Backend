@@ -314,33 +314,38 @@ export class TaskService {
                     status: true,
                 },
             });
+            const user = await this.prismaService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            const isOrchestrator = user.positions.some(
+                (position) =>
+                    position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                    position.position.squadId == newStatus.squadId,
+            );
+            if(task.assignedToId != userId && !isOrchestrator) {
+                throw new BadRequestException(
+                    'You do not have the required permissions..',
+                );
+            }
             if(task.status.name == 'APPROVED') {
                 throw new BadRequestException(
                     'Approved tasks can not be edited..',
                 );
             }
             if (newStatus.crucial && newStatus.name == 'APPROVED') {
-                const user = await this.prismaService.user.findUnique({
-                    where: {
-                        id: userId,
-                    },
-                    include: {
-                        positions: {
-                            include: {
-                                position: {
-                                    include: {
-                                        squad: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                });
-                const isOrchestrator = user.positions.some(
-                    (position) =>
-                        position.position.gsLevel == GsLevel.ORCHESTRATOR &&
-                        position.position.squadId == newStatus.squadId,
-                );
                 if (!isOrchestrator) {
                     throw new BadRequestException(
                         'You do not have the required permissions..',
