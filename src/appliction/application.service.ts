@@ -8,6 +8,7 @@ import {
     Application,
     RecruitmentStatus,
     QuestionType,
+    GsLevel,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -278,6 +279,7 @@ export class ApplicationService {
 
     async update(
         id: number,
+        userId: number,
         updateApplicationDto: UpdateApplicationDto,
     ): Promise<Application> {
         try {
@@ -286,8 +288,32 @@ export class ApplicationService {
                     where: {
                         id: id,
                     },
+                    include: {
+                        vacancy: {
+                            include: {
+                                position: true
+                            }
+                        }
+                    }
                 },
             );
+            const user = await this.prismaService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                    role: true
+                },
+            });
             if (!application) {
                 throw new BadRequestException('Application Not Found');
             }
@@ -295,8 +321,31 @@ export class ApplicationService {
                 application.status,
                 updateApplicationDto.status,
             );
+            const isOrchestrator = user.positions.some(
+                (position) =>
+                    position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                    position.position.squadId == application.vacancy.position.squadId,
+            );
             if (!isValidStatusUpdate) {
                 throw new BadRequestException('Invalid status update');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.HR_APPROVED && user.role.name != 'HR') {
+                throw new BadRequestException('You do not have the required permission..');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.HR_INTERVIEW_APPROVED && user.role.name != 'HR') {
+                throw new BadRequestException('You do not have the required permission..');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.ORCH_APPROVED && !isOrchestrator) {
+                throw new BadRequestException('You do not have the required permission..');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.TECH_INTERVIEW_APPROVED && !isOrchestrator) {
+                throw new BadRequestException('You do not have the required permission..');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.REFUSED && !isOrchestrator && user.role.name != 'HR') {
+                throw new BadRequestException('You do not have the required permission..');
+            }
+            if(updateApplicationDto.status == RecruitmentStatus.DONE && user.role.name != 'HR') {
+                throw new BadRequestException('You do not have the required permission..');
             }
             const email = await this.prismaService.email.findFirst({
                 where: {

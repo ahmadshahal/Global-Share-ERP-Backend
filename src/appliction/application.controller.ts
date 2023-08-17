@@ -25,6 +25,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationFilesValidator } from './validator/application.validator';
 import { FilterApplicationDto } from './dto/filter-application.dto';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('application')
@@ -73,10 +74,11 @@ export class ApplicationController {
     @HttpCode(HttpStatus.OK)
     @Put(':id')
     async update(
+        @UserId() userId: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateApplicationDto: UpdateApplicationDto,
     ) {
-        return await this.applicationService.update(id, updateApplicationDto);
+        return await this.applicationService.update(id, userId, updateApplicationDto);
     }
 
     @Permissions({ action: Action.Delete, subject: 'Application' })
