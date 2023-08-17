@@ -22,6 +22,7 @@ import { VacancyModule } from './vacancy/vacancy.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { DriveModule } from './drive/drive.module';
 import { RoleModule } from './role/role.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
     imports: [
@@ -63,6 +64,7 @@ import { RoleModule } from './role/role.module';
         }),
         DriveModule,
         RoleModule,
+        PublicModule,
     ],
 })
 export class AppModule {}
