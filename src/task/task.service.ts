@@ -335,12 +335,12 @@ export class TaskService {
                     position.position.gsLevel == GsLevel.ORCHESTRATOR &&
                     position.position.squadId == newStatus.squadId,
             );
-            if(task.assignedToId != userId && !isOrchestrator) {
+            if (task.assignedToId != userId && !isOrchestrator) {
                 throw new BadRequestException(
                     'You do not have the required permissions..',
                 );
             }
-            if(task.status.name == 'APPROVED') {
+            if (task.status.name == 'APPROVED') {
                 throw new BadRequestException(
                     'Approved tasks can not be edited..',
                 );
@@ -360,7 +360,7 @@ export class TaskService {
                     },
                 });
             }
-            if(newStatus.crucial && newStatus.name == 'DONE') {
+            if (newStatus.crucial && newStatus.name == 'DONE') {
                 if (!updateTaskDto.hoursTaken) {
                     throw new BadRequestException(
                         'Taken hours are required when finishing a task..',
@@ -395,7 +395,7 @@ export class TaskService {
                                 })) ?? [],
                         },
                     },
-                    takenHours: updateTaskDto.hoursTaken
+                    takenHours: updateTaskDto.hoursTaken,
                 },
             });
         } catch (error) {

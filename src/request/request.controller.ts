@@ -37,15 +37,13 @@ export class RequestController {
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Request' })
-    @Get(':generalType')
+    @Get('')
     async findAll(
-        @Param('generalType', RequestGeneralTypeValidationPipe)
-        generalType: RequestGeneralType,
-        @Query('skip', ParseIntPipe) skip: number = 0,
-        @Query('take', ParseIntPipe) take: number = 0,
+        @Query('skip') skip: number = 0,
+        @Query('take') take: number = 0,
         @Query() filters: FilterRequestDto,
     ) {
-        return this.requestService.readAll(generalType, filters, skip, take);
+        return this.requestService.readAll(filters, +skip, +take);
     }
 
     @HttpCode(HttpStatus.OK)
