@@ -7,5 +7,6 @@ import { DriveModule } from 'src/drive/drive.module';
     controllers: [ApplicationController],
     providers: [ApplicationService],
     imports: [DriveModule],
+    exports: [ApplicationService]
 })
 export class ApplicationModule {}

@@ -7,5 +7,6 @@ import { DriveModule } from 'src/drive/drive.module';
     providers: [SquadService],
     controllers: [SquadController],
     imports: [DriveModule],
+    exports: [SquadService]
 })
 export class SquadModule {}
