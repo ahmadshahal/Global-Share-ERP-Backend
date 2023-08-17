@@ -56,7 +56,9 @@ export class SquadService {
                 positions: {
                     include: {
                         users: true,
-                        vacancies: true,
+                        vacancies: {
+                            where: { isOpen: true },
+                        },
                     },
                 },
             },
