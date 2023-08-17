@@ -105,10 +105,13 @@ export class TaskService {
     }
 
     async readAll(filters: FilterTaskDto, skip: number, take: number) {
-        const { assignedTo, difficulty, priority, search, squad } = filters;
+        const { assignedTo, difficulty, priority, search, squad, status } =
+            filters;
         return await this.prismaService.status.findMany({
             where: {
                 squadId: squad ? +squad : undefined,
+                name: status ? status : undefined,
+                crucial: status ? true : undefined,
             },
             include: {
                 tasks: {
