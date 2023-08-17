@@ -53,7 +53,12 @@ export class SquadService {
                     : undefined,
             },
             include: {
-                positions: true,
+                positions: {
+                    include: {
+                        users: true,
+                        vacancies: true,
+                    },
+                },
             },
             skip: skip,
             take: take == 0 ? undefined : take,
