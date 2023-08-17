@@ -22,6 +22,7 @@ import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { FilterRequestDto } from './dto/filter-request-dto';
 import { RequestGeneralType } from 'src/request/enums/request-general-type.enum';
 import { RequestGeneralTypeValidationPipe } from './pipes/general-type.pipe';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('request')
@@ -31,19 +32,22 @@ export class RequestController {
     @HttpCode(HttpStatus.CREATED)
     @Permissions({ action: Action.Create, subject: 'Request' })
     @Post()
-    async create(@Body() createRequestDto: CreateRequestDto) {
-        return this.requestService.create(createRequestDto);
+    async create(
+        @UserId() userId: number,
+        @Body() createRequestDto: CreateRequestDto,
+    ) {
+        return this.requestService.create(userId, createRequestDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'Request' })
     @Get('')
     async findAll(
-        @Query('skip') skip: number = 0,
-        @Query('take') take: number = 0,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('take', ParseIntPipe) take: number = 0,
         @Query() filters: FilterRequestDto,
     ) {
-        return this.requestService.readAll(filters, +skip, +take);
+        return this.requestService.readAll(filters, skip, take);
     }
 
     @HttpCode(HttpStatus.OK)

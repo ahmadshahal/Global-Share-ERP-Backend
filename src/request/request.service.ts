@@ -4,7 +4,13 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 
-import { GsStatus, Prisma, RequestStatus, RequestType } from '@prisma/client';
+import {
+    GsLevel,
+    GsStatus,
+    Prisma,
+    RequestStatus,
+    RequestType,
+} from '@prisma/client';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { Request } from '.prisma/client';
@@ -17,10 +23,68 @@ import { RequestGeneralType } from 'src/request/enums/request-general-type.enum'
 export class RequestService {
     constructor(private prismaService: PrismaService) {}
 
-    async create(createRequestDto: CreateRequestDto): Promise<Request> {
+    async create(
+        userId: number,
+        createRequestDto: CreateRequestDto,
+    ): Promise<Request> {
         const user = await this.prismaService.user.findUnique({
-            where: { id: createRequestDto.userId },
+            where: {
+                id: createRequestDto.userId,
+            },
+            include: {
+                positions: {
+                    include: {
+                        position: {
+                            include: {
+                                squad: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
+        const applier = await this.prismaService.user.findUnique({
+            where: {
+                id: userId,
+            },
+            include: {
+                positions: {
+                    include: {
+                        position: {
+                            include: {
+                                squad: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        const isOrchestrator = applier.positions.some(
+            (position) =>
+                position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                user.positions.some(
+                    (position2) =>
+                        position2.position.squadId == position.position.squadId,
+                ),
+        );
+        if (
+            (createRequestDto.requestType == RequestType.FREEZE ||
+                createRequestDto.requestType == RequestType.PROTECTION) &&
+            userId != createRequestDto.userId
+        ) {
+            throw new BadRequestException(
+                'You do not have the required permissions..',
+            );
+        }
+        if (
+            (createRequestDto.requestType == RequestType.HEART_ADDITION ||
+                createRequestDto.requestType == RequestType.HEART_DELETION) &&
+            !isOrchestrator
+        ) {
+            throw new BadRequestException(
+                'You do not have the required permissions..',
+            );
+        }
         if (
             createRequestDto.requestType == RequestType.FREEZE &&
             !user.freezeCardsCount
