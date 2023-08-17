@@ -48,13 +48,8 @@ export class RequestService {
         });
     }
 
-    async readAll(
-        generalType: RequestGeneralType,
-        filters: FilterRequestDto,
-        skip: number,
-        take: number,
-    ) {
-        const { squads, volunteers, status, search } = filters;
+    async readAll(filters: FilterRequestDto, skip: number, take: number) {
+        const { squads, volunteers, status, search, generalType } = filters;
         const data = await this.prismaService.request.findMany({
             where: {
                 AND: [
@@ -77,23 +72,25 @@ export class RequestService {
                               }
                             : undefined,
                     },
+
                     {
-                        user: {
-                            positions: {
-                                some: {
-                                    position: squads
-                                        ? {
+                        user: squads
+                            ? {
+                                  positions: {
+                                      some: {
+                                          position: {
                                               squadId: {
                                                   in: squads
                                                       .split(',')
                                                       .map((value) => +value),
                                               },
-                                          }
-                                        : undefined,
-                                },
-                            },
-                        },
+                                          },
+                                      },
+                                  },
+                              }
+                            : undefined,
                     },
+
                     {
                         OR: search
                             ? [
