@@ -11,7 +11,7 @@ export class AuthorizationGuard implements CanActivate {
     ) {}
     async canActivate(context: ExecutionContext): Promise<boolean> {
         // TESTING PURPOSES..
-        return true;
+        // return true;
         const requiredPermission = this.reflector.getAllAndOverride(
             Permission_KEY,
             [context.getHandler(), context.getClass()],
@@ -38,10 +38,13 @@ export class AuthorizationGuard implements CanActivate {
                 id: request.user.id,
             },
             include: {
-                role: true
-            }
+                role: true,
+            },
         });
-        const isAdmin = user.role.name == 'Admin' 
-        return isAdmin || permission.roles.some((role) => role.roleId == user.roleId);
+        const isAdmin = user.role.name == 'Admin';
+        return (
+            isAdmin ||
+            permission.roles.some((role) => role.roleId == user.roleId)
+        );
     }
 }

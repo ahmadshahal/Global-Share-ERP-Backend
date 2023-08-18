@@ -11,10 +11,15 @@ import { exclude } from 'src/utils/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon from 'argon2';
 import { FilterUserDto } from './dto/filter-user.dto';
+import { DriveService } from 'src/drive/drive.service';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class UserService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private driveService: DriveService,
+    ) {}
 
     async readOne(id: number) {
         const user = await this.prismaService.user.findUnique({
@@ -273,15 +278,32 @@ export class UserService {
         }
     }
 
-    async update(id: number, updateUserDto: UpdateUserDto) {
+    async update(
+        id: number,
+        updateUserDto: UpdateUserDto,
+        cv: Express.Multer.File,
+    ) {
         try {
+            let user = await this.prismaService.user.findUnique({
+                where: { id },
+            });
+            let cvUrl = user.cv;
+            if (cv) {
+                const resource = await this.driveService.saveFile(
+                    updateUserDto.firstName ?? user.firstName,
+                    new PassThrough().end(cv.buffer),
+                    cv.mimetype,
+                );
+                cvUrl =
+                    resource.data.webViewLink || resource.data.webContentLink;
+            }
             const fullName =
                 updateUserDto.firstName?.trim() +
                 ' ' +
                 updateUserDto.middleName?.trim() +
                 ' ' +
                 updateUserDto.lastName?.trim();
-            const user = await this.prismaService.user.update({
+            user = await this.prismaService.user.update({
                 where: {
                     id: id,
                 },
@@ -297,6 +319,7 @@ export class UserService {
                     phoneNumber: updateUserDto.phoneNumber,
                     gsStatus: updateUserDto.gsStatus,
                     roleId: updateUserDto.roleId,
+                    cv: cvUrl,
                 },
                 include: {
                     role: {

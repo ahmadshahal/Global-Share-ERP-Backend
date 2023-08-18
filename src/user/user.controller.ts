@@ -6,11 +6,14 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    ParseFilePipe,
     ParseIntPipe,
     Post,
     Put,
     Query,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserId } from 'src/auth/decorator/user-id.decorator';
@@ -21,6 +24,8 @@ import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { jobDescriptionFileValidator } from 'src/position/validator/job-description-file.validator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('user')
@@ -54,15 +59,29 @@ export class UserController {
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'User' })
+    @UseInterceptors(FileInterceptor('cv'))
     @Put()
-    async updateProfile(@UserId() id: number, @Body() updateUserDto: UpdateUserDto) {
-        return await this.userService.update(id, updateUserDto);
+    async updateProfile(
+        @UserId() id: number,
+        @Body() updateUserDto: UpdateUserDto,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: jobDescriptionFileValidator,
+                fileIsRequired: false,
+            }),
+        )
+        cv: Express.Multer.File,
+    ) {
+        return await this.userService.update(id, updateUserDto,cv);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'User' })
     @Put(':id')
-    async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateUserDto: UpdateUserDto,
+    ) {
         return await this.userService.update(id, updateUserDto);
     }
 
