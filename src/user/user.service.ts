@@ -281,7 +281,7 @@ export class UserService {
     async update(
         id: number,
         updateUserDto: UpdateUserDto,
-        cv: Express.Multer.File,
+        cv: Express.Multer.File = null,
     ) {
         try {
             let user = await this.prismaService.user.findUnique({

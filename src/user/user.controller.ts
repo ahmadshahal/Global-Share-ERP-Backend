@@ -72,7 +72,7 @@ export class UserController {
         )
         cv: Express.Multer.File,
     ) {
-        return await this.userService.update(id, updateUserDto,cv);
+        return await this.userService.update(id, updateUserDto, cv);
     }
 
     @HttpCode(HttpStatus.OK)
