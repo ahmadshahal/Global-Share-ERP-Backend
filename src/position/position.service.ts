@@ -159,6 +159,9 @@ export class PositionService {
                 where: {
                     id: id,
                 },
+                include: {
+                    squad: true,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -205,6 +208,9 @@ export class PositionService {
                     weeklyHours: updatePositionDto.weeklyHours,
                     squadId: updatePositionDto.squadId,
                     jobDescription: jobDescriptionUrl,
+                },
+                include: {
+                    squad: true,
                 },
             });
         } catch (error) {
