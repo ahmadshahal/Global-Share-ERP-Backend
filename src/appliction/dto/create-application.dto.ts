@@ -7,15 +7,18 @@ import {
     IsString,
     ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
-class AnswerDto {
+export class AnswerDto {
     @IsNotEmpty()
+    @IsInt()
+    @Type(() => Number)
     questionId: number;
 
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
+    @Transform(({ value }) => JSON.parse(value))
     content: string[];
 }
 
@@ -30,8 +33,8 @@ export class CreateApplicationDto {
     email: string;
 
     @IsNotEmpty()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => AnswerDto)
+    // @ValidateNested({ each: true })
+    // @Type(() => AnswerDto)
+    @Transform(({ value }) => JSON.parse(value))
     answers: AnswerDto[];
 }
