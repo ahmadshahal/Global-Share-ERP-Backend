@@ -6,11 +6,14 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    ParseFilePipe,
     ParseIntPipe,
     Post,
     Put,
     Query,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
@@ -21,6 +24,8 @@ import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
 import { FilterPositionDto } from './dto/filter-position.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { jobDescriptionFileValidator } from './validator/job-description-file.validator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('position')
@@ -46,20 +51,45 @@ export class PositionController {
     }
 
     @HttpCode(HttpStatus.CREATED)
+    @UseInterceptors(FileInterceptor('jobDescription'))
     @Permissions({ action: Action.Create, subject: 'Position' })
     @Post()
-    async create(@Body() createPositionDto: CreatePositionDto) {
-        return await this.positionService.create(createPositionDto);
+    async create(
+        @Body() createPositionDto: CreatePositionDto,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: jobDescriptionFileValidator,
+                fileIsRequired: true,
+            }),
+        )
+        jobDescription: Express.Multer.File,
+    ) {
+        return await this.positionService.create(
+            createPositionDto,
+            jobDescription,
+        );
     }
 
     @HttpCode(HttpStatus.OK)
+    @UseInterceptors(FileInterceptor('jobDescription'))
     @Permissions({ action: Action.Update, subject: 'Position' })
     @Put(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updatePositionDto: UpdatePositionDto,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: jobDescriptionFileValidator,
+                fileIsRequired: false,
+            }),
+        )
+        jobDescription: Express.Multer.File,
     ) {
-        return await this.positionService.update(id, updatePositionDto);
+        return await this.positionService.update(
+            id,
+            updatePositionDto,
+            jobDescription,
+        );
     }
 
     @HttpCode(HttpStatus.OK)
