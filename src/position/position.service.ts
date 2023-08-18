@@ -139,6 +139,9 @@ export class PositionService {
                         resource.data.webViewLink ||
                         resource.data.webContentLink,
                 },
+                include: {
+                    squad: true,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
