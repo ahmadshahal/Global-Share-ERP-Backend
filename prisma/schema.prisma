@@ -42,13 +42,15 @@ model Squad {
     name                 String
     gsName               String
     description          String
-    imageUrl             String
+    imageUrl             String?
     positions            Position[]
     statuses             Status[]
     enterpriseObjectives EnterpriseObjective[] // for the future
     SquadObjectives      SquadObjective[]
     goals                Goal[]
     steps                Step[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 }
 
 model User {
@@ -83,6 +85,8 @@ model User {
     SquadObjectives      SquadObjective[]
     goals                Goal[]
     steps                Step[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([roleId])
 }
@@ -99,6 +103,8 @@ model Position {
     users          PositionUser[]
     competencies   PositionCompetency[]
     vacancies      Vacancy[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([squadId])
 }
@@ -111,6 +117,8 @@ model Request {
     reason      String?
     status      RequestStatus @default(PENDING)
     date        DateTime
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([userId])
 }
@@ -124,6 +132,8 @@ model PositionUser {
     startDate   DateTime
     endDate     DateTime?
     evaluations Evaluation[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([userId])
     @@index([positionId])
@@ -141,6 +151,8 @@ model Vacancy {
     preferred    String?
     applications Application[]
     questions    VacancyQuestion[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([positionId])
 }
@@ -153,6 +165,8 @@ model Application {
     status    RecruitmentStatus
     feedbacks RecruitmentFeedback[]
     answers   Answer[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([vacancyId])
 }
@@ -163,6 +177,8 @@ model RecruitmentFeedback {
     application   Application       @relation(fields: [applicationId], references: [id])
     type          RecruitmentStatus
     text          String
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([applicationId])
 }
@@ -173,6 +189,8 @@ model Question {
     type      QuestionType
     options   Json?
     positions VacancyQuestion[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 }
 
 model VacancyQuestion {
@@ -182,6 +200,8 @@ model VacancyQuestion {
     vacancyId  Int
     vacancy    Vacancy  @relation(fields: [vacancyId], references: [id])
     answer     Answer?
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([questionId])
     @@index([vacancyId])
@@ -194,6 +214,8 @@ model Answer {
     application   Application     @relation(fields: [applicationId], references: [id])
     questionId    Int             @unique
     question      VacancyQuestion @relation(fields: [questionId], references: [id])
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([applicationId])
     @@index([questionId])
@@ -206,6 +228,8 @@ model Status {
     squadId Int
     squad   Squad   @relation(fields: [squadId], references: [id])
     tasks   Task[]
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([squadId])
 }
@@ -215,6 +239,7 @@ model Task {
     title        String
     description  String
     url          String?
+    startDate    DateTime?
     deadline     DateTime
     priority     Priority   @default(NORMAL)
     difficulty   Difficulty @default(MEDIUM)
@@ -229,6 +254,8 @@ model Task {
     kpis         TaskKPI[]
     step         Step?      @relation(fields: [stepId], references: [id])
     stepId       Int?
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([assignedById])
     @@index([statusId])
@@ -243,6 +270,8 @@ model Comment {
     taskId   Int
     author   User   @relation(fields: [authorId], references: [id])
     authorId Int
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 
     @@index([taskId])
     @@index([authorId])
@@ -254,6 +283,8 @@ model Email {
     body              String
     recruitmentStatus RecruitmentStatus
     cc                String?
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 }
 
 model Feedback {
@@ -262,6 +293,8 @@ model Feedback {
     email String
     title String
     body  String
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 }
 
 enum GsLevel {

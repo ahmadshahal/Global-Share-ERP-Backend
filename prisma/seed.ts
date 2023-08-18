@@ -72,7 +72,7 @@ async function main() {
         58,
         60,
     ];
-    console.log(orch_permissions);
+
     const volunteer = await prismaService.role.create({
         data: {
             name: 'Volunteer',
@@ -114,6 +114,26 @@ async function main() {
             name: 'Admin',
         },
     });
+
+    const squad = await prismaService.squad.create({
+        data: {
+            name: 'HR Department',
+            gsName: 'Hive Squad',
+            description:
+                'Hive squad is the squad responsible for managing the enterprise human resources',
+            positions: {
+                create: {
+                    name: 'HR Manager',
+                    gsName: 'HR Manager',
+                    gsLevel: 'ORCHESTRATOR',
+                    weeklyHours: 20,
+                },
+            },
+        },
+        include: {
+            positions: true,
+        },
+    });
     const hashedPassword = await argon.hash('12345678');
     await prismaService.user.create({
         data: {
@@ -123,38 +143,44 @@ async function main() {
             firstName: 'admin',
             lastName: 'doe',
             roleId: admin.id,
+            positions: {
+                create: {
+                    positionId: squad.positions[0].id,
+                    startDate: new Date(),
+                },
+            },
         },
     });
-    await prismaService.user.create({
-        data: {
-            email: 'hr@gs.com',
-            password: hashedPassword,
-            phoneNumber: '123456789',
-            firstName: 'HR_Member',
-            lastName: 'doe',
-            roleId: hr_member.id,
-        },
-    });
-    await prismaService.user.create({
-        data: {
-            email: 'orch@gs.com',
-            password: hashedPassword,
-            phoneNumber: '123456798',
-            firstName: 'Orch',
-            lastName: 'doe',
-            roleId: orch_member.id,
-        },
-    });
-    await prismaService.user.create({
-        data: {
-            email: 'volunteer@gs.com',
-            password: hashedPassword,
-            phoneNumber: '12345679',
-            firstName: 'Volunteer',
-            lastName: 'doe',
-            roleId: volunteer.id,
-        },
-    });
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'hr@gs.com',
+    //         password: hashedPassword,
+    //         phoneNumber: '123456789',
+    //         firstName: 'HR_Member',
+    //         lastName: 'doe',
+    //         roleId: hr_member.id,
+    //     },
+    // });
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'orch@gs.com',
+    //         password: hashedPassword,
+    //         phoneNumber: '123456798',
+    //         firstName: 'Orch',
+    //         lastName: 'doe',
+    //         roleId: orch_member.id,
+    //     },
+    // });
+    // await prismaService.user.create({
+    //     data: {
+    //         email: 'volunteer@gs.com',
+    //         password: hashedPassword,
+    //         phoneNumber: '12345679',
+    //         firstName: 'Volunteer',
+    //         lastName: 'doe',
+    //         roleId: volunteer.id,
+    //     },
+    // });
 }
 main()
     .then(async () => {

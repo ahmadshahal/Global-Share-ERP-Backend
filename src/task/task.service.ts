@@ -160,9 +160,9 @@ export class TaskService {
                             },
                         ],
                     },
-                    // orderBy: {
-                    //     createdAt: 'desc',
-                    // },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
                     skip: skip,
                     take: take == 0 ? undefined : take,
                     include: {
