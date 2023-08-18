@@ -10,10 +10,15 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AddUserToPositionDto } from './dto/add-user-to-position.dto';
 import { FilterPositionDto } from './dto/filter-position.dto';
+import { DriveService } from 'src/drive/drive.service';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class PositionService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+        private driveService: DriveService,
+    ) {}
 
     async readOne(id: number): Promise<Position> {
         const position = await this.prismaService.position.findUnique({
@@ -76,8 +81,16 @@ export class PositionService {
         };
     }
 
-    async create(createPositionDto: CreatePositionDto): Promise<Position> {
+    async create(
+        createPositionDto: CreatePositionDto,
+        jobDescription: Express.Multer.File,
+    ): Promise<Position> {
         try {
+            const resource = await this.driveService.saveFile(
+                createPositionDto.gsName,
+                new PassThrough().end(jobDescription.buffer),
+                jobDescription.mimetype,
+            );
             return await this.prismaService.position.create({
                 data: {
                     name: createPositionDto.name,
@@ -85,6 +98,9 @@ export class PositionService {
                     gsLevel: createPositionDto.gsLevel,
                     weeklyHours: createPositionDto.weeklyHours,
                     squadId: createPositionDto.squadId,
+                    jobDescription:
+                        resource.data.webViewLink ||
+                        resource.data.webContentLink,
                 },
             });
         } catch (error) {
@@ -122,8 +138,22 @@ export class PositionService {
     async update(
         id: number,
         updatePositionDto: UpdatePositionDto,
+        jobDescription: Express.Multer.File,
     ): Promise<Position> {
         try {
+            const position = await this.prismaService.position.findUnique({
+                where: { id },
+            });
+            let jobDescriptionUrl = position.jobDescription;
+            if (jobDescription) {
+                const resource = await this.driveService.saveFile(
+                    updatePositionDto.gsName,
+                    new PassThrough().end(jobDescription.buffer),
+                    jobDescription.mimetype,
+                );
+                jobDescriptionUrl =
+                    resource.data.webViewLink || resource.data.webContentLink;
+            }
             return await this.prismaService.position.update({
                 where: {
                     id: id,
@@ -134,6 +164,7 @@ export class PositionService {
                     gsLevel: updatePositionDto.gsLevel,
                     weeklyHours: updatePositionDto.weeklyHours,
                     squadId: updatePositionDto.squadId,
+                    jobDescription: jobDescriptionUrl,
                 },
             });
         } catch (error) {

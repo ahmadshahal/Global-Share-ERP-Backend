@@ -88,16 +88,17 @@ model User {
 }
 
 model Position {
-    id           Int                  @id @default(autoincrement())
-    name         String
-    gsName       String
-    weeklyHours  Int
-    gsLevel      GsLevel
-    squadId      Int
-    squad        Squad                @relation(fields: [squadId], references: [id])
-    users        PositionUser[]
-    competencies PositionCompetency[]
-    vacancies    Vacancy[]
+    id             Int                  @id @default(autoincrement())
+    name           String
+    gsName         String
+    weeklyHours    Int
+    gsLevel        GsLevel
+    squadId        Int
+    jobDescription String?
+    squad          Squad                @relation(fields: [squadId], references: [id])
+    users          PositionUser[]
+    competencies   PositionCompetency[]
+    vacancies      Vacancy[]
 
     @@index([squadId])
 }

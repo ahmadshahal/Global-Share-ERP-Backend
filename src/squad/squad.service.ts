@@ -53,7 +53,18 @@ export class SquadService {
                     : undefined,
             },
             include: {
-                positions: true,
+                positions: {
+                    include: {
+                        users: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                        vacancies: {
+                            where: { isOpen: true },
+                        },
+                    },
+                },
             },
             skip: skip,
             take: take == 0 ? undefined : take,
@@ -127,7 +138,10 @@ export class SquadService {
         image: Express.Multer.File,
     ) {
         try {
-            let imageUrl = undefined;
+            const squad = await this.prismaService.squad.findUnique({
+                where: { id },
+            });
+            let imageUrl = squad.imageUrl;
             if (image) {
                 const resource = await this.driveService.saveFile(
                     updateSquadDto.gsName,

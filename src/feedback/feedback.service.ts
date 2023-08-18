@@ -12,7 +12,7 @@ export class FeedbackService {
         return await this.prismaService.feedback.create({
             data: {
                 name: createFeedbackDto.name,
-                title: createFeedbackDto.title,
+                title: 'Website Feedback',
                 email: createFeedbackDto.email,
                 body: createFeedbackDto.body,
             },

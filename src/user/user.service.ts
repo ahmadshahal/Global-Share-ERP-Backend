@@ -164,9 +164,9 @@ export class UserService {
                     firstName: createUserDto.firstName,
                     lastName: createUserDto.lastName,
                     fullName:
-                        createUserDto.firstName.trim() +
+                        createUserDto.firstName?.trim() +
                         ' ' +
-                        createUserDto.lastName.trim() +
+                        createUserDto.lastName?.trim() +
                         ' ',
                     gsStatus: GsStatus.ACTIVE,
                     positions: {

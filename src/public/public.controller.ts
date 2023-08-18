@@ -20,6 +20,8 @@ import { CreateApplicationDto } from 'src/appliction/dto/create-application.dto'
 import { ApplicationFilesValidator } from 'src/appliction/validator/application.validator';
 import { ApplicationService } from 'src/appliction/application.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { FeedbackService } from 'src/feedback/feedback.service';
+import { CreateFeedbackDto } from 'src/feedback/dto/create-feedback.dto';
 
 @Controller('public')
 export class PublicController {
@@ -27,6 +29,7 @@ export class PublicController {
         private squadService: SquadService,
         private vacancyService: VacancyService,
         private applicationService: ApplicationService,
+        private feedbackService: FeedbackService,
     ) {}
 
     @HttpCode(HttpStatus.OK)
@@ -47,6 +50,12 @@ export class PublicController {
         @Query() filters: FilterVacancyDto,
     ) {
         return await this.vacancyService.readAll(filters, skip, take);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('feedback')
+    async createFeedback(@Body() createFeedbackDto: CreateFeedbackDto) {
+        return await this.feedbackService.create(createFeedbackDto);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -5,9 +5,9 @@ export class CreateFeedbackDto {
     @MinLength(3)
     name: string;
 
-    @IsNotEmpty()
-    @MinLength(3)
-    title: string;
+    // @IsNotEmpty()
+    // @MinLength(3)
+    // title: string;
 
     @IsNotEmpty()
     @IsEmail()

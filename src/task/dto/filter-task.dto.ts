@@ -20,4 +20,7 @@ export class FilterTaskDto {
 
     @IsOptional()
     assignedTo: string;
+
+    @IsOptional()
+    status: string;
 }
