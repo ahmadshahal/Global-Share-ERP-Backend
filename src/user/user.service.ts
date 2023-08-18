@@ -36,6 +36,7 @@ export class UserService {
                         permissions: true,
                     },
                 },
+                requests: true,
             },
         });
         if (!user) {
