@@ -139,6 +139,9 @@ export class PositionService {
                         resource.data.webViewLink ||
                         resource.data.webContentLink,
                 },
+                include: {
+                    squad: true,
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -155,6 +158,9 @@ export class PositionService {
             return await this.prismaService.position.delete({
                 where: {
                     id: id,
+                },
+                include: {
+                    squad: true,
                 },
             });
         } catch (error) {
@@ -202,6 +208,9 @@ export class PositionService {
                     weeklyHours: updatePositionDto.weeklyHours,
                     squadId: updatePositionDto.squadId,
                     jobDescription: jobDescriptionUrl,
+                },
+                include: {
+                    squad: true,
                 },
             });
         } catch (error) {
