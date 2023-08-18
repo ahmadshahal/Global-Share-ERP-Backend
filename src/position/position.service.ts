@@ -37,44 +37,81 @@ export class PositionService {
 
     async readAll(filters: FilterPositionDto, skip: number, take: number) {
         const { squads, level, search } = filters;
-        const data = await this.prismaService.position.findMany({
-            where: {
-                AND: [
-                    {
-                        squadId: squads
-                            ? {
-                                  in: squads?.split(',').map((value) => +value),
-                              }
-                            : undefined,
-                    },
-                    {
-                        gsLevel: level
-                            ? {
-                                  in: level
-                                      ?.split(',')
-                                      .map((value) => GsLevel[value]),
-                              }
-                            : undefined,
-                    },
-                    {
-                        OR: search
-                            ? [
-                                  {
-                                      name: { contains: search },
-                                      gsName: { contains: search },
-                                  },
-                              ]
-                            : undefined,
-                    },
-                ],
-            },
-            include: {
-                squad: true,
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
-        const count = await this.prismaService.position.count();
+        const [data, count] = await this.prismaService.$transaction([
+            this.prismaService.position.findMany({
+                where: {
+                    AND: [
+                        {
+                            squadId: squads
+                                ? {
+                                      in: squads
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            gsLevel: level
+                                ? {
+                                      in: level
+                                          ?.split(',')
+                                          .map((value) => GsLevel[value]),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          name: { contains: search },
+                                          gsName: { contains: search },
+                                      },
+                                  ]
+                                : undefined,
+                        },
+                    ],
+                },
+                include: {
+                    squad: true,
+                },
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.position.count({
+                where: {
+                    AND: [
+                        {
+                            squadId: squads
+                                ? {
+                                      in: squads
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            gsLevel: level
+                                ? {
+                                      in: level
+                                          ?.split(',')
+                                          .map((value) => GsLevel[value]),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          name: { contains: search },
+                                          gsName: { contains: search },
+                                      },
+                                  ]
+                                : undefined,
+                        },
+                    ],
+                },
+            }),
+        ]);
         return {
             data,
             count,

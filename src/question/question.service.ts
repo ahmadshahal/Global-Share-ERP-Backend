@@ -33,33 +33,52 @@ export class QuestionService {
 
     async readAll(filters: FilterQuestionDto, skip: number, take: number) {
         const { search, type } = filters;
-        const questions = await this.prisma.question.findMany({
-            where: {
-                AND: [
-                    {
-                        type: type
-                            ? {
-                                  in: type
-                                      .split(',')
-                                      .map((value) => QuestionType[value]),
-                              }
-                            : undefined,
-                    },
-                    {
-                        text: search ? { contains: search } : undefined,
-                    },
-                ],
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
+        const [questions, count] = await this.prisma.$transaction([
+            this.prisma.question.findMany({
+                where: {
+                    AND: [
+                        {
+                            type: type
+                                ? {
+                                      in: type
+                                          .split(',')
+                                          .map((value) => QuestionType[value]),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            text: search ? { contains: search } : undefined,
+                        },
+                    ],
+                },
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prisma.question.count({
+                where: {
+                    AND: [
+                        {
+                            type: type
+                                ? {
+                                      in: type
+                                          .split(',')
+                                          .map((value) => QuestionType[value]),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            text: search ? { contains: search } : undefined,
+                        },
+                    ],
+                },
+            }),
+        ]);
         const parsedQuestions = questions.map((question) => {
             if (question.options) {
                 question.options = JSON.parse(question.options.toString());
             }
             return question;
         });
-        const count = await this.prisma.question.count();
         return {
             data: parsedQuestions,
             count,

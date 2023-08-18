@@ -114,72 +114,147 @@ export class RequestService {
 
     async readAll(filters: FilterRequestDto, skip: number, take: number) {
         const { squads, volunteers, status, search, generalType } = filters;
-        const data = await this.prismaService.request.findMany({
-            where: {
-                AND: [
-                    {
-                        requestType:
-                            generalType == RequestGeneralType.PERSONAL
+        const [data, count] = await this.prismaService.$transaction([
+            this.prismaService.request.findMany({
+                where: {
+                    AND: [
+                        {
+                            requestType:
+                                generalType == RequestGeneralType.PERSONAL
+                                    ? {
+                                          in: ['FREEZE', 'PROTECTION'],
+                                      }
+                                    : {
+                                          in: [
+                                              'HEART_ADDITION',
+                                              'HEART_DELETION',
+                                          ],
+                                      },
+                        },
+                        {
+                            status: status
                                 ? {
-                                      in: ['FREEZE', 'PROTECTION'],
+                                      in: status
+                                          ?.split(',')
+                                          .map((value) => RequestStatus[value]),
                                   }
-                                : {
-                                      in: ['HEART_ADDITION', 'HEART_DELETION'],
-                                  },
-                    },
-                    {
-                        status: status
-                            ? {
-                                  in: status
-                                      ?.split(',')
-                                      .map((value) => RequestStatus[value]),
-                              }
-                            : undefined,
-                    },
+                                : undefined,
+                        },
 
-                    {
-                        user: squads
-                            ? {
-                                  positions: {
-                                      some: {
-                                          position: {
-                                              squadId: {
-                                                  in: squads
-                                                      .split(',')
-                                                      .map((value) => +value),
+                        {
+                            user: squads
+                                ? {
+                                      positions: {
+                                          some: {
+                                              position: {
+                                                  squadId: {
+                                                      in: squads
+                                                          .split(',')
+                                                          .map(
+                                                              (value) => +value,
+                                                          ),
+                                                  },
                                               },
                                           },
                                       },
-                                  },
-                              }
-                            : undefined,
-                    },
+                                  }
+                                : undefined,
+                        },
 
-                    {
-                        OR: search
-                            ? [
-                                  {
-                                      user: {
-                                          fullName: { contains: search },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          user: {
+                                              fullName: { contains: search },
+                                          },
                                       },
-                                  },
-                                  {
-                                      user: {
-                                          arabicFullName: { contains: search },
+                                      {
+                                          user: {
+                                              arabicFullName: {
+                                                  contains: search,
+                                              },
+                                          },
                                       },
-                                  },
-                              ]
-                            : undefined,
-                    },
-                ],
-            },
-            include: {
-                user: true,
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
-        const count = await this.prismaService.request.count();
+                                  ]
+                                : undefined,
+                        },
+                    ],
+                },
+                include: {
+                    user: true,
+                },
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.request.count({
+                where: {
+                    AND: [
+                        {
+                            requestType:
+                                generalType == RequestGeneralType.PERSONAL
+                                    ? {
+                                          in: ['FREEZE', 'PROTECTION'],
+                                      }
+                                    : {
+                                          in: [
+                                              'HEART_ADDITION',
+                                              'HEART_DELETION',
+                                          ],
+                                      },
+                        },
+                        {
+                            status: status
+                                ? {
+                                      in: status
+                                          ?.split(',')
+                                          .map((value) => RequestStatus[value]),
+                                  }
+                                : undefined,
+                        },
+
+                        {
+                            user: squads
+                                ? {
+                                      positions: {
+                                          some: {
+                                              position: {
+                                                  squadId: {
+                                                      in: squads
+                                                          .split(',')
+                                                          .map(
+                                                              (value) => +value,
+                                                          ),
+                                                  },
+                                              },
+                                          },
+                                      },
+                                  }
+                                : undefined,
+                        },
+
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          user: {
+                                              fullName: { contains: search },
+                                          },
+                                      },
+                                      {
+                                          user: {
+                                              arabicFullName: {
+                                                  contains: search,
+                                              },
+                                          },
+                                      },
+                                  ]
+                                : undefined,
+                        },
+                    ],
+                },
+            }),
+        ]);
         console.log(data);
         return {
             data,

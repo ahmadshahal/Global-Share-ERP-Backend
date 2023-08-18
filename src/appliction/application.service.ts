@@ -37,8 +37,8 @@ export class ApplicationService {
                     include: {
                         question: {
                             include: {
-                                question: true
-                            }
+                                question: true,
+                            },
                         },
                     },
                 },
@@ -47,11 +47,11 @@ export class ApplicationService {
                     include: {
                         position: {
                             include: {
-                                squad: true
-                            }
+                                squad: true,
+                            },
                         },
-                    }
-                }
+                    },
+                },
             },
         });
         if (!application) {
@@ -59,75 +59,125 @@ export class ApplicationService {
         }
         application.answers = application.answers.map((answer) => {
             answer.content = JSON.parse(answer.content.toString());
-            answer.question.question.options = JSON.parse(answer.question.question.options?.toString() ?? null);
+            answer.question.question.options = JSON.parse(
+                answer.question.question.options?.toString() ?? null,
+            );
             return answer;
         });
-        
+
         return application;
     }
 
     async readAll(filters: FilterApplicationDto, skip: number, take: number) {
         const { positions, squads, status, vacancies } = filters;
-        const applications = await this.prismaService.application.findMany({
-            where: {
-                status: status
-                    ? {
-                          in: status
-                              ?.split(',')
-                              .map((value) => RecruitmentStatus[value]),
-                      }
-                    : undefined,
-                vacancy: {
-                    id: vacancies
-                        ? { in: vacancies?.split(',').map((value) => +value) }
+        const [applications, count] = await this.prismaService.$transaction([
+            // Original findMany query
+            this.prismaService.application.findMany({
+                where: {
+                    status: status
+                        ? {
+                              in: status
+                                  ?.split(',')
+                                  .map((value) => RecruitmentStatus[value]),
+                          }
                         : undefined,
-                    position: {
-                        id: positions
+                    vacancy: {
+                        id: vacancies
                             ? {
-                                  in: positions
+                                  in: vacancies
                                       ?.split(',')
                                       .map((value) => +value),
                               }
                             : undefined,
-                        squadId: squads
-                            ? { in: squads?.split(',').map((value) => +value) }
-                            : undefined,
-                    },
-                },
-            },
-            include: {
-                answers: {
-                    include: {
-                        question: {
-                            include: {
-                                question: true
-                            }
-                        },
-                    },
-                },
-                feedbacks: true,
-                vacancy: {
-                    include: {
                         position: {
-                            include: {
-                                squad: true
-                            }
+                            id: positions
+                                ? {
+                                      in: positions
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
+                            squadId: squads
+                                ? {
+                                      in: squads
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
                         },
-                    }
-                }
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
+                    },
+                },
+                include: {
+                    answers: {
+                        include: {
+                            question: {
+                                include: {
+                                    question: true,
+                                },
+                            },
+                        },
+                    },
+                    feedbacks: true,
+                    vacancy: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.application.count({
+                where: {
+                    status: status
+                        ? {
+                              in: status
+                                  ?.split(',')
+                                  .map((value) => RecruitmentStatus[value]),
+                          }
+                        : undefined,
+                    vacancy: {
+                        id: vacancies
+                            ? {
+                                  in: vacancies
+                                      ?.split(',')
+                                      .map((value) => +value),
+                              }
+                            : undefined,
+                        position: {
+                            id: positions
+                                ? {
+                                      in: positions
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
+                            squadId: squads
+                                ? {
+                                      in: squads
+                                          ?.split(',')
+                                          .map((value) => +value),
+                                  }
+                                : undefined,
+                        },
+                    },
+                },
+            }),
+        ]);
         const parsedApplications = applications.map((application) => {
             application.answers = application.answers.map((answer) => {
                 answer.content = JSON.parse(answer.content.toString());
-                answer.question.question.options = JSON.parse(answer.question.question.options?.toString() ?? null);
+                answer.question.question.options = JSON.parse(
+                    answer.question.question.options?.toString() ?? null,
+                );
                 return answer;
             });
             return application;
         });
-        const count = await this.prismaService.application.count();
         return {
             data: parsedApplications,
             count,
@@ -139,6 +189,7 @@ export class ApplicationService {
         files: Express.Multer.File[],
     ): Promise<Application> {
         try {
+            console.log(createApplicationDto);
             const applicationFiles =
                 files?.map(async (file) => {
                     const res = await this.driveService.saveFile(
@@ -198,12 +249,12 @@ export class ApplicationService {
                         include: {
                             question: {
                                 include: {
-                                    question: true
-                                }
+                                    question: true,
+                                },
                             },
                         },
                     },
-                }
+                },
             });
             const email = await this.prismaService.email.findFirst({
                 where: {
@@ -255,8 +306,8 @@ export class ApplicationService {
                         include: {
                             question: {
                                 include: {
-                                    question: true
-                                }
+                                    question: true,
+                                },
                             },
                         },
                     },
@@ -291,10 +342,10 @@ export class ApplicationService {
                     include: {
                         vacancy: {
                             include: {
-                                position: true
-                            }
-                        }
-                    }
+                                position: true,
+                            },
+                        },
+                    },
                 },
             );
             const user = await this.prismaService.user.findUnique({
@@ -311,7 +362,7 @@ export class ApplicationService {
                             },
                         },
                     },
-                    role: true
+                    role: true,
                 },
             });
             if (!application) {
@@ -324,28 +375,63 @@ export class ApplicationService {
             const isOrchestrator = user.positions.some(
                 (position) =>
                     position.position.gsLevel == GsLevel.ORCHESTRATOR &&
-                    position.position.squadId == application.vacancy.position.squadId,
+                    position.position.squadId ==
+                        application.vacancy.position.squadId,
             );
             if (!isValidStatusUpdate) {
                 throw new BadRequestException('Invalid status update');
             }
-            if(updateApplicationDto.status == RecruitmentStatus.HR_APPROVED && user.role.name != 'HR') {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status == RecruitmentStatus.HR_APPROVED &&
+                user.role.name != 'HR'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
-            if(updateApplicationDto.status == RecruitmentStatus.HR_INTERVIEW_APPROVED && user.role.name != 'HR') {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status ==
+                    RecruitmentStatus.HR_INTERVIEW_APPROVED &&
+                user.role.name != 'HR'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
-            if(updateApplicationDto.status == RecruitmentStatus.ORCH_APPROVED && !isOrchestrator) {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status ==
+                    RecruitmentStatus.ORCH_APPROVED &&
+                !isOrchestrator
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
-            if(updateApplicationDto.status == RecruitmentStatus.TECH_INTERVIEW_APPROVED && !isOrchestrator) {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status ==
+                    RecruitmentStatus.TECH_INTERVIEW_APPROVED &&
+                !isOrchestrator
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
-            if(updateApplicationDto.status == RecruitmentStatus.REFUSED && !isOrchestrator && user.role.name != 'HR') {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status == RecruitmentStatus.REFUSED &&
+                !isOrchestrator &&
+                user.role.name != 'HR'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
-            if(updateApplicationDto.status == RecruitmentStatus.DONE && user.role.name != 'HR') {
-                throw new BadRequestException('You do not have the required permission..');
+            if (
+                updateApplicationDto.status == RecruitmentStatus.DONE &&
+                user.role.name != 'HR'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
             }
             const email = await this.prismaService.email.findFirst({
                 where: {
@@ -376,8 +462,8 @@ export class ApplicationService {
                             include: {
                                 question: {
                                     include: {
-                                        question: true
-                                    }
+                                        question: true,
+                                    },
                                 },
                             },
                         },

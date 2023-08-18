@@ -47,100 +47,182 @@ export class UserService {
 
     async readAll(filters: FilterUserDto, skip: number = 0, take: number = 0) {
         const { status, positions, level, squads, search } = filters;
-        const users = await this.prismaService.user.findMany({
-            where: {
-                AND: [
-                    {
-                        gsStatus: status
-                            ? {
-                                  in: status
-                                      ?.split(',')
-                                      .map((value) => GsStatus[value]),
-                              }
-                            : undefined,
-                    },
-                    {
-                        positions: {
-                            some: positions
+        const [users, count] = await this.prismaService.$transaction([
+            this.prismaService.user.findMany({
+                where: {
+                    AND: [
+                        {
+                            gsStatus: status
                                 ? {
-                                      positionId: {
-                                          in: positions
-                                              ?.split(',')
-                                              .map((value) => +value),
-                                      },
-                                  }
-                                : level
-                                ? {
-                                      position: {
-                                          gsLevel: {
-                                              in: level
-                                                  ?.split(',')
-                                                  .map(
-                                                      (value) => GsLevel[value],
-                                                  ),
-                                          },
-                                      },
-                                  }
-                                : squads
-                                ? {
-                                      position: {
-                                          squadId: {
-                                              in: squads
-                                                  ?.split(',')
-                                                  .map((value) => +value),
-                                          },
-                                      },
+                                      in: status
+                                          ?.split(',')
+                                          .map((value) => GsStatus[value]),
                                   }
                                 : undefined,
                         },
-                    },
-                    {
-                        OR: [
-                            {
-                                fullName: {
-                                    contains: search,
-                                },
+                        {
+                            positions: {
+                                some: positions
+                                    ? {
+                                          positionId: {
+                                              in: positions
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          },
+                                      }
+                                    : level
+                                    ? {
+                                          position: {
+                                              gsLevel: {
+                                                  in: level
+                                                      ?.split(',')
+                                                      .map(
+                                                          (value) =>
+                                                              GsLevel[value],
+                                                      ),
+                                              },
+                                          },
+                                      }
+                                    : squads
+                                    ? {
+                                          position: {
+                                              squadId: {
+                                                  in: squads
+                                                      ?.split(',')
+                                                      .map((value) => +value),
+                                              },
+                                          },
+                                      }
+                                    : undefined,
                             },
-                            {
-                                firstName: {
-                                    contains: search,
+                        },
+                        {
+                            OR: [
+                                {
+                                    fullName: {
+                                        contains: search,
+                                    },
                                 },
-                            },
-                            {
-                                lastName: {
-                                    contains: search,
+                                {
+                                    firstName: {
+                                        contains: search,
+                                    },
                                 },
-                            },
-                            {
-                                middleName: {
-                                    contains: search,
+                                {
+                                    lastName: {
+                                        contains: search,
+                                    },
                                 },
-                            },
-                            {
-                                arabicFullName: {
-                                    contains: search,
+                                {
+                                    middleName: {
+                                        contains: search,
+                                    },
                                 },
-                            },
-                        ],
-                    },
-                ],
-            },
-            include: {
-                positions: {
-                    include: {
-                        position: {
-                            include: {
-                                squad: true,
+                                {
+                                    arabicFullName: {
+                                        contains: search,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.user.count({
+                where: {
+                    AND: [
+                        {
+                            gsStatus: status
+                                ? {
+                                      in: status
+                                          ?.split(',')
+                                          .map((value) => GsStatus[value]),
+                                  }
+                                : undefined,
+                        },
+                        {
+                            positions: {
+                                some: positions
+                                    ? {
+                                          positionId: {
+                                              in: positions
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          },
+                                      }
+                                    : level
+                                    ? {
+                                          position: {
+                                              gsLevel: {
+                                                  in: level
+                                                      ?.split(',')
+                                                      .map(
+                                                          (value) =>
+                                                              GsLevel[value],
+                                                      ),
+                                              },
+                                          },
+                                      }
+                                    : squads
+                                    ? {
+                                          position: {
+                                              squadId: {
+                                                  in: squads
+                                                      ?.split(',')
+                                                      .map((value) => +value),
+                                              },
+                                          },
+                                      }
+                                    : undefined,
+                            },
+                        },
+                        {
+                            OR: [
+                                {
+                                    fullName: {
+                                        contains: search,
+                                    },
+                                },
+                                {
+                                    firstName: {
+                                        contains: search,
+                                    },
+                                },
+                                {
+                                    lastName: {
+                                        contains: search,
+                                    },
+                                },
+                                {
+                                    middleName: {
+                                        contains: search,
+                                    },
+                                },
+                                {
+                                    arabicFullName: {
+                                        contains: search,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            }),
+        ]);
         const editedUser = users.map((user) => exclude(user, ['password']));
-        const count = await this.prismaService.user.count();
         return {
             data: editedUser,
             count,

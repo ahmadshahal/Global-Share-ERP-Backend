@@ -46,34 +46,57 @@ export class VacancyService {
 
     async readAll(filters: FilterVacancyDto, skip: number, take: number) {
         const { isOpen, positions, squads } = filters;
-        const data = await this.prismaService.vacancy.findMany({
-            where: {
-                isOpen: isOpen ? (isOpen == 1 ? true : false) : undefined,
-                position: positions
-                    ? {
-                          id: {
-                              in: positions?.split(',').map((value) => +value),
-                          },
-                      }
-                    : squads
-                    ? {
-                          squadId: {
-                              in: squads?.split(',').map((value) => +value),
-                          },
-                      }
-                    : undefined,
-            },
-            include: {
-                position: {
-                    include: {
-                        squad: true,
+        const [data, count] = await this.prismaService.$transaction([
+            this.prismaService.vacancy.findMany({
+                where: {
+                    isOpen: isOpen ? (isOpen == 1 ? true : false) : undefined,
+                    position: positions
+                        ? {
+                              id: {
+                                  in: positions
+                                      ?.split(',')
+                                      .map((value) => +value),
+                              },
+                          }
+                        : squads
+                        ? {
+                              squadId: {
+                                  in: squads?.split(',').map((value) => +value),
+                              },
+                          }
+                        : undefined,
+                },
+                include: {
+                    position: {
+                        include: {
+                            squad: true,
+                        },
                     },
                 },
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
-        const count = await this.prismaService.vacancy.count();
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.vacancy.count({
+                where: {
+                    isOpen: isOpen ? (isOpen == 1 ? true : false) : undefined,
+                    position: positions
+                        ? {
+                              id: {
+                                  in: positions
+                                      ?.split(',')
+                                      .map((value) => +value),
+                              },
+                          }
+                        : squads
+                        ? {
+                              squadId: {
+                                  in: squads?.split(',').map((value) => +value),
+                              },
+                          }
+                        : undefined,
+                },
+            }),
+        ]);
         return {
             data,
             count,

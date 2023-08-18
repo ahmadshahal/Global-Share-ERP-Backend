@@ -38,27 +38,46 @@ export class EmailService {
 
     async readAll(filters: FilterEmailDto, skip: number, take: number) {
         const { search } = filters;
-        const data = await this.prismaService.email.findMany({
-            where: {
-                OR: search
-                    ? [
-                          {
-                              title: {
-                                  contains: search,
+        const [data, count] = await this.prismaService.$transaction([
+            this.prismaService.email.findMany({
+                where: {
+                    OR: search
+                        ? [
+                              {
+                                  title: {
+                                      contains: search,
+                                  },
                               },
-                          },
-                          {
-                              body: {
-                                  contains: search,
+                              {
+                                  body: {
+                                      contains: search,
+                                  },
                               },
-                          },
-                      ]
-                    : undefined,
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
-        const count = await this.prismaService.email.count();
+                          ]
+                        : undefined,
+                },
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.email.count({
+                where: {
+                    OR: search
+                        ? [
+                              {
+                                  title: {
+                                      contains: search,
+                                  },
+                              },
+                              {
+                                  body: {
+                                      contains: search,
+                                  },
+                              },
+                          ]
+                        : undefined,
+                },
+            }),
+        ]);
         return {
             data,
             count,

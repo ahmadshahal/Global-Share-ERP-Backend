@@ -35,41 +35,60 @@ export class SquadService {
 
     async readAll(filters: FilterSquadDto, skip: number, take: number) {
         const { search } = filters;
-        const data = await this.prismaService.squad.findMany({
-            where: {
-                OR: search
-                    ? [
-                          {
-                              name: {
-                                  contains: search,
+        const [data, count] = await this.prismaService.$transaction([
+            this.prismaService.squad.findMany({
+                where: {
+                    OR: search
+                        ? [
+                              {
+                                  name: {
+                                      contains: search,
+                                  },
                               },
-                          },
-                          {
-                              gsName: {
-                                  contains: search,
+                              {
+                                  gsName: {
+                                      contains: search,
+                                  },
                               },
-                          },
-                      ]
-                    : undefined,
-            },
-            include: {
-                positions: {
-                    include: {
-                        users: {
-                            include: {
-                                user: true,
+                          ]
+                        : undefined,
+                },
+                include: {
+                    positions: {
+                        include: {
+                            users: {
+                                include: {
+                                    user: true,
+                                },
                             },
-                        },
-                        vacancies: {
-                            where: { isOpen: true },
+                            vacancies: {
+                                where: { isOpen: true },
+                            },
                         },
                     },
                 },
-            },
-            skip: skip,
-            take: take == 0 ? undefined : take,
-        });
-        const count = await this.prismaService.squad.count();
+                skip: skip,
+                take: take == 0 ? undefined : take,
+            }),
+            this.prismaService.squad.count({
+                where: {
+                    OR: search
+                        ? [
+                              {
+                                  name: {
+                                      contains: search,
+                                  },
+                              },
+                              {
+                                  gsName: {
+                                      contains: search,
+                                  },
+                              },
+                          ]
+                        : undefined,
+                },
+            }),
+        ]);
         return {
             data,
             count,
