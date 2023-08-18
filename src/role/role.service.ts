@@ -6,6 +6,11 @@ export class RoleService {
     constructor(private prismaService: PrismaService) {}
 
     async readAll() {
-        return await this.prismaService.role.findMany();
+        return await this.prismaService.role.findMany({
+            include: {
+                permissions: true,
+                users: true,
+            }
+        });
     }
 }
