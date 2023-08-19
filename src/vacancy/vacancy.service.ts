@@ -199,7 +199,7 @@ export class VacancyService {
                 }
                 if (error.code === PrismaErrorCodes.RelationConstrainFailed) {
                     throw new BadRequestException(
-                        'Unable to delete a related Vacancy',
+                        'Can not update a vacancy with existing applications',
                     );
                 }
             }
