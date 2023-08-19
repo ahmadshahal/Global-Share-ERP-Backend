@@ -98,17 +98,18 @@ export class EmailService {
 
     async update(id: number, updateEmailDto: UpdateEmailDto) {
         try {
-            const oldEmail = await this.prismaService.email.findFirst({
-                where: {
-                    recruitmentStatus: updateEmailDto.recruitmentStatus,
-                    id: { not: id },
-                },
-            });
-
-            if (oldEmail) {
-                throw new BadRequestException(
-                    'An email with the same status already exists',
-                );
+            if(updateEmailDto.recruitmentStatus) {
+                const oldEmail = await this.prismaService.email.findFirst({
+                    where: {
+                        recruitmentStatus: updateEmailDto.recruitmentStatus ?? null,
+                        id: { not: id },
+                    },
+                });
+                if (oldEmail) {
+                    throw new BadRequestException(
+                        'An email with the same status already exists',
+                    );
+                }
             }
             return await this.prismaService.email.update({
                 where: {
