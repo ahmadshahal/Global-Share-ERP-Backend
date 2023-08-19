@@ -298,6 +298,36 @@ export class TaskService {
                         },
                     },
                 },
+                include: {
+                    assignedBy: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            email: true,
+                            middleName: true,
+                        },
+                    },
+                    assignedTo: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            email: true,
+                            middleName: true,
+                        },
+                    },
+                    comments: {
+                        include: {
+                            author: {
+                                select: {
+                                    firstName: true,
+                                    lastName: true,
+                                    email: true,
+                                    middleName: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
