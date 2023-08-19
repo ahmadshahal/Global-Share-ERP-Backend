@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
@@ -23,9 +23,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { DriveModule } from './drive/drive.module';
 import { RoleModule } from './role/role.module';
 import { PublicModule } from './public/public.module';
+import { UserService } from './user/user.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
+        ScheduleModule.forRoot(),
         PrismaModule,
         UserModule,
         AuthModule,
@@ -67,4 +70,10 @@ import { PublicModule } from './public/public.module';
         PublicModule,
     ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+    constructor(private userService: UserService) {}
+    onModuleInit() {
+        console.log('hearts count started');
+        this.userService.addHeartsAndFreezeCards();
+    }
+}

@@ -13,6 +13,7 @@ import * as argon from 'argon2';
 import { FilterUserDto } from './dto/filter-user.dto';
 import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UserService {
@@ -361,5 +362,22 @@ export class UserService {
             }
             throw error;
         }
+    }
+
+    @Cron('0 0 1 1,4,7,10 *')
+    async addHeartsAndFreezeCards() {
+        await this.prismaService.user.updateMany({
+            data: {
+                heartsCount: { increment: 3 },
+            },
+        });
+        await this.prismaService.user.updateMany({
+            where: {
+                freezeCardsCount: { lt: 6 },
+            },
+            data: {
+                freezeCardsCount: { increment: 1 },
+            },
+        });
     }
 }

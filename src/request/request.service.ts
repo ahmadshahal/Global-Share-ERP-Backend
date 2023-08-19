@@ -272,7 +272,6 @@ export class RequestService {
                 },
             }),
         ]);
-        console.log(data);
         return {
             data,
             count,

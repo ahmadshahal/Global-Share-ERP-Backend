@@ -3,12 +3,14 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
+import { replace } from 'lodash';
 import {
     Prisma,
     Application,
     RecruitmentStatus,
     QuestionType,
     GsLevel,
+    Email,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -18,6 +20,7 @@ import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
 import { FilterApplicationDto } from './dto/filter-application.dto';
+import { EmailPlaceholders, PlaceholderEnum } from './enums/Placeholder.enum';
 
 @Injectable()
 export class ApplicationService {
@@ -189,7 +192,6 @@ export class ApplicationService {
         files: Express.Multer.File[],
     ): Promise<Application> {
         try {
-            console.log(createApplicationDto);
             const applicationFiles =
                 files?.map(async (file) => {
                     const res = await this.driveService.saveFile(
@@ -383,7 +385,8 @@ export class ApplicationService {
             }
             if (
                 updateApplicationDto.status == RecruitmentStatus.HR_APPROVED &&
-                user.role.name != 'HR'
+                user.role.name != 'HR' &&
+                user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',
@@ -440,7 +443,7 @@ export class ApplicationService {
             });
             if (!email) {
                 throw new BadRequestException(
-                    'Application Status Has No Emails',
+                    'Application Status Has No Emails, Add one and try again',
                 );
             }
             const updatedApplication =
@@ -449,6 +452,11 @@ export class ApplicationService {
                         id,
                     },
                     data: {
+                        recruiterId:
+                            updateApplicationDto.status ==
+                            RecruitmentStatus.HR_APPROVED
+                                ? userId
+                                : undefined,
                         status: updateApplicationDto.status,
                         feedbacks: {
                             create: {
@@ -510,5 +518,54 @@ export class ApplicationService {
             (previousStatus == RecruitmentStatus.TECH_INTERVIEW_APPROVED &&
                 newStatus == RecruitmentStatus.DONE)
         );
+    }
+
+    async sendEmail(applicationId) {
+        const application = await this.prismaService.application.findUnique({
+            where: { id: +applicationId.id },
+            include: {
+                vacancy: {
+                    include: { position: { include: { squad: true } } },
+                },
+                recruiter: {
+                    select: {
+                        appointlet: true,
+                    },
+                },
+            },
+        });
+        const squadId = application.vacancy.position.squadId;
+        const squad = await this.prismaService.squad.findUnique({
+            where: { id: squadId },
+            include: {
+                positions: {
+                    where: {
+                        gsLevel: GsLevel.ORCHESTRATOR,
+                    },
+                    include: {
+                        users: {
+                            include: {
+                                user: {
+                                    select: { appointlet: true },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        const orchAppointlet = squad.positions[0].users[0].user.appointlet;
+        const recruiterAppointlet = application.recruiter.appointlet;
+        const squadName = squad.name;
+        const positionName = application.vacancy.position.name;
+        const email = await this.prismaService.email.findUnique({
+            where: { id: 1 },
+        });
+        const emailBody = email.body
+            .replace(EmailPlaceholders.ORCH_APPOINTLET, orchAppointlet)
+            .replace(EmailPlaceholders.HR_APPOINTLET, recruiterAppointlet)
+            .replace(EmailPlaceholders.SQUAD, squadName)
+            .replace(EmailPlaceholders.POSITION, positionName);
+        return emailBody;
     }
 }

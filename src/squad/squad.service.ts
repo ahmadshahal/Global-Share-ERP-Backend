@@ -98,7 +98,6 @@ export class SquadService {
                 hasVacancies,
             };
         });
-        console.log(squads);
         return {
             data: squads,
             count,

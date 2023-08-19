@@ -41,7 +41,7 @@ model Squad {
     id                   Int                   @id @default(autoincrement())
     name                 String
     gsName               String
-    description          String
+    description          String                @db.LongText
     imageUrl             String?
     positions            Position[]
     statuses             Status[]
@@ -49,8 +49,8 @@ model Squad {
     SquadObjectives      SquadObjective[]
     goals                Goal[]
     steps                Step[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt            DateTime              @default(now())
+    updatedAt            DateTime              @updatedAt
 }
 
 model User {
@@ -60,7 +60,7 @@ model User {
     email                String                @unique
     password             String
     phoneNumber          String?               @unique
-    cv                   String?               
+    cv                   String?
     firstName            String
     lastName             String
     additionalEmail      String?               @unique
@@ -68,7 +68,7 @@ model User {
     fullName             String?
     arabicFullName       String?
     appointlet           String?
-    bio                  String?
+    bio                  String?               @db.LongText
     tasksCompleted       Int                   @default(0)
     volunteeredHours     Float                 @default(0)
     heartsCount          Int                   @default(0)
@@ -79,6 +79,7 @@ model User {
     positions            PositionUser[]
     comments             Comment[]
     requests             Request[]
+    applications         Application[]
     assignedTasks        Task[]                @relation("assignedBy")
     assignedToTasks      Task[]                @relation("assignedTo")
     doneEvaluations      Evaluation[]
@@ -86,8 +87,8 @@ model User {
     SquadObjectives      SquadObjective[]
     goals                Goal[]
     steps                Step[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt            DateTime              @default(now())
+    updatedAt            DateTime              @updatedAt
 
     @@index([roleId])
 }
@@ -104,8 +105,8 @@ model Position {
     users          PositionUser[]
     competencies   PositionCompetency[]
     vacancies      Vacancy[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt      DateTime             @default(now())
+    updatedAt      DateTime             @updatedAt
 
     @@index([squadId])
 }
@@ -115,11 +116,11 @@ model Request {
     userId      Int
     user        User          @relation(fields: [userId], references: [id])
     requestType RequestType
-    reason      String?
+    reason      String?       @db.Text
     status      RequestStatus @default(PENDING)
     date        DateTime
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
 
     @@index([userId])
 }
@@ -133,8 +134,8 @@ model PositionUser {
     startDate   DateTime
     endDate     DateTime?
     evaluations Evaluation[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
 
     @@index([userId])
     @@index([positionId])
@@ -145,31 +146,34 @@ model Vacancy {
     positionId   Int
     position     Position          @relation(fields: [positionId], references: [id])
     isOpen       Boolean           @default(true)
-    effect       String
-    brief        String
-    tasks        String
-    required     String
-    preferred    String?
+    effect       String            @db.LongText
+    brief        String            @db.LongText
+    tasks        String            @db.LongText
+    required     String            @db.LongText
+    preferred    String?           @db.LongText
     applications Application[]
     questions    VacancyQuestion[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
 
     @@index([positionId])
 }
 
 model Application {
-    id        Int                   @id @default(autoincrement())
-    email     String
-    vacancyId Int
-    vacancy   Vacancy               @relation(fields: [vacancyId], references: [id])
-    status    RecruitmentStatus
-    feedbacks RecruitmentFeedback[]
-    answers   Answer[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    id          Int                   @id @default(autoincrement())
+    email       String
+    recruiterId Int?
+    recruiter   User?                 @relation(fields: [recruiterId], references: [id])
+    vacancyId   Int
+    vacancy     Vacancy               @relation(fields: [vacancyId], references: [id])
+    status      RecruitmentStatus
+    feedbacks   RecruitmentFeedback[]
+    answers     Answer[]
+    createdAt   DateTime              @default(now())
+    updatedAt   DateTime              @updatedAt
 
     @@index([vacancyId])
+    @@index([recruiterId])
 }
 
 model RecruitmentFeedback {
@@ -177,21 +181,21 @@ model RecruitmentFeedback {
     applicationId Int
     application   Application       @relation(fields: [applicationId], references: [id])
     type          RecruitmentStatus
-    text          String
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    text          String            @db.LongText
+    createdAt     DateTime          @default(now())
+    updatedAt     DateTime          @updatedAt
 
     @@index([applicationId])
 }
 
 model Question {
     id        Int               @id @default(autoincrement())
-    text      String
+    text      String            @db.LongText
     type      QuestionType
     options   Json?
     positions VacancyQuestion[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt DateTime          @default(now())
+    updatedAt DateTime          @updatedAt
 }
 
 model VacancyQuestion {
@@ -201,8 +205,8 @@ model VacancyQuestion {
     vacancyId  Int
     vacancy    Vacancy  @relation(fields: [vacancyId], references: [id])
     answer     Answer?
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
     @@index([questionId])
     @@index([vacancyId])
@@ -215,22 +219,22 @@ model Answer {
     application   Application     @relation(fields: [applicationId], references: [id])
     questionId    Int             @unique
     question      VacancyQuestion @relation(fields: [questionId], references: [id])
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
 
     @@index([applicationId])
     @@index([questionId])
 }
 
 model Status {
-    id      Int     @id @default(autoincrement())
-    name    String
-    crucial Boolean @default(false)
-    squadId Int
-    squad   Squad   @relation(fields: [squadId], references: [id])
-    tasks   Task[]
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    id        Int      @id @default(autoincrement())
+    name      String
+    crucial   Boolean  @default(false)
+    squadId   Int
+    squad     Squad    @relation(fields: [squadId], references: [id])
+    tasks     Task[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([squadId])
 }
@@ -238,7 +242,7 @@ model Status {
 model Task {
     id           Int        @id @default(autoincrement())
     title        String
-    description  String
+    description  String     @db.Text
     url          String?
     startDate    DateTime?
     deadline     DateTime
@@ -255,8 +259,8 @@ model Task {
     kpis         TaskKPI[]
     step         Step?      @relation(fields: [stepId], references: [id])
     stepId       Int?
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
 
     @@index([assignedById])
     @@index([statusId])
@@ -265,14 +269,14 @@ model Task {
 }
 
 model Comment {
-    id       Int    @id @default(autoincrement())
-    content  String
-    task     Task   @relation(fields: [taskId], references: [id])
-    taskId   Int
-    author   User   @relation(fields: [authorId], references: [id])
-    authorId Int
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    id        Int      @id @default(autoincrement())
+    content   String   @db.LongText
+    task      Task     @relation(fields: [taskId], references: [id])
+    taskId    Int
+    author    User     @relation(fields: [authorId], references: [id])
+    authorId  Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([taskId])
     @@index([authorId])
@@ -281,21 +285,21 @@ model Comment {
 model Email {
     id                Int               @id @default(autoincrement())
     title             String
-    body              String
+    body              String            @db.LongText
     recruitmentStatus RecruitmentStatus
     cc                String?
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
 }
 
 model Feedback {
-    id    Int    @id @default(autoincrement())
-    name  String
-    email String
-    title String
-    body  String
-    createdAt            DateTime   @default(now())
-    updatedAt            DateTime   @updatedAt
+    id        Int      @id @default(autoincrement())
+    name      String
+    email     String
+    title     String
+    body      String   @db.LongText
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 enum GsLevel {

@@ -78,7 +78,11 @@ export class ApplicationController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateApplicationDto: UpdateApplicationDto,
     ) {
-        return await this.applicationService.update(id, userId, updateApplicationDto);
+        return await this.applicationService.update(
+            id,
+            userId,
+            updateApplicationDto,
+        );
     }
 
     @Permissions({ action: Action.Delete, subject: 'Application' })
@@ -86,5 +90,10 @@ export class ApplicationController {
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
         return await this.applicationService.delete(id);
+    }
+
+    @Post('email/:id')
+    async send(@Param() id: number) {
+        return await this.applicationService.sendEmail(id);
     }
 }

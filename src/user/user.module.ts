@@ -7,5 +7,6 @@ import { DriveModule } from 'src/drive/drive.module';
     controllers: [UserController],
     providers: [UserService],
     imports: [DriveModule],
+    exports: [UserService],
 })
 export class UserModule {}
