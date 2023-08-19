@@ -101,6 +101,18 @@ export class RequestService {
                 "You don't have enough protection cards",
             );
         }
+        const oldRequest = await this.prismaService.request.findFirst({
+            where: {
+                userId: createRequestDto.userId,
+                requestType: createRequestDto.requestType,
+                status: RequestStatus.PENDING,
+            },
+        });
+        if (oldRequest) {
+            throw new BadRequestException(
+                "You can't apply to a new request while having a pending one",
+            );
+        }
         return await this.prismaService.request.create({
             data: {
                 userId: createRequestDto.userId,
