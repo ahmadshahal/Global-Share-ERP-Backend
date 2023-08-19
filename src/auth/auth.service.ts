@@ -22,7 +22,7 @@ export class AuthService {
             where: {
                 email: loginDto.email,
             },
-            include: { positions: true },
+            include: { positions: { include: { position: true } } },
         });
         if (!user) {
             throw new BadRequestException('Credentials Incorrect');

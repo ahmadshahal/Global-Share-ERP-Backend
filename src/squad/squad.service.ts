@@ -89,8 +89,18 @@ export class SquadService {
                 },
             }),
         ]);
+        const squads = data.map((squad) => {
+            const hasVacancies = squad.positions.some((position) => {
+                return position.vacancies.length !== 0;
+            });
+            return {
+                ...squad,
+                hasVacancies,
+            };
+        });
+        console.log(squads);
         return {
-            data,
+            squads,
             count,
         };
     }

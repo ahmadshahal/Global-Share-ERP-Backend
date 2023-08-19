@@ -67,6 +67,9 @@ export class RequestService {
                         position2.position.squadId == position.position.squadId,
                 ),
         );
+        const isGeneral =
+            createRequestDto.requestType ===
+            (RequestType.HEART_DELETION || RequestType.HEART_ADDITION);
         if (
             (createRequestDto.requestType == RequestType.FREEZE ||
                 createRequestDto.requestType == RequestType.PROTECTION) &&
@@ -103,7 +106,9 @@ export class RequestService {
                 userId: createRequestDto.userId,
                 requestType: createRequestDto.requestType,
                 reason: createRequestDto.reason,
-                status: createRequestDto.status,
+                status: isGeneral
+                    ? RequestStatus.ORCH_APPROVED
+                    : RequestStatus.PENDING,
                 date: new Date(),
             },
             include: {
