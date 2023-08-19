@@ -67,6 +67,9 @@ export class RequestService {
                         position2.position.squadId == position.position.squadId,
                 ),
         );
+        const isGeneral =
+            createRequestDto.requestType === RequestType.HEART_DELETION ||
+            createRequestDto.requestType === RequestType.HEART_ADDITION;
         if (
             (createRequestDto.requestType == RequestType.FREEZE ||
                 createRequestDto.requestType == RequestType.PROTECTION) &&
@@ -98,12 +101,26 @@ export class RequestService {
                 "You don't have enough protection cards",
             );
         }
+        const oldRequest = await this.prismaService.request.findFirst({
+            where: {
+                userId: createRequestDto.userId,
+                requestType: createRequestDto.requestType,
+                status: RequestStatus.PENDING,
+            },
+        });
+        if (oldRequest) {
+            throw new BadRequestException(
+                "You can't apply to a new request while having a pending one",
+            );
+        }
         return await this.prismaService.request.create({
             data: {
                 userId: createRequestDto.userId,
                 requestType: createRequestDto.requestType,
                 reason: createRequestDto.reason,
-                status: createRequestDto.status,
+                status: isGeneral
+                    ? RequestStatus.ORCH_APPROVED
+                    : RequestStatus.PENDING,
                 date: new Date(),
             },
             include: {

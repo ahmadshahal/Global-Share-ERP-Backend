@@ -22,6 +22,7 @@ export class AuthService {
             where: {
                 email: loginDto.email,
             },
+            include: { positions: { include: { position: true } } },
         });
         if (!user) {
             throw new BadRequestException('Credentials Incorrect');
