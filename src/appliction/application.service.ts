@@ -268,12 +268,16 @@ export class ApplicationService {
                     'Application Status Has No Emails',
                 );
             }
+            const formattedEmail = await this.formatEmail(
+                application.id,
+                email.body,
+            );
             this.mailService
                 .sendMail({
                     to: [application.email],
                     subject: email.title,
-                    text: email.body,
-                    cc: email.cc?.split(','),
+                    text: formattedEmail,
+                    bcc: email.cc?.split(','),
                 })
                 .then((success) => {
                     return success;
@@ -525,9 +529,9 @@ export class ApplicationService {
         );
     }
 
-    async sendEmail(applicationId) {
+    private async formatEmail(applicationId: number, email: string) {
         const application = await this.prismaService.application.findUnique({
-            where: { id: +applicationId.id },
+            where: { id: +applicationId },
             include: {
                 vacancy: {
                     include: { position: { include: { squad: true } } },
@@ -559,14 +563,11 @@ export class ApplicationService {
                 },
             },
         });
-        const orchAppointlet = squad.positions[0].users[0].user.appointlet;
-        const recruiterAppointlet = application.recruiter.appointlet;
+        const orchAppointlet = squad.positions[0].users[0].user?.appointlet;
+        const recruiterAppointlet = application.recruiter?.appointlet;
         const squadName = squad.name;
         const positionName = application.vacancy.position.name;
-        const email = await this.prismaService.email.findUnique({
-            where: { id: 1 },
-        });
-        const emailBody = email.body
+        const emailBody = email
             .replace(EmailPlaceholders.ORCH_APPOINTLET, orchAppointlet)
             .replace(EmailPlaceholders.HR_APPOINTLET, recruiterAppointlet)
             .replace(EmailPlaceholders.SQUAD, squadName)

@@ -91,9 +91,4 @@ export class ApplicationController {
     async delete(@Param('id', ParseIntPipe) id: number) {
         return await this.applicationService.delete(id);
     }
-
-    @Post('email/:id')
-    async send(@Param() id: number) {
-        return await this.applicationService.sendEmail(id);
-    }
 }

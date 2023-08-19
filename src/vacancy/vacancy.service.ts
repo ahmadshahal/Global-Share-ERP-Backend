@@ -219,7 +219,13 @@ export class VacancyService {
                 },
                 include: {
                     question: true,
-                    answer: true,
+                    answers: {
+                        where: {
+                            application: {
+                                vacancyId: id,
+                            },
+                        },
+                    },
                 },
                 skip: skip,
                 take: take,
