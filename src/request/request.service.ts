@@ -68,8 +68,8 @@ export class RequestService {
                 ),
         );
         const isGeneral =
-            createRequestDto.requestType ===
-            (RequestType.HEART_DELETION || RequestType.HEART_ADDITION);
+            createRequestDto.requestType === RequestType.HEART_DELETION ||
+            createRequestDto.requestType === RequestType.HEART_ADDITION;
         if (
             (createRequestDto.requestType == RequestType.FREEZE ||
                 createRequestDto.requestType == RequestType.PROTECTION) &&
