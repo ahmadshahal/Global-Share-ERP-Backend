@@ -100,7 +100,7 @@ export class SquadService {
         });
         console.log(squads);
         return {
-            squads,
+            data: squads,
             count,
         };
     }
