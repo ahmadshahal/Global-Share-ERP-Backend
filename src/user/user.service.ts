@@ -309,12 +309,15 @@ export class UserService {
                 cvUrl =
                     resource.data.webViewLink || resource.data.webContentLink;
             }
+            const firstName = updateUserDto.firstName ?? user.firstName;
+            const middleName = updateUserDto.middleName ?? user.middleName;
+            const lastName = updateUserDto.lastName ?? user.lastName;
             const fullName =
-                updateUserDto.firstName?.trim() +
+                firstName.trim() +
                 ' ' +
-                updateUserDto.middleName?.trim() +
+                (middleName.trim() ?? ' ') +
                 ' ' +
-                updateUserDto.lastName?.trim();
+                lastName.trim();
             user = await this.prismaService.user.update({
                 where: {
                     id: id,
@@ -377,18 +380,19 @@ export class UserService {
 
     @Cron('0 0 1 1,4,7,10 *')
     async addHeartsAndFreezeCards() {
-        await this.prismaService.user.updateMany({
-            data: {
-                heartsCount: { increment: 3 },
-            },
-        });
-        await this.prismaService.user.updateMany({
-            where: {
-                freezeCardsCount: { lt: 6 },
-            },
-            data: {
-                freezeCardsCount: { increment: 1 },
-            },
-        });
+        console.log('adding cards at' + new Date().toDateString());
+        // await this.prismaService.user.updateMany({
+        //     data: {
+        //         heartsCount: { increment: 3 },
+        //     },
+        // });
+        // await this.prismaService.user.updateMany({
+        //     where: {
+        //         freezeCardsCount: { lt: 6 },
+        //     },
+        //     data: {
+        //         freezeCardsCount: { increment: 1 },
+        //     },
+        // });
     }
 }
