@@ -264,6 +264,17 @@ export class UserService {
                         },
                     },
                 },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
             return exclude(user, ['password']);
         } catch (error) {

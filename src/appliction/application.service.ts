@@ -395,7 +395,7 @@ export class ApplicationService {
             if (
                 updateApplicationDto.status ==
                     RecruitmentStatus.HR_INTERVIEW_APPROVED &&
-                user.role.name != 'HR'
+                user.role.name != 'HR' && user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',
@@ -404,7 +404,7 @@ export class ApplicationService {
             if (
                 updateApplicationDto.status ==
                     RecruitmentStatus.ORCH_APPROVED &&
-                !isOrchestrator
+                !isOrchestrator && user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',
@@ -413,7 +413,7 @@ export class ApplicationService {
             if (
                 updateApplicationDto.status ==
                     RecruitmentStatus.TECH_INTERVIEW_APPROVED &&
-                !isOrchestrator
+                !isOrchestrator && user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',
@@ -422,7 +422,7 @@ export class ApplicationService {
             if (
                 updateApplicationDto.status == RecruitmentStatus.REFUSED &&
                 !isOrchestrator &&
-                user.role.name != 'HR'
+                user.role.name != 'HR' && user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',
@@ -430,7 +430,7 @@ export class ApplicationService {
             }
             if (
                 updateApplicationDto.status == RecruitmentStatus.DONE &&
-                user.role.name != 'HR'
+                user.role.name != 'HR' && user.role.name != 'Admin'
             ) {
                 throw new BadRequestException(
                     'You do not have the required permission..',

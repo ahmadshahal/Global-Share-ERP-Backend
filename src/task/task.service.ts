@@ -376,12 +376,12 @@ export class TaskService {
                     'You do not have the required permissions..',
                 );
             }
-            if (task.status.name == 'APPROVED') {
+            if (task.status.name == 'Approved') {
                 throw new BadRequestException(
                     'Approved tasks can not be edited..',
                 );
             }
-            if (newStatus.crucial && newStatus.name == 'APPROVED') {
+            if (newStatus.crucial && newStatus.name == 'Approved') {
                 if (!isOrchestrator) {
                     throw new BadRequestException(
                         'You do not have the required permissions..',
@@ -396,7 +396,7 @@ export class TaskService {
                     },
                 });
             }
-            if (newStatus.crucial && newStatus.name == 'DONE') {
+            if (newStatus.crucial && newStatus.name == 'Done') {
                 if (!updateTaskDto.hoursTaken) {
                     throw new BadRequestException(
                         'Taken hours are required when finishing a task..',
