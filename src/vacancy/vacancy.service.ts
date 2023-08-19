@@ -45,26 +45,42 @@ export class VacancyService {
     }
 
     async readAll(filters: FilterVacancyDto, skip: number, take: number) {
-        const { isOpen, positions, squads } = filters;
+        const { isOpen, positions, squads, search } = filters;
         const [data, count] = await this.prismaService.$transaction([
             this.prismaService.vacancy.findMany({
                 where: {
-                    isOpen: isOpen ? (isOpen == 1 ? true : false) : undefined,
-                    position: positions
-                        ? {
-                              id: {
-                                  in: positions
-                                      ?.split(',')
-                                      .map((value) => +value),
-                              },
-                          }
-                        : squads
-                        ? {
-                              squadId: {
-                                  in: squads?.split(',').map((value) => +value),
-                              },
-                          }
-                        : undefined,
+                    AND: [
+                        {
+                            isOpen: isOpen
+                                ? isOpen == 1
+                                    ? true
+                                    : false
+                                : undefined,
+                        },
+                        {
+                            position: positions
+                                ? {
+                                      id: {
+                                          in: positions
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      },
+                                  }
+                                : squads
+                                ? {
+                                      squadId: {
+                                          in: squads
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      },
+                                  }
+                                : search
+                                ? {
+                                      name: { contains: search },
+                                  }
+                                : undefined,
+                        },
+                    ],
                 },
                 include: {
                     position: {
