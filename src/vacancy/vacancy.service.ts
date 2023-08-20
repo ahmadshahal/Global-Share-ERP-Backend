@@ -29,6 +29,11 @@ export class VacancyService {
                     include: {
                         question: true,
                     },
+                    orderBy: {
+                        question: {
+                            type: 'asc'
+                        }
+                    }
                 },
             },
         });
