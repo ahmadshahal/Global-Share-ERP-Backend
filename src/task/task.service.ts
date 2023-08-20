@@ -26,6 +26,7 @@ export class TaskService {
                     include: {
                         assignedBy: {
                             select: {
+                                id: true,
                                 firstName: true,
                                 lastName: true,
                                 email: true,
@@ -34,6 +35,7 @@ export class TaskService {
                         },
                         assignedTo: {
                             select: {
+                                id: true,
                                 firstName: true,
                                 lastName: true,
                                 email: true,
@@ -44,6 +46,7 @@ export class TaskService {
                             include: {
                                 author: {
                                     select: {
+                                        id: true,
                                         firstName: true,
                                         lastName: true,
                                         email: true,
