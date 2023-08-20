@@ -19,6 +19,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { AuthorizationGuard } from 'src/auth/guard/authorization.guard';
 import { Action } from '@prisma/client';
 import { Permissions } from 'src/auth/decorator/permissions.decorator';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtGuard, AuthorizationGuard)
 @Controller('status')
@@ -56,8 +57,11 @@ export class StatusController {
     @HttpCode(HttpStatus.CREATED)
     @Permissions({ action: Action.Create, subject: 'Status' })
     @Post()
-    async create(@Body() createStatusDto: CreateStatusDto) {
-        return await this.statusService.create(createStatusDto);
+    async create(
+        @UserId() userId: number,
+        @Body() createStatusDto: CreateStatusDto,
+    ) {
+        return await this.statusService.create(userId, createStatusDto);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -3,7 +3,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Status } from '@prisma/client';
+import { GsLevel, Prisma, Status } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
@@ -56,7 +56,32 @@ export class StatusService {
         });
     }
 
-    async create(createStatusDto: CreateStatusDto): Promise<Status> {
+    async create(userId: number, createStatusDto: CreateStatusDto): Promise<Status> {
+        const user = await this.prismaService.user.findUnique({
+            where: {
+                id: userId,
+            },
+            include: {
+                positions: {
+                    include: {
+                        position: {
+                            include: {
+                                squad: true,
+                            },
+                        },
+                    },
+                },
+                role: true,
+            },
+        });
+        const isOrchestrator = user.positions.some(
+            (position) =>
+                position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                position.position.squadId == createStatusDto.squadId,
+        );
+        if(!isOrchestrator && user.role.name != 'Admin') {
+            throw new BadRequestException('You do not have the required permissions')
+        }
         try {
             return await this.prismaService.status.create({
                 data: {

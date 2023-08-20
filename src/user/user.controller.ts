@@ -58,7 +58,7 @@ export class UserController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Permissions({ action: Action.Update, subject: 'User' })
+    // @Permissions({ action: Action.Update, subject: 'User' })
     @UseInterceptors(FileInterceptor('cv'))
     @Put()
     async updateProfile(
