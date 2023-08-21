@@ -98,10 +98,11 @@ export class EmailService {
 
     async update(id: number, updateEmailDto: UpdateEmailDto) {
         try {
-            if(updateEmailDto.recruitmentStatus) {
+            if (updateEmailDto.recruitmentStatus) {
                 const oldEmail = await this.prismaService.email.findFirst({
                     where: {
-                        recruitmentStatus: updateEmailDto.recruitmentStatus ?? null,
+                        recruitmentStatus:
+                            updateEmailDto.recruitmentStatus ?? null,
                         id: { not: id },
                     },
                 });

@@ -72,43 +72,72 @@ export class ApplicationService {
     }
 
     async readAll(filters: FilterApplicationDto, skip: number, take: number) {
-        const { positions, squads, status, vacancies } = filters;
+        const { positions, squads, status, vacancies, search } = filters;
         const [applications, count] = await this.prismaService.$transaction([
-            // Original findMany query
             this.prismaService.application.findMany({
                 where: {
-                    status: status
-                        ? {
-                              in: status
-                                  ?.split(',')
-                                  .map((value) => RecruitmentStatus[value]),
-                          }
-                        : undefined,
-                    vacancy: {
-                        id: vacancies
-                            ? {
-                                  in: vacancies
-                                      ?.split(',')
-                                      .map((value) => +value),
-                              }
-                            : undefined,
-                        position: {
-                            id: positions
+                    AND: [
+                        {
+                            status: status
                                 ? {
-                                      in: positions
+                                      in: status
                                           ?.split(',')
-                                          .map((value) => +value),
-                                  }
-                                : undefined,
-                            squadId: squads
-                                ? {
-                                      in: squads
-                                          ?.split(',')
-                                          .map((value) => +value),
+                                          .map(
+                                              (value) =>
+                                                  RecruitmentStatus[value],
+                                          ),
                                   }
                                 : undefined,
                         },
-                    },
+                        {
+                            vacancy: {
+                                id: vacancies
+                                    ? {
+                                          in: vacancies
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      }
+                                    : undefined,
+                                position: {
+                                    id: positions
+                                        ? {
+                                              in: positions
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                    squadId: squads
+                                        ? {
+                                              in: squads
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                },
+                            },
+                        },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  name: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  gsName: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      ,
+                                  ]
+                                : undefined,
+                        },
+                    ],
                 },
                 include: {
                     answers: {
@@ -487,12 +516,16 @@ export class ApplicationService {
                         },
                     },
                 });
+            const formattedEmail = await this.formatEmail(
+                application.id,
+                email.body,
+            );
             this.mailService
                 .sendMail({
                     to: [application.email],
                     subject: email.title,
-                    text: email.body,
-                    cc: email.cc?.split(','),
+                    text: formattedEmail,
+                    bcc: email.cc?.split(','),
                 })
                 .then((success) => {
                     return success;
