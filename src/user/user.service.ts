@@ -260,7 +260,7 @@ export class UserService {
             if (!role) {
                 throw new BadRequestException('Role not found..');
             }
-            if(!requester) {
+            if (!requester) {
                 throw new BadRequestException('User not found..');
             }
             if (role.name == 'Admin' && requester.role.name != 'Admin') {
@@ -321,7 +321,7 @@ export class UserService {
         cv: Express.Multer.File = null,
     ) {
         try {
-            if(updateUserDto.roleId) {
+            if (updateUserDto.roleId) {
                 const role = await this.prismaService.role.findUnique({
                     where: {
                         id: updateUserDto.roleId,
@@ -338,7 +338,7 @@ export class UserService {
                 if (!role) {
                     throw new BadRequestException('Role not found..');
                 }
-                if(!requester) {
+                if (!requester) {
                     throw new BadRequestException('User not found..');
                 }
                 if (role.name == 'Admin' && requester.role.name != 'Admin') {
@@ -349,6 +349,9 @@ export class UserService {
             }
             let user = await this.prismaService.user.findUnique({
                 where: { id },
+                include: {
+                    positions: true,
+                },
             });
             let cvUrl = user.cv;
             if (cv) {
@@ -386,6 +389,18 @@ export class UserService {
                     gsStatus: updateUserDto.gsStatus,
                     roleId: updateUserDto.roleId,
                     cv: cvUrl,
+                    positions: {
+                        deleteMany: {
+                            id: updateUserDto.positions ? user.id : -1,
+                        },
+                        createMany: {
+                            data:
+                                updateUserDto.positions?.map((position) => ({
+                                    positionId: position.positionId,
+                                    startDate: new Date(),
+                                })) ?? [],
+                        },
+                    },
                 },
                 include: {
                     role: {
@@ -402,7 +417,9 @@ export class UserService {
                     throw new NotFoundException('User Not Found');
                 }
                 if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
-                    throw new BadRequestException('Phone Number or email already exists');
+                    throw new BadRequestException(
+                        'Phone Number or email already exists',
+                    );
                 }
             }
             throw error;
