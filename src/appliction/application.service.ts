@@ -219,12 +219,13 @@ export class ApplicationService {
     async create(
         createApplicationDto: CreateApplicationDto,
         files: Express.Multer.File[],
-    ): Promise<Application> {
+    ) {
         try {
+            let fileAnswersCounter = 0;
             const applicationFiles =
                 files?.map(async (file) => {
                     const res = await this.driveService.saveFile(
-                        Date.now().toString(),
+                        Date.now().toString() + `${fileAnswersCounter}`,
                         new PassThrough().end(file.buffer),
                         file.mimetype,
                     );
@@ -232,7 +233,6 @@ export class ApplicationService {
                 }) ?? [];
 
             const answers: { questionId: number; content: string }[] = [];
-            let fileAnswersCounter = 0;
             await Promise.all(
                 createApplicationDto.answers.map(async (answer) => {
                     const vacancyQuestion =
@@ -314,7 +314,7 @@ export class ApplicationService {
                 .catch((error) => {
                     return error;
                 });
-            return application;
+            return answers;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {

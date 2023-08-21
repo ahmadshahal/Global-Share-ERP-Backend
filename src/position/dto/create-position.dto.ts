@@ -11,12 +11,10 @@ import {
 export class CreatePositionDto {
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     name: string;
 
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     gsName: string;
 
     @IsNotEmpty()

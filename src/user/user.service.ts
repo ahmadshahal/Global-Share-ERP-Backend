@@ -243,7 +243,7 @@ export class UserService {
         };
     }
 
-    async create(createUserDto: CreateUserDto) {
+    async create(userId: number, createUserDto: CreateUserDto) {
         try {
             const positions = createUserDto.positions.map((position) => {
                 return {
@@ -252,6 +252,30 @@ export class UserService {
                     endDate: position.endDate ?? null,
                 };
             });
+            const role = await this.prismaService.role.findUnique({
+                where: {
+                    id: createUserDto.roleId,
+                },
+            });
+            const requester = await this.prismaService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    role: true,
+                },
+            });
+            if (!role) {
+                throw new BadRequestException('Role not found..');
+            }
+            if (!requester) {
+                throw new BadRequestException('User not found..');
+            }
+            if (role.name == 'Admin' && requester.role.name != 'Admin') {
+                throw new BadRequestException(
+                    'You do not have the required permissions',
+                );
+            }
             const password = await argon.hash(createUserDto.password);
             const user = await this.prismaService.user.create({
                 data: {
@@ -299,13 +323,43 @@ export class UserService {
     }
 
     async update(
+        userId: number,
         id: number,
         updateUserDto: UpdateUserDto,
         cv: Express.Multer.File = null,
     ) {
         try {
-            let user = await this.prismaService.user.findUnique({
+            if (updateUserDto.roleId) {
+                const role = await this.prismaService.role.findUnique({
+                    where: {
+                        id: updateUserDto.roleId,
+                    },
+                });
+                const requester = await this.prismaService.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                    include: {
+                        role: true,
+                    },
+                });
+                if (!role) {
+                    throw new BadRequestException('Role not found..');
+                }
+                if (!requester) {
+                    throw new BadRequestException('User not found..');
+                }
+                if (role.name == 'Admin' && requester.role.name != 'Admin') {
+                    throw new BadRequestException(
+                        'You do not have the required permissions',
+                    );
+                }
+            }
+            const user = await this.prismaService.user.findUnique({
                 where: { id },
+                include: {
+                    positions: true,
+                },
             });
             let cvUrl = user.cv;
             if (cv) {
@@ -326,7 +380,7 @@ export class UserService {
                 (middleName.trim() ?? ' ') +
                 ' ' +
                 lastName.trim();
-            user = await this.prismaService.user.update({
+            const newUser = await this.prismaService.user.update({
                 where: {
                     id: id,
                 },
@@ -343,6 +397,18 @@ export class UserService {
                     gsStatus: updateUserDto.gsStatus,
                     roleId: updateUserDto.roleId,
                     cv: cvUrl,
+                    positions: {
+                        deleteMany: {
+                            userId: updateUserDto.positions ? user.id : -1,
+                        },
+                        createMany: {
+                            data:
+                                updateUserDto.positions?.map((position) => ({
+                                    positionId: position.positionId,
+                                    startDate: new Date(),
+                                })) ?? [],
+                        },
+                    },
                 },
                 include: {
                     role: {
@@ -352,11 +418,16 @@ export class UserService {
                     },
                 },
             });
-            return exclude(user, ['password']);
+            return exclude(newUser, ['password']);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
                     throw new NotFoundException('User Not Found');
+                }
+                if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
+                    throw new BadRequestException(
+                        'Phone Number or email already exists',
+                    );
                 }
             }
             throw error;

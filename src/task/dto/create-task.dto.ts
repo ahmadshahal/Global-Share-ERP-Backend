@@ -34,12 +34,10 @@ class TaskKpiDto {
 export class CreateTaskDto {
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     title: string;
 
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(250)
     description: string;
 
     @IsOptional()

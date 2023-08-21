@@ -117,16 +117,26 @@ async function main() {
 
     const squad = await prismaService.squad.create({
         data: {
-            name: 'HR Department',
-            gsName: 'Hive Squad',
+            name: 'Management',
+            gsName: 'Management',
             description:
-                'Hive squad is the squad responsible for managing the enterprise human resources',
+                'Responsible for overseeing and managing specific areas or functions. They work collaboratively to make strategic decisions, coordinate operations, and ensure the achievement of organizational goals.',
             positions: {
                 create: {
-                    name: 'HR Manager',
-                    gsName: 'HR Manager',
+                    name: 'CEO',
+                    gsName: 'CEO',
                     gsLevel: 'ORCHESTRATOR',
                     weeklyHours: 20,
+                },
+            },
+            statuses: {
+                createMany: {
+                    data: [
+                        { name: 'Todo', crucial: true },
+                        { name: 'InProgress', crucial: true },
+                        { name: 'Done', crucial: true },
+                        { name: 'Approved', crucial: true },
+                    ],
                 },
             },
         },
@@ -137,11 +147,11 @@ async function main() {
     const hashedPassword = await argon.hash('12345678');
     await prismaService.user.create({
         data: {
-            email: 'admin@gs.com',
+            email: 'ceo@gs.com',
             password: hashedPassword,
-            phoneNumber: '1234567890',
-            firstName: 'admin',
-            lastName: 'doe',
+            phoneNumber: '+963951737433',
+            firstName: 'Ben',
+            lastName: 'Affleck',
             roleId: admin.id,
             positions: {
                 create: {
@@ -156,8 +166,8 @@ async function main() {
     //         email: 'hr@gs.com',
     //         password: hashedPassword,
     //         phoneNumber: '123456789',
-    //         firstName: 'HR_Member',
-    //         lastName: 'doe',
+    //         firstName: 'HR Volunteer',
+    //         lastName: 'Global Share',
     //         roleId: hr_member.id,
     //     },
     // });
@@ -166,8 +176,8 @@ async function main() {
     //         email: 'orch@gs.com',
     //         password: hashedPassword,
     //         phoneNumber: '123456798',
-    //         firstName: 'Orch',
-    //         lastName: 'doe',
+    //         firstName: 'Orch Volunteer',
+    //         lastName: 'Global Share',
     //         roleId: orch_member.id,
     //     },
     // });
@@ -177,7 +187,7 @@ async function main() {
     //         password: hashedPassword,
     //         phoneNumber: '12345679',
     //         firstName: 'Volunteer',
-    //         lastName: 'doe',
+    //         lastName: 'Gloabl Share',
     //         roleId: volunteer.id,
     //     },
     // });

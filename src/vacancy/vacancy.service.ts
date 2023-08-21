@@ -143,6 +143,13 @@ export class VacancyService {
                         },
                     },
                 },
+                include: {
+                    position: {
+                        include: {
+                            squad: true,
+                        },
+                    },
+                },
             });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {

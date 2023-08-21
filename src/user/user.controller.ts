@@ -61,7 +61,7 @@ export class UserController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Permissions({ action: Action.Update, subject: 'User' })
+    // @Permissions({ action: Action.Update, subject: 'User' })
     @UseInterceptors(FileInterceptor('cv'))
     @Put()
     async updateProfile(
@@ -75,24 +75,25 @@ export class UserController {
         )
         cv: Express.Multer.File,
     ) {
-        return await this.userService.update(id, updateUserDto, cv);
+        return await this.userService.update(id, id, updateUserDto, cv);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'User' })
     @Put(':id')
     async update(
+        @UserId() userId: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,
     ) {
-        return await this.userService.update(id, updateUserDto);
+        return await this.userService.update(userId, id, updateUserDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'User' })
     @Post()
-    async create(@Body() createUserDto: CreateUserDto) {
-        return await this.userService.create(createUserDto);
+    async create(@UserId() userId: number, @Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(userId, createUserDto);
     }
 
     @HttpCode(HttpStatus.OK)
