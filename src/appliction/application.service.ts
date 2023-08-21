@@ -3,14 +3,12 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { replace } from 'lodash';
 import {
     Prisma,
     Application,
     RecruitmentStatus,
     QuestionType,
     GsLevel,
-    Email,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -20,7 +18,7 @@ import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
 import { FilterApplicationDto } from './dto/filter-application.dto';
-import { EmailPlaceholders, PlaceholderEnum } from './enums/Placeholder.enum';
+import { EmailPlaceholders } from './enums/Placeholder.enum';
 
 @Injectable()
 export class ApplicationService {
@@ -165,38 +163,68 @@ export class ApplicationService {
             }),
             this.prismaService.application.count({
                 where: {
-                    status: status
-                        ? {
-                              in: status
-                                  ?.split(',')
-                                  .map((value) => RecruitmentStatus[value]),
-                          }
-                        : undefined,
-                    vacancy: {
-                        id: vacancies
-                            ? {
-                                  in: vacancies
-                                      ?.split(',')
-                                      .map((value) => +value),
-                              }
-                            : undefined,
-                        position: {
-                            id: positions
+                    AND: [
+                        {
+                            status: status
                                 ? {
-                                      in: positions
+                                      in: status
                                           ?.split(',')
-                                          .map((value) => +value),
-                                  }
-                                : undefined,
-                            squadId: squads
-                                ? {
-                                      in: squads
-                                          ?.split(',')
-                                          .map((value) => +value),
+                                          .map(
+                                              (value) =>
+                                                  RecruitmentStatus[value],
+                                          ),
                                   }
                                 : undefined,
                         },
-                    },
+                        {
+                            vacancy: {
+                                id: vacancies
+                                    ? {
+                                          in: vacancies
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      }
+                                    : undefined,
+                                position: {
+                                    id: positions
+                                        ? {
+                                              in: positions
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                    squadId: squads
+                                        ? {
+                                              in: squads
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                },
+                            },
+                        },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  name: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  gsName: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      ,
+                                  ]
+                                : undefined,
+                        },
+                    ],
                 },
             }),
         ]);
@@ -259,7 +287,7 @@ export class ApplicationService {
                     questionId: vacancyQuestion.id,
                     content: JSON.stringify(answer.content),
                 };
-                answers.push(stringifiedAnswer);   
+                answers.push(stringifiedAnswer);
             }
 
             const application = await this.prismaService.application.create({
@@ -598,11 +626,25 @@ export class ApplicationService {
         const recruiterAppointlet = application.recruiter?.appointlet;
         const squadName = squad.name;
         const positionName = application.vacancy.position.name;
-        const emailBody = email
-            .replace(EmailPlaceholders.ORCH_APPOINTLET, orchAppointlet)
-            .replace(EmailPlaceholders.HR_APPOINTLET, recruiterAppointlet)
-            .replace(EmailPlaceholders.SQUAD, squadName)
-            .replace(EmailPlaceholders.POSITION, positionName);
-        return emailBody;
+        email;
+        while (email.includes(EmailPlaceholders.ORCH_APPOINTLET)) {
+            email = email.replace(
+                EmailPlaceholders.ORCH_APPOINTLET,
+                orchAppointlet,
+            );
+        }
+        while (email.includes(EmailPlaceholders.HR_APPOINTLET)) {
+            email = email.replace(
+                EmailPlaceholders.HR_APPOINTLET,
+                recruiterAppointlet,
+            );
+        }
+        while (email.includes(EmailPlaceholders.SQUAD)) {
+            email = email.replace(EmailPlaceholders.SQUAD, squadName);
+        }
+        while (email.includes(EmailPlaceholders.POSITION)) {
+            email = email.replace(EmailPlaceholders.POSITION, positionName);
+        }
+        return email;
     }
 }
