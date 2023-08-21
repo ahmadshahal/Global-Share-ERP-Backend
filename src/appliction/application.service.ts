@@ -190,7 +190,7 @@ export class ApplicationService {
     async create(
         createApplicationDto: CreateApplicationDto,
         files: Express.Multer.File[],
-    ): Promise<Application> {
+    ) {
         try {
             const applicationFiles =
                 files?.map(async (file) => {
@@ -285,7 +285,7 @@ export class ApplicationService {
                 .catch((error) => {
                     return error;
                 });
-            return application;
+            return applicationFiles;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
