@@ -312,7 +312,7 @@ export class ApplicationService {
                 .catch((error) => {
                     return error;
                 });
-            return answers;
+            return application;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
