@@ -347,7 +347,7 @@ export class UserService {
                     );
                 }
             }
-            let user = await this.prismaService.user.findUnique({
+            const user = await this.prismaService.user.findUnique({
                 where: { id },
                 include: {
                     positions: true,
@@ -372,7 +372,7 @@ export class UserService {
                 (middleName.trim() ?? ' ') +
                 ' ' +
                 lastName.trim();
-            user = await this.prismaService.user.update({
+            const newUser = await this.prismaService.user.update({
                 where: {
                     id: id,
                 },
@@ -391,7 +391,7 @@ export class UserService {
                     cv: cvUrl,
                     positions: {
                         deleteMany: {
-                            id: updateUserDto.positions ? user.id : -1,
+                            userId: updateUserDto.positions ? user.id : -1,
                         },
                         createMany: {
                             data:
@@ -410,7 +410,7 @@ export class UserService {
                     },
                 },
             });
-            return exclude(user, ['password']);
+            return exclude(newUser, ['password']);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
