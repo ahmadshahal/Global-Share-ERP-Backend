@@ -312,10 +312,7 @@ export class ApplicationService {
                 .catch((error) => {
                     return error;
                 });
-            return {
-                first: await applicationFiles[0],
-                second: await applicationFiles[1],
-            };
+            return answers;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
