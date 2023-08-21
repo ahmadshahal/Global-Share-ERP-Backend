@@ -79,17 +79,18 @@ export class UserController {
     @Permissions({ action: Action.Update, subject: 'User' })
     @Put(':id')
     async update(
+        @UserId() userId: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,
     ) {
-        return await this.userService.update(id, updateUserDto);
+        return await this.userService.update(userId, id, updateUserDto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Update, subject: 'User' })
     @Post()
-    async create(@Body() createUserDto: CreateUserDto) {
-        return await this.userService.create(createUserDto);
+    async create(@UserId() userId: number, @Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(userId, createUserDto);
     }
 
     @HttpCode(HttpStatus.OK)

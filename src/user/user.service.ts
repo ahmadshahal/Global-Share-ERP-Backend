@@ -235,7 +235,7 @@ export class UserService {
         };
     }
 
-    async create(createUserDto: CreateUserDto) {
+    async create(userId: number, createUserDto: CreateUserDto) {
         try {
             const positions = createUserDto.positions.map((position) => {
                 return {
@@ -244,6 +244,30 @@ export class UserService {
                     endDate: position.endDate ?? null,
                 };
             });
+            const role = await this.prismaService.role.findUnique({
+                where: {
+                    id: createUserDto.roleId,
+                },
+            });
+            const requester = await this.prismaService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    role: true,
+                },
+            });
+            if (!role) {
+                throw new BadRequestException('Role not found..');
+            }
+            if(!requester) {
+                throw new BadRequestException('User not found..');
+            }
+            if (role.name == 'Admin' && requester.role.name != 'Admin') {
+                throw new BadRequestException(
+                    'You do not have the required permissions',
+                );
+            }
             const password = await argon.hash(createUserDto.password);
             const user = await this.prismaService.user.create({
                 data: {
@@ -291,11 +315,38 @@ export class UserService {
     }
 
     async update(
+        userId: number,
         id: number,
         updateUserDto: UpdateUserDto,
         cv: Express.Multer.File = null,
     ) {
         try {
+            if(updateUserDto.roleId) {
+                const role = await this.prismaService.role.findUnique({
+                    where: {
+                        id: updateUserDto.roleId,
+                    },
+                });
+                const requester = await this.prismaService.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                    include: {
+                        role: true,
+                    },
+                });
+                if (!role) {
+                    throw new BadRequestException('Role not found..');
+                }
+                if(!requester) {
+                    throw new BadRequestException('User not found..');
+                }
+                if (role.name == 'Admin' && requester.role.name != 'Admin') {
+                    throw new BadRequestException(
+                        'You do not have the required permissions',
+                    );
+                }
+            }
             let user = await this.prismaService.user.findUnique({
                 where: { id },
             });
