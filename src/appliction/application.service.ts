@@ -192,11 +192,10 @@ export class ApplicationService {
         files: Express.Multer.File[],
     ) {
         try {
-            let fileAnswersCounter = 0;
             const applicationFiles =
                 files?.map(async (file) => {
                     const res = await this.driveService.saveFile(
-                        Date.now().toString() + `${fileAnswersCounter}`,
+                        Date.now().toString(),
                         new PassThrough().end(file.buffer),
                         file.mimetype,
                     );
@@ -204,36 +203,35 @@ export class ApplicationService {
                 }) ?? [];
 
             const answers: { questionId: number; content: string }[] = [];
-            await Promise.all(
-                createApplicationDto.answers.map(async (answer) => {
-                    const vacancyQuestion =
-                        await this.prismaService.vacancyQuestion.findFirst({
-                            where: {
-                                questionId: answer.questionId,
-                                vacancyId: createApplicationDto.vacancyId,
-                            },
-                            include: {
-                                question: true,
-                            },
-                        });
-                    if (!vacancyQuestion) {
-                        throw new NotFoundException(
-                            'Question or Vacancy Not Found',
-                        );
-                    }
-                    if (vacancyQuestion.question.type == QuestionType.FILE) {
-                        answer.content = [
-                            await applicationFiles[fileAnswersCounter],
-                        ];
-                        fileAnswersCounter++;
-                    }
-                    const stringifiedAnswer = {
-                        questionId: vacancyQuestion.id,
-                        content: JSON.stringify(answer.content),
-                    };
-                    answers.push(stringifiedAnswer);
-                }),
-            );
+            let fileAnswersCounter = 0;
+            for await (const answer of createApplicationDto.answers) {
+                const vacancyQuestion =
+                    await this.prismaService.vacancyQuestion.findFirst({
+                        where: {
+                            questionId: answer.questionId,
+                            vacancyId: createApplicationDto.vacancyId,
+                        },
+                        include: {
+                            question: true,
+                        },
+                    });
+                if (!vacancyQuestion) {
+                    throw new NotFoundException(
+                        'Question or Vacancy Not Found',
+                    );
+                }
+                if (vacancyQuestion.question.type == QuestionType.FILE) {
+                    answer.content = [
+                        await applicationFiles[fileAnswersCounter],
+                    ];
+                    fileAnswersCounter++;
+                }
+                const stringifiedAnswer = {
+                    questionId: vacancyQuestion.id,
+                    content: JSON.stringify(answer.content),
+                };
+                answers.push(stringifiedAnswer);   
+            }
 
             const application = await this.prismaService.application.create({
                 data: {
@@ -285,7 +283,10 @@ export class ApplicationService {
                 .catch((error) => {
                     return error;
                 });
-            return answers;
+            return {
+                first: await applicationFiles[0],
+                second: await applicationFiles[1],
+            };
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === PrismaErrorCodes.RecordsNotFound) {
