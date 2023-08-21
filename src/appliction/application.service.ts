@@ -165,38 +165,68 @@ export class ApplicationService {
             }),
             this.prismaService.application.count({
                 where: {
-                    status: status
-                        ? {
-                              in: status
-                                  ?.split(',')
-                                  .map((value) => RecruitmentStatus[value]),
-                          }
-                        : undefined,
-                    vacancy: {
-                        id: vacancies
-                            ? {
-                                  in: vacancies
-                                      ?.split(',')
-                                      .map((value) => +value),
-                              }
-                            : undefined,
-                        position: {
-                            id: positions
+                    AND: [
+                        {
+                            status: status
                                 ? {
-                                      in: positions
+                                      in: status
                                           ?.split(',')
-                                          .map((value) => +value),
-                                  }
-                                : undefined,
-                            squadId: squads
-                                ? {
-                                      in: squads
-                                          ?.split(',')
-                                          .map((value) => +value),
+                                          .map(
+                                              (value) =>
+                                                  RecruitmentStatus[value],
+                                          ),
                                   }
                                 : undefined,
                         },
-                    },
+                        {
+                            vacancy: {
+                                id: vacancies
+                                    ? {
+                                          in: vacancies
+                                              ?.split(',')
+                                              .map((value) => +value),
+                                      }
+                                    : undefined,
+                                position: {
+                                    id: positions
+                                        ? {
+                                              in: positions
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                    squadId: squads
+                                        ? {
+                                              in: squads
+                                                  ?.split(',')
+                                                  .map((value) => +value),
+                                          }
+                                        : undefined,
+                                },
+                            },
+                        },
+                        {
+                            OR: search
+                                ? [
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  name: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      {
+                                          vacancy: {
+                                              position: {
+                                                  gsName: { contains: search },
+                                              },
+                                          },
+                                      },
+                                      ,
+                                  ]
+                                : undefined,
+                        },
+                    ],
                 },
             }),
         ]);
