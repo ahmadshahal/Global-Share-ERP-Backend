@@ -22,7 +22,7 @@ export class UserService {
         private driveService: DriveService,
     ) {}
 
-    async readOne(id: number) {
+    async readOne(id: number, loggedUserId: number) {
         const user = await this.prismaService.user.findUnique({
             where: {
                 id: id,
@@ -48,7 +48,15 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('User Not Found');
         }
-        return exclude(user, ['password']);
+        return loggedUserId === id
+            ? exclude(user, ['password'])
+            : exclude(user, [
+                  'password',
+                  'additionalEmail',
+                  'phoneNumber',
+                  'cv',
+                  'middleName',
+              ]);
     }
 
     async readAll(filters: FilterUserDto, skip: number = 0, take: number = 0) {
@@ -395,4 +403,15 @@ export class UserService {
         //     },
         // });
     }
+
+    // @Cron('0 0 1 1,4,7,10 *')
+    // async checkFreezedVolunteers() {
+    //     await this.prismaService.user.updateMany({
+    //         where: {
+    //         },
+    //         data: {
+    //             heartsCount: { increment: 3 },
+    //         },
+    //     });
+    // }
 }

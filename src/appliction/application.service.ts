@@ -486,12 +486,16 @@ export class ApplicationService {
                         },
                     },
                 });
+            const formattedEmail = await this.formatEmail(
+                application.id,
+                email.body,
+            );
             this.mailService
                 .sendMail({
                     to: [application.email],
                     subject: email.title,
-                    text: email.body,
-                    cc: email.cc?.split(','),
+                    text: formattedEmail,
+                    bcc: email.cc?.split(','),
                 })
                 .then((success) => {
                     return success;

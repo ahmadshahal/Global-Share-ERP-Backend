@@ -35,15 +35,18 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'User' })
     @Get('profile')
-    async profile(@UserId() id: number) {
-        return await this.userService.readOne(id);
+    async profile(@UserId() id: number, @UserId() loggedUserId: number) {
+        return await this.userService.readOne(id, loggedUserId);
     }
 
     @HttpCode(HttpStatus.OK)
     @Permissions({ action: Action.Read, subject: 'User' })
     @Get(':id')
-    async readOne(@Param('id', ParseIntPipe) id: number) {
-        return await this.userService.readOne(id);
+    async readOne(
+        @Param('id', ParseIntPipe) id: number,
+        @UserId() loggedUserId: number,
+    ) {
+        return await this.userService.readOne(id, loggedUserId);
     }
 
     @HttpCode(HttpStatus.OK)
