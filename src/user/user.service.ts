@@ -425,6 +425,9 @@ export class UserService {
                     'Unable to delete a related User',
                 );
             }
+            if (error.code === PrismaErrorCodes.UniqueConstraintFailed) {
+                throw new BadRequestException('Phone Number or email already exists');
+            }
             throw error;
         }
     }
