@@ -3,14 +3,12 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { replace } from 'lodash';
 import {
     Prisma,
     Application,
     RecruitmentStatus,
     QuestionType,
     GsLevel,
-    Email,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -20,7 +18,7 @@ import { DriveService } from 'src/drive/drive.service';
 import { PassThrough } from 'stream';
 import { MailerService } from '@nestjs-modules/mailer';
 import { FilterApplicationDto } from './dto/filter-application.dto';
-import { EmailPlaceholders, PlaceholderEnum } from './enums/Placeholder.enum';
+import { EmailPlaceholders } from './enums/Placeholder.enum';
 
 @Injectable()
 export class ApplicationService {
@@ -628,17 +626,25 @@ export class ApplicationService {
         const recruiterAppointlet = application.recruiter?.appointlet;
         const squadName = squad.name;
         const positionName = application.vacancy.position.name;
-        const emailBody = email
-            .replace(
-                new RegExp(EmailPlaceholders.ORCH_APPOINTLET, 'g'),
+        email;
+        while (email.includes(EmailPlaceholders.ORCH_APPOINTLET)) {
+            email = email.replace(
+                EmailPlaceholders.ORCH_APPOINTLET,
                 orchAppointlet,
-            )
-            .replace(
-                new RegExp(EmailPlaceholders.HR_APPOINTLET, 'g'),
+            );
+        }
+        while (email.includes(EmailPlaceholders.HR_APPOINTLET)) {
+            email = email.replace(
+                EmailPlaceholders.HR_APPOINTLET,
                 recruiterAppointlet,
-            )
-            .replace(new RegExp(EmailPlaceholders.SQUAD, 'g'), squadName)
-            .replace(new RegExp(EmailPlaceholders.POSITION, 'g'), positionName);
-        return emailBody;
+            );
+        }
+        while (email.includes(EmailPlaceholders.SQUAD)) {
+            email = email.replace(EmailPlaceholders.SQUAD, squadName);
+        }
+        while (email.includes(EmailPlaceholders.POSITION)) {
+            email = email.replace(EmailPlaceholders.POSITION, positionName);
+        }
+        return email;
     }
 }
