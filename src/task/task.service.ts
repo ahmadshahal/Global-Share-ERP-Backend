@@ -402,6 +402,9 @@ export class TaskService {
                         volunteeredHours: {
                             increment: task.takenHours,
                         },
+                        tasksCompleted: {
+                            increment: 1
+                        }
                     },
                 });
             }
