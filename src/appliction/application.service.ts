@@ -289,7 +289,7 @@ export class ApplicationService {
                     questionId: vacancyQuestion.id,
                     content: JSON.stringify(answer.content),
                 };
-                answers.push(stringifiedAnswer);   
+                answers.push(stringifiedAnswer);
             }
 
             const application = await this.prismaService.application.create({
@@ -629,10 +629,16 @@ export class ApplicationService {
         const squadName = squad.name;
         const positionName = application.vacancy.position.name;
         const emailBody = email
-            .replace(EmailPlaceholders.ORCH_APPOINTLET, orchAppointlet)
-            .replace(EmailPlaceholders.HR_APPOINTLET, recruiterAppointlet)
-            .replace(EmailPlaceholders.SQUAD, squadName)
-            .replace(EmailPlaceholders.POSITION, positionName);
+            .replace(
+                new RegExp(EmailPlaceholders.ORCH_APPOINTLET, 'g'),
+                orchAppointlet,
+            )
+            .replace(
+                new RegExp(EmailPlaceholders.HR_APPOINTLET, 'g'),
+                recruiterAppointlet,
+            )
+            .replace(new RegExp(EmailPlaceholders.SQUAD, 'g'), squadName)
+            .replace(new RegExp(EmailPlaceholders.POSITION, 'g'), positionName);
         return emailBody;
     }
 }
