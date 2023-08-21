@@ -31,24 +31,20 @@ class PositionDto {
 export class CreateUserDto {
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     firstName: string;
 
     @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     middleName: string;
 
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     lastName: string;
 
     @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(50)
     arabicFullName: string;
 
     @IsNotEmpty()
@@ -76,13 +72,11 @@ export class CreateUserDto {
     @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(150)
     appointlet: string;
 
     @IsOptional()
     @IsNotEmpty()
     @MinLength(3)
-    @MaxLength(200)
     bio: string;
 
     @IsOptional()
