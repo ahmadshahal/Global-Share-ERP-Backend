@@ -33,6 +33,7 @@ async function main() {
         ...volunteer_permissions.flatMap((value) => value),
         17,
         24,
+        28,
         29,
         30,
         32,

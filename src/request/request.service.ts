@@ -296,8 +296,69 @@ export class RequestService {
     async update(
         id: number,
         updateRequestDto: UpdateRequestDto,
+        userId: number,
     ): Promise<Request> {
         try {
+            const user = await this.prismaService.user.findUnique({
+                where: { id: userId },
+                include: {
+                    positions: {
+                        include: {
+                            position: {
+                                include: {
+                                    squad: true,
+                                },
+                            },
+                        },
+                    },
+                    role: true,
+                },
+            });
+            const request = await this.prismaService.request.findUnique({
+                where: {
+                    id,
+                },
+                include: {
+                    user: {
+                        include: {
+                            positions: {
+                                include: {
+                                    position: { include: { squad: true } },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            const isOrchestrator = user.positions.some(
+                (position) =>
+                    position.position.gsLevel == GsLevel.ORCHESTRATOR &&
+                    request.user.positions.some((position2) => {
+                        return (
+                            position.position.squadId ==
+                            position2.position.squadId
+                        );
+                    }),
+            );
+            if (
+                updateRequestDto.status == RequestStatus.ORCH_APPROVED &&
+                !isOrchestrator &&
+                user.role.name != 'Orch' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
+            if (
+                updateRequestDto.status == RequestStatus.APPROVED &&
+                user.role.name != 'HR' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
             return await this.prismaService.$transaction(
                 async (prismaService) => {
                     const request = await prismaService.request.update({

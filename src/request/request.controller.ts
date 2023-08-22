@@ -61,10 +61,11 @@ export class RequestController {
     @Permissions({ action: Action.Update, subject: 'Request' })
     @Put(':id')
     async update(
+        @UserId() userId: number,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateRequestDto: UpdateRequestDto,
     ) {
-        return this.requestService.update(id, updateRequestDto);
+        return this.requestService.update(id, updateRequestDto, userId);
     }
 
     @HttpCode(HttpStatus.OK)
