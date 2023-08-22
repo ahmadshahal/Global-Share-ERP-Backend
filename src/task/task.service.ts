@@ -14,13 +14,65 @@ import { FilterTaskDto } from './dto/filter-task.dto';
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(squadId: number, skip: number = 0, take: number = 10) {
+    async readBySquad(filters: FilterTaskDto, squadId: number, skip: number = 0, take: number = 10) {
+        const { assignedTo, difficulty, priority, search, squad, status } =
+            filters;
         const tasks = await this.prismaService.status.findMany({
             where: {
                 squadId: squadId,
+                name: status ? status : undefined,
+                crucial: status ? true : undefined,
             },
             include: {
                 tasks: {
+                    where: {
+                        AND: [
+                            {
+                                difficulty: difficulty
+                                    ? {
+                                          in: difficulty
+                                              .split(',')
+                                              .map(
+                                                  (value) => Difficulty[value],
+                                              ),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                priority: priority
+                                    ? {
+                                          in: priority
+                                              .split(',')
+                                              .map((value) => Priority[value]),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                assignedToId: assignedTo
+                                    ? {
+                                          in: assignedTo
+                                              .split(',')
+                                              .map((value) => +value),
+                                      }
+                                    : undefined,
+                            },
+                            {
+                                OR: search
+                                    ? [
+                                          {
+                                              title: { contains: search },
+                                          },
+                                          {
+                                              description: { contains: search },
+                                          },
+                                      ]
+                                    : undefined,
+                            },
+                        ],
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
                     skip: skip,
                     take: take == 0 ? undefined : take,
                     include: {
