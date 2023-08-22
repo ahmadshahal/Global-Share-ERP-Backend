@@ -510,6 +510,24 @@ export class ApplicationService {
                     'Application Status Has No Emails, Add one and try again',
                 );
             }
+            if (updateApplicationDto.status == RecruitmentStatus.DONE) {
+                const vacancy = await this.prismaService.vacancy.findUnique({
+                    where: {
+                        id: application.vacancyId,
+                    },
+                });
+                if (!vacancy) {
+                    throw new BadRequestException('Vacancy Not Found');
+                }
+                await this.prismaService.vacancy.update({
+                    where: {
+                        id: application.vacancyId,
+                    },
+                    data: {
+                        isOpen: false,
+                    },
+                });
+            }
             const updatedApplication =
                 await this.prismaService.application.update({
                     where: {
