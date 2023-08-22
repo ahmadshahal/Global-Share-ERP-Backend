@@ -52,8 +52,9 @@ export class TaskController {
         @Param('id', ParseIntPipe) squadId: number,
         @Query('skip', ParseIntPipe) skip: number,
         @Query('take', ParseIntPipe) take: number,
+        @Query() filters: FilterTaskDto,
     ) {
-        return await this.taskService.readBySquad(squadId, skip, take);
+        return await this.taskService.readBySquad(filters, squadId, skip, take);
     }
 
     @HttpCode(HttpStatus.CREATED)
