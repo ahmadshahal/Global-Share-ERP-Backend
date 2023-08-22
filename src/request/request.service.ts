@@ -341,6 +341,46 @@ export class RequestService {
                     }),
             );
             if (
+                request.status == RequestStatus.PENDING &&
+                updateRequestDto.status == RequestStatus.REFUSED &&
+                !isOrchestrator &&
+                user.role.name != 'Orch' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
+            if (
+                request.status == RequestStatus.ORCH_APPROVED &&
+                updateRequestDto.status == RequestStatus.REFUSED &&
+                user.role.name != 'HR' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
+            if (
+                request.status == RequestStatus.PENDING &&
+                !isOrchestrator &&
+                user.role.name != 'Orch' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
+            if (
+                request.status == RequestStatus.ORCH_APPROVED &&
+                user.role.name != 'HR' &&
+                user.role.name != 'Admin'
+            ) {
+                throw new BadRequestException(
+                    'You do not have the required permission..',
+                );
+            }
+            if (
                 updateRequestDto.status == RequestStatus.ORCH_APPROVED &&
                 !isOrchestrator &&
                 user.role.name != 'Orch' &&
