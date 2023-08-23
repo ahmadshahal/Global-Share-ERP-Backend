@@ -9,12 +9,18 @@ import { PrismaErrorCodes } from 'src/prisma/utils/prisma.error-codes.utils';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { FilterTaskDto } from './dto/filter-task.dto';
+import { stat } from 'fs';
 
 @Injectable()
 export class TaskService {
     constructor(private prismaService: PrismaService) {}
 
-    async readBySquad(filters: FilterTaskDto, squadId: number, skip: number = 0, take: number = 10) {
+    async readBySquad(
+        filters: FilterTaskDto,
+        squadId: number,
+        skip: number = 0,
+        take: number = 10,
+    ) {
         const { assignedTo, difficulty, priority, search, squad, status } =
             filters;
         const tasks = await this.prismaService.status.findMany({
@@ -279,6 +285,15 @@ export class TaskService {
                     },
                 },
             });
+            const status = await this.prismaService.status.findUnique({
+                where: { id: createTaskDto.statusId },
+            });
+            if (!status) {
+                throw new NotFoundException('Status Not Found');
+            }
+            if (status.name != 'Todo') {
+                throw new BadRequestException('Can add task only to Todo');
+            }
             if (!assignedBy) {
                 throw new NotFoundException('User Not Found');
             }
@@ -437,6 +452,11 @@ export class TaskService {
                     'You do not have the required permissions..',
                 );
             }
+            if (task.status.name != 'Done' && newStatus.name == 'Approved') {
+                throw new BadRequestException(
+                    'Can not move task to approved without moving it to done',
+                );
+            }
             if (task.status.name == 'Approved') {
                 throw new BadRequestException(
                     'Approved tasks can not be edited..',
@@ -455,8 +475,8 @@ export class TaskService {
                             increment: task.takenHours,
                         },
                         tasksCompleted: {
-                            increment: 1
-                        }
+                            increment: 1,
+                        },
                     },
                 });
             }
