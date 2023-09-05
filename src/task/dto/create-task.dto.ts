@@ -42,7 +42,6 @@ export class CreateTaskDto {
 
     @IsOptional()
     @IsUrl()
-    @MinLength(3)
     url?: string;
 
     @IsNotEmpty()
